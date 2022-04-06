@@ -1,14 +1,16 @@
 <template>
   <div>
     <b-row>
-      <b-col>
+      <b-col class="pr-0">
       <b-table small hover noCollapse outlined sticky-header sort-icon-left
         head-variant="light" 
         select-mode="single"
         selectable
         reactive
+        class="h-100"
         @row-clicked="onRowClicked"
-        :items="items" :fields="fields">
+        :items="items"
+        :fields="fields">
 
         <template #cell(index)="data">
           {{ data.index + 1 }}
@@ -20,18 +22,18 @@
 
         <template #cell(selected)="{ rowSelected }">
           <template v-if="rowSelected">
-            <span aria-hidden="true">&#10624;</span>
+            <span aria-hidden="true">&Rrightarrow;</span>
           </template>
           <template v-else>
-            <span aria-hidden="true">&Rrightarrow;</span>
+            <span aria-hidden="true">&#10624;</span>
           </template>
         </template>
 
       </b-table>
       </b-col>
-      <b-col>
+      <b-col class="pl-0">
       <b-card class="h-100"
-        style="width: 20rem;"
+        style="width: 20rem; border: 5px solid lightgray;"
       >
         <pre v-if="selectedItem">
           <b-card-title>Message</b-card-title>
@@ -51,7 +53,10 @@ export default {
   data() {
     return {
       fields: [
-          'index',
+          {
+            key: 'index',
+            label: ''
+          },
           {
             key: 'title',
             sortable: true
