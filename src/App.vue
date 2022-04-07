@@ -21,7 +21,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  margin-top: 60px;
   margin-left: 10px;
   margin-right: 10px;
   display: flex;
@@ -31,11 +30,9 @@ export default {
 }
 #nav {
   padding: 30px;
+  padding-top: 10px;
   width: 100%;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-  }
+
 }
 
 </style>
