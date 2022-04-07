@@ -37,7 +37,7 @@
       >
         <pre v-if="selectedItem">
           <b-card-title>Message</b-card-title>
-          {{ selectedItem.message }}</pre>
+          {{ selectedItem.message_text }}</pre>
         <h4 class="text-center" v-else>
           Expand a message.
         </h4>
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   name: "ViewMessages",
   data() {
@@ -62,7 +63,7 @@ export default {
             sortable: true
           },
           {
-            key: 'authors',
+            key: 'author',
             sortable: true
           },
           {
@@ -71,18 +72,20 @@ export default {
             headerTitle: 'selected'
           },
         ],
-      items: [
-        {title: 'Title1', authors: 'Authors1', message: 'Message1'},
-        {title: 'Title2', authors: 'Authors2', message: 'A longer message'},
-        {title: 'Title3', authors: 'Authors3', message: 'no'},
-      ],
-      selectedItem: null
+      items: null,
+      selectedItem: null,
     }
   },
   methods: {
     onRowClicked(item) {
       this.selectedItem = item
     }
+  },
+  mounted () {
+    axios
+      .get('http://hermes-dev.lco.gtn/api/v0/messages.json')
+      .then(response => (this.items = response.data.results))
+      .catch(error => console.log(error))
   }
 }
 </script>
