@@ -15,7 +15,7 @@
     "@jsonforms/vue2-vuetify": "^3.0.0-beta.1",
     "@vue/composition-api": "^1.0.0-rc.3",
     "bootstrap": "^4.5.2",
-    "bootstrap-vue": "^2.17.3",
+    "bootstrap-vue": "^2.21.2",
     "core-js": "^3.8.3",
     "http": "^0.0.1-security",
     "http-browserify": "^1.7.0",
