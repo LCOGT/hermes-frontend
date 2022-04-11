@@ -1,14 +1,17 @@
 import '@babel/polyfill'
 import 'mutationobserver-shim'
 import Vue, { VNode } from "vue";
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './plugins/bootstrap-vue'
 import App from "./App.vue";
 import router from "./router";
-import VueCompositionAPI from "@vue/composition-api";
-import "@jsonforms/vue2-vanilla/vanilla.css";
 import vuetify from './plugins/vuetify'
 
-Vue.use(VueCompositionAPI);
+Vue.use(BootstrapVue)
+Vue.use(IconsPlugin)
 
 Vue.config.productionTip = false;
 

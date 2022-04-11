@@ -82,4 +82,7 @@ export default {
 .extra-input-col {
   max-width: 20%;
 }
+.submit-button {
+  color: white
+}
 </style>

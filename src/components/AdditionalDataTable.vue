@@ -1,56 +1,64 @@
 <template>
   <div>
-      <b-table class='additional-data-table' :items="items" :fields="fields">
-        <template #cell(key)="data">
-          <b-form-input v-if="items[data.index].isEdit && selectedCell === 'key'" type="text" v-model="items[data.index].key" placeholder="Key"></b-form-input>
-          <span v-else @click="editCellHandler(data, 'key')">{{ formatEmpty(data.value) }}</span>
-        </template>
-        <template #cell(value)="data">
-          <b-form-input v-if="items[data.index].isEdit && selectedCell === 'value'" type="text" v-model="items[data.index].value" placeholder="Value"></b-form-input>
-          <span v-else @click="editCellHandler(data, 'value')">{{ formatEmpty(data.value) }}</span>
-        </template>
-      </b-table>
+    <b-editable-table bordered class="additional-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+      <template #cell(isActive)="data">
+        <span v-if="data.value">Yes</span>
+        <span v-else>No</span>
+      </template>
+    </b-editable-table>
       <div class="add-row-additional-data">
-        <b-button class="add-row-additional-data-button" variant="primary" @click="addRowHandler">Add Row</b-button>
+        <b-button class="add-row-additional-data-button" variant="primary" @click="handleAdd()">Add Row</b-button>
       </div>
   </div>
   </template>
 
 <script>
+import BEditableTable from "bootstrap-vue-editable-table";
+
 export default {
   name: "AdditionalDataTable",
+  components: {
+      BEditableTable,
+  },
   data() {
     return {
-      fields: [{key: "key", label: "Key"},
-        {key: "value", label: "Value"}],
+      fields: [{key: "key", label: "Key", type: 'text', editable: true, placeholder: "Key", class: "key-column"},
+        {key: "value", label: "Value", type: 'text', editable: true, placeholder: "Value", class: "value-column"}],
       items: [],
-      selectedCell: null
+      rowUpdate: {},
     };
   },
-  mounted() {
-    this.items = this.items.map(item => ({...item, isEdit: false}));
-  },
   methods: {
-    editCellHandler(data, name) {
-      this.items = this.items.map(item => ({...item, isEdit: false}));
-      this.items[data.index].isEdit = true;
-      this.selectedCell = name
+    handleAdd() {
+      const newId = Date.now();
+      this.rowUpdate = {
+        edit: true,
+        id: newId,
+        action: "add",
+        data: {
+          id: newId,
+          key: null,
+          value: null,
+          isActive: false,
+        },
+      };
+
     },
-    addRowHandler() {
-      const newRow = this.fields.reduce(
-          (a, c) => ({ ...a, [c.key]: null }),
-          {}
-      );
-      newRow.isEdit = true;
-      this.items.push(newRow);
-    },
-    formatEmpty(value) {
-    return value?.trim() ? value : " - ";
-    }
   }
 }
 </script>
 
 <style scoped>
+.add-row-additional-data-button {
+  color: white
+}
 
+/* We need to use a deep selector here for the css because we are dynamically generating rows */
+.additional-data-table >>> .key-column {
+  height: calc(1.5em + 0.75rem + 2px);
+}
+
+.additional-data-table >>> .value-column {
+  height: calc(1.5em + 0.75rem + 2px);
+}
 </style>
