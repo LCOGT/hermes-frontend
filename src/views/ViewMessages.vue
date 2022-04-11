@@ -29,6 +29,12 @@
           </template>
         </template>
 
+        <template #cell(timestamp)="data">
+          <b class="small">
+            {{ data.item.timestamp.split("T") }}
+          </b>
+        </template>
+
       </b-table>
       </b-col>
       <b-col class="pl-0">
@@ -37,7 +43,8 @@
       >
         <pre v-if="selectedItem">
           <b-card-title>Message</b-card-title>
-          {{ selectedItem.message_text }}</pre>
+          {{ selectedItem.message_text }}
+        </pre>
         <h4 class="text-center" v-else>
           Expand a message.
         </h4>
@@ -57,6 +64,9 @@ export default {
           {
             key: 'index',
             label: ''
+          },
+          {
+            key: 'timestamp',
           },
           {
             key: 'title',
