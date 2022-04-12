@@ -1,34 +1,51 @@
 <template>
   <div>
-    <b-row>
-      <b-col class="pr-0">
-      <b-table small hover noCollapse outlined sticky-header sort-icon-left
+      <b-table hover noCollapse outlined sticky-header sort-icon-left
         head-variant="light" 
-        select-mode="single"
         selectable
         reactive
-        class="h-100"
-        @row-clicked="onRowClicked"
+        @row-clicked="item=>$set(item, '_showDetails', !item._showDetails)"
         :items="items"
         :fields="fields">
 
+        <!-- Index Message -->
         <template #cell(index)="data">
           {{ data.index + 1 }}
         </template>
 
+        <!-- Style Header -->
         <template #head()="data">
           <span variant="secondary">{{ data.label.toUpperCase() }}</span>
         </template>
 
+        <!-- Selection Behavior -->
         <template #cell(selected)="{ rowSelected }">
           <template v-if="rowSelected">
-            <span aria-hidden="true">&Rrightarrow;</span>
+            <span aria-hidden="true">&#10507;</span>
           </template>
           <template v-else>
             <span aria-hidden="true">&#10624;</span>
           </template>
         </template>
 
+        <!-- Detail Card -->
+        <template slot="row-details" slot-scope="row">
+          <b-card>
+
+            <b-row class="mb-2">
+              <b-col sm="3" class="text-sm-right"><b>Message:</b></b-col>
+              <b-col>{{ row.item.message_text }}</b-col>
+            </b-row>
+
+            <b-row class="mb-2">
+              <b-col sm="3" class="text-sm-right"><b>Other Stuff:</b></b-col>
+              <b-col>{{ row.item.data }}</b-col>
+            </b-row>
+
+          </b-card>
+        </template>
+
+        <!-- Format Timestamp -->
         <template #cell(timestamp)="data">
           <b class="small">
             {{ data.item.timestamp.split("T") }}
@@ -36,21 +53,6 @@
         </template>
 
       </b-table>
-      </b-col>
-      <b-col class="pl-0">
-      <b-card class="h-100"
-        style="width: 20rem; border: 5px solid lightgray;"
-      >
-        <pre v-if="selectedItem">
-          <b-card-title>Message</b-card-title>
-          {{ selectedItem.message_text }}
-        </pre>
-        <h4 class="text-center" v-else>
-          Expand a message.
-        </h4>
-      </b-card>
-    </b-col>
-    </b-row>
   </div>
 </template>
 
@@ -61,6 +63,11 @@ export default {
   data() {
     return {
       fields: [
+          {
+            key: 'selected',
+            label: '',
+            headerTitle: 'selected'
+          },
           {
             key: 'index',
             label: ''
@@ -75,11 +82,6 @@ export default {
           {
             key: 'author',
             sortable: true
-          },
-          {
-            key: 'selected',
-            label: '',
-            headerTitle: 'selected'
           },
         ],
       items: null,
