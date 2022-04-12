@@ -1,174 +1,88 @@
 <template>
-  <div class="myform"  width="100%">
-    <json-forms
-        v-bind:data="data"
-        v-bind:renderers="renderers"
-        v-bind:schema="schema"
-        v-bind:uischema="uischema"
-        @change="onChange"
-    />
-  </div>
+  <b-container fluid class="outside-container">
+    <b-row>
+    <label for="title-input">Title:</label>
+    <b-form-input class="title-input" placeholder="Title"></b-form-input>
+    </b-row>
+    <b-row>
+      <b-col class="eventid-col">
+        <label for="eventid-input">Event ID:</label>
+
+        <b-form-input class="eventid-input" placeholder="Event ID"></b-form-input>
+      </b-col>
+      <b-col class="authors-col">
+        <label for="authors-input">Authors:</label>
+        <b-form-input class="authors-input" placeholder="Authors"></b-form-input>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col class="candidates-input-col">
+      <candidates-input-table></candidates-input-table>
+      </b-col>
+      <b-col class="extra-input-col">
+        <label for="extra-input-table">Additional Data Elements:</label>
+        <additional-data-input-table class="extra-input-table"></additional-data-input-table>
+      </b-col>
+    </b-row>
+    <b-row>
+      <label for="message-input">Message:</label>
+      <b-form-textarea id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+    </b-row>
+    <b-row>
+      <div class="submit-container">
+        <b-button class="submit-button" variant="success" @click="submitToHop">Submit</b-button>
+      </div>
+    </b-row>
+  </b-container>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "@vue/composition-api";
-import { JsonForms, JsonFormsChangeEvent } from "@jsonforms/vue2";
-import { vuetifyRenderers } from '@jsonforms/vue2-vuetify';
 
+import CandidatesInputTable from "@/components/CandidatesInputTable.vue"
+import AdditionalDataTable from "@/components/AdditionalDataTable.vue"
 
-// mergeStyles combines all classes from both styles definitions
-import {defaultStyles, mergeStyles} from "@jsonforms/vue2-vanilla";
-
-const myStyles = mergeStyles(defaultStyles, { control: { label: "mylabel" } });
-const renderers = [
-  ...vuetifyRenderers,
-  // here you can add custom renderers
-];
-const schema = {
-  properties: {
-    title: {
-      type: "string",
-      minLength: 1,
-      title: "Title",
-      description: "Title of the message"
-    },
-    authors: {
-      title: "Authors",
-      type: "string"
-    },
-    ra: {
-      type: "string",
-      title: "Right Ascension"
-    },
-    dec: {
-      type: "string",
-      title: "Declination"
-    },
-    discoveryDate: {
-      type: "string",
-      title: "Date/Time of Discovery",
-      format: "date-time",
-    },
-    telescope: {
-      type: "string",
-    },
-    instrument: {
-      type: "string",
-    },
-    band: {
-      type: "string"
-    },
-    brightness: {
-      type: "number"
-    },
-    brightnessError: {
-      type: "number"
-    },
-    message: {
-      type: "string"
-    }
-  }
-};
-
-const uischema = {
-  "type": "VerticalLayout",
-  "elements": [
-    {
-      "type": "Control",
-      "label": "Title",
-      "scope": "#/properties/title"
-    },
-    {
-      "type": "Control",
-      "label": "Authors",
-      "scope": "#/properties/authors"
-    },
-    {
-      "type": "HorizontalLayout",
-      "elements":
-          [{
-            "type": "Control",
-            "label": "RA",
-            "scope": "#/properties/ra"
-          },
-            {
-              "type": "Control",
-              "label": "Dec",
-              "scope": "#/properties/dec"
-            }]
-    },
-    {
-      "type": "HorizontalLayout",
-      "elements": [                    {
-        "type": "Control",
-        "label": "Discovery Date",
-        "scope": "#/properties/discoveryDate"
-      },
-        {
-          "type": "Control",
-          "label": "Telescope",
-          "scope": "#/properties/telescope"
-        },
-        {
-          "type": "Control",
-          "label": "Instrument",
-          "scope": "#/properties/instrument"
-        }]
-    },
-    { "type": "HorizontalLayout",
-      "elements": [                    {
-        "type": "Control",
-        "label": "Band",
-        "scope": "#/properties/band"
-      },
-        {
-          "type": "Control",
-          "label": "Brightness",
-          "scope": "#/properties/brightness"
-        },
-        {
-          "type": "Control",
-          "label": "Brightness Error",
-          "scope": "#/properties/brightnessError"
-        }]},
-    {
-      "type": "Control",
-      "label": "Message",
-      "scope": "#/properties/message"
-    }
-  ]
-}
-
-export default defineComponent({
+export default {
   name: "SubmitCandidates",
   components: {
-    JsonForms
+    "candidates-input-table": CandidatesInputTable,
+    "additional-data-input-table": AdditionalDataTable
   },
   data() {
     return {
-    // freeze renderers for performance gains
-    renderers: Object.freeze(renderers),
-    data: {
-      title: "Message Title",
-    },
-    schema,
-    uischema
-  };
-},
+      data: {
+      },
+    };
+  },
   methods: {
-  onChange(event: JsonFormsChangeEvent) {
-    this.data = event.data;
+    submitToHop() {
+      console.log("Submitting to hop")
+    }
   }
-},
-provide() {
-  return {
-    styles: myStyles
-  };
 }
-});
 
 </script>
 
 <style scoped>
+.outside-container {
+  width: 75%;
+  margin: auto;
+}
 
+.eventid-col {
+  max-width: 20%;
+  padding: 0;
+  padding-right: 3%;
+}
+
+.authors-col {
+  max-width: 100%;
+  padding: 0;
+}
+
+.extra-input-col {
+  max-width: 20%;
+}
+.submit-button {
+  color: white
+}
 </style>
