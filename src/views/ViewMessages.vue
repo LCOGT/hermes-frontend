@@ -83,7 +83,7 @@ export default {
   },
   mounted () {
     axios
-      .get('http://hermes-dev.lco.gtn/api/v0/messages.json')
+      .get(process.env.VUE_APP_HERMES_BACKEND_URL)
       .then(response => (this.items = response.data.results))
       .catch(error => console.log(error))
   }
