@@ -4,6 +4,8 @@
       v-model="currentPage"
       :total-rows="items.length"
       :per-page="perPage"
+      first-number
+      last-number
       aria-controls="message-table"
     ></b-pagination>
     <b-table
@@ -13,7 +15,6 @@
       outlined
       sort-icon-left
       head-variant="light"
-      selectable
       @row-clicked="(item) => $set(item, '_showDetails', !item._showDetails)"
       id="message-table"
       :per-page="perPage"
@@ -32,8 +33,8 @@
       </template>
 
       <!-- Selection Behavior -->
-      <template #cell(selected)="{ rowSelected }">
-        <template v-if="rowSelected">
+      <template #cell(selected)="row">
+        <template v-if="row.detailsShowing">
           <span aria-hidden="true">&#10507;</span>
         </template>
         <template v-else>
@@ -72,7 +73,7 @@ export default {
   name: "ViewMessages",
   data() {
     return {
-      perPage: 3,
+      perPage: 10,
       currentPage: 1,
       fields: [
         {
@@ -100,15 +101,10 @@ export default {
       selectedItem: null,
     };
   },
-  methods: {
-    onRowClicked(item) {
-      this.selectedItem = item;
-    },
-  },
   mounted() {
     axios
       .get("http://hermes-dev.lco.gtn/api/v0/messages.json")
-      .then((response) => (this.items = response.data.results))
+      .then((response) => (this.items = response.data))
       .catch((error) => console.log(error));
   },
 };
