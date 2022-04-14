@@ -1,5 +1,6 @@
 <template>
   <div class="overflow-auto">
+
    <b-pagination
       v-model="currentPage"
       :total-rows="items.length"
@@ -8,6 +9,7 @@
       last-number
       aria-controls="message-table"
     ></b-pagination>
+
     <b-table
       hover
       small
@@ -19,6 +21,8 @@
       id="message-table"
       :per-page="perPage"
       :current-page="currentPage"
+      :sort-by.sync="sortBy"
+      :sort-desc.sync="sortDesc"
       :items="items"
       :fields="fields"
     >
@@ -60,7 +64,8 @@
       <!-- Format Timestamp -->
       <template #cell(created)="data">
         <b class="small">
-          {{ data.item.created.split("T") }}
+          {{ data.item.created | format_date }}
+          {{ data.item.created | format_time }}
         </b>
       </template>
     </b-table>
@@ -73,6 +78,8 @@ export default {
   name: "ViewMessages",
   data() {
     return {
+      sortBy: 'created',
+      sortDesc: true,
       perPage: 10,
       currentPage: 1,
       fields: [
@@ -87,6 +94,9 @@ export default {
         },
         {
           key: "created",
+          sortable: true,
+          sortDirection: 'desc',
+          label: "Timestamp"
         },
         {
           key: "title",
@@ -107,5 +117,20 @@ export default {
       .then((response) => (this.items = response.data))
       .catch((error) => console.log(error));
   },
+  filters: {
+  format_date: function(datetime) {
+    if (!datetime) { return '(n/a)'; }
+    datetime = new Date(datetime);
+    return datetime.getUTCFullYear() + "/" +
+      ((datetime.getUTCMonth() < 9) ? '0' : '') + (datetime.getUTCMonth() + 1) + '/' +
+      ((datetime.getUTCDate() < 10) ? '0' : '') + datetime.getUTCDate();
+  },
+  format_time:  function(datetime) {
+    if (!datetime) { return '(n/a)'; }
+    datetime = new Date(datetime);
+    return datetime.getUTCHours() + ':' + datetime.getUTCMinutes() + ':' +
+      datetime.getUTCSeconds() + '.' + datetime.getUTCMilliseconds();
+  }
+}
 };
 </script>
