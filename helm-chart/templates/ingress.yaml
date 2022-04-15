@@ -37,14 +37,14 @@ rules:
     - path: {{ . }}
       pathType: Prefix
       backend:
-    {{- if semverCompare ">=1.22-0" $.Capabilities.KubeVersion.GitVersion -}}
-    service:
-      name: {{ $fullName }}
-      port:
-        number: {{ $svcPort }}
+    {{- if semverCompare ">=1.22-0" $.Capabilities.KubeVersion.GitVersion }}
+        service:
+          name: {{ $fullName }}
+          port:
+            number: {{ $svcPort }}
     {{- else}}
-    serviceName: {{ $fullName }}
-    servicePort: {{ $svcPort }}
+        serviceName: {{ $fullName }}
+        servicePort: {{ $svcPort }}
     {{- end }}
     {{- end }}
   {{- end }}
