@@ -69,6 +69,8 @@
         </b>
       </template>
     </b-table>
+    {{ items }}
+    <!-- {{ process.env.VUE_APP_HERMES_BACKEND_URL }} -->
   </div>
 </template>
 
@@ -113,7 +115,7 @@ export default {
   },
   mounted() {
     axios
-      .get("http://hermes-dev.lco.gtn/api/v0/messages.json")
+      .get("http://hermes-dev.lco.gtn/api/v0/messages.json ")
       .then((response) => (this.items = response.data))
       .catch((error) => console.log(error));
   },
