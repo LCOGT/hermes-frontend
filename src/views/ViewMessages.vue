@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-auto">
+  <div class="overflow-auto px-4" :style="{width: '100%'}">
 
    <b-pagination
       v-model="currentPage"
@@ -15,6 +15,7 @@
       small
       noCollapse
       outlined
+      striped
       sort-icon-left
       head-variant="light"
       @row-clicked="(item) => $set(item, '_showDetails', !item._showDetails)"
