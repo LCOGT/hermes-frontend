@@ -28,24 +28,24 @@ spec:
       secretName: {{ .secretName }}
   {{- end }}
 {{- end }}
-rules:
-  {{- range .Values.ingress.hosts }}
-- host: {{ .host | quote }}
-  http:
-    paths:
-    {{- range .paths }}
-    - path: {{ . }}
-      pathType: Prefix
-      backend:
-    {{- if semverCompare ">=1.22-0" $.Capabilities.KubeVersion.GitVersion }}
-        service:
-          name: {{ $fullName }}
-          port:
-            number: {{ $svcPort }}
-    {{- else}}
-        serviceName: {{ $fullName }}
-        servicePort: {{ $svcPort }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+        - path: {{ . }}
+          pathType: Prefix
+          backend:
+        {{- if semverCompare ">=1.22-0" $.Capabilities.KubeVersion.GitVersion }}
+            service:
+              name: {{ $fullName }}
+              port:
+                number: {{ $svcPort }}
+        {{- else}}
+            serviceName: {{ $fullName }}
+            servicePort: {{ $svcPort }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
     {{- end }}
-    {{- end }}
-  {{- end }}
-{{- end }}
