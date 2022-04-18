@@ -169,10 +169,10 @@ export default {
           kvList.push(dataDict);
         } else if (key == "header") {
           for (const [header_key, header_value] of Object.entries(value)) {
-            var dataDict = {};
-            dataDict['key']= header_key;
-            dataDict['value']= header_value;
-            kvList.push(dataDict);
+            var headerDict = {};
+            headerDict['key']= header_key;
+            headerDict['value']= header_value;
+            kvList.push(headerDict);
           }
         }
       }
