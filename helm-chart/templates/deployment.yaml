@@ -46,6 +46,14 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: app-configuration
+              mountPath: /app/env-config.js
+              subPath: "env-config.js"
+      volumes:
+        - name: app-configuration
+          configMap:
+            name: {{ include "hermes-frontend.fullname" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

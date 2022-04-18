@@ -19,6 +19,7 @@
     "bootstrap-vue": "^2.21.2",
     "bootstrap-vue-editable-table": "^0.1.2-beta.7",
     "core-js": "^3.8.3",
+    "dotenv": "^16.0.0",
     "http": "^0.0.1-security",
     "http-browserify": "^1.7.0",
     "https": "^1.0.0",
@@ -61,6 +62,9 @@
   },
   "eslintConfig": {
     "root": true,
+    "globals": {
+      "_env_": "readonly"
+    },
     "env": {
       "node": true
     },
