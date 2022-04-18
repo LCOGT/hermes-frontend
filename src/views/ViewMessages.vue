@@ -19,6 +19,7 @@
       sort-icon-left
       head-variant="light"
       @row-clicked="(item) => $set(item, '_showDetails', !item._showDetails)"
+      class="message-b-table"
       id="message-table"
       :per-page="perPage"
       :current-page="currentPage"
@@ -74,6 +75,7 @@
 </template>
 
 <script>
+import getEnv from "@/utils/env.js"
 import axios from "axios";
 export default {
   name: "ViewMessages",
@@ -114,7 +116,7 @@ export default {
   },
   mounted() {
     axios
-      .get(process.env.VUE_APP_HERMES_BACKEND_URL)
+      .get(getEnv("VUE_APP_HERMES_BACKEND_URL"))
       .then((response) => (this.items = response.data))
       .catch((error) => console.log(error));
   },
