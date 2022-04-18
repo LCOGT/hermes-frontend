@@ -56,9 +56,26 @@
           </b-row>
 
           <b-row class="mb-2">
-            <b-col sm="3" class="text-sm-right"><b>Other Stuff:</b></b-col>
-            <b-col>{{ row.item.data }}</b-col>
+            <b-col sm="3" class="text-sm-right"><b>Additional Data:</b></b-col>
+            <b-col>
+              <b-table
+                small
+                reactive
+                :items="getDataitems(row.item)"
+                :fields="dataFields"
+              >
+              </b-table>
+            </b-col>
           </b-row>
+          
+          <b-row class="mb-2">
+            <b-col sm="3" class="text-sm-right">
+              <b-button variant="outline-light" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
+                <b> Show JSON: </b>
+              </b-button>
+            </b-col>
+          </b-row>
+          
         </b-card>
       </template>
 
@@ -70,6 +87,12 @@
         </b>
       </template>
     </b-table>
+
+    <!-- JSON DATA -->
+    <b-modal :id="jsonData.id" :title="jsonData.title" ok-only @hide="resetjsonData">
+      <pre>{{ jsonData.content }}</pre>
+    </b-modal>
+
   </div>
 </template>
 
@@ -110,13 +133,50 @@ export default {
       ],
       items: [],
       selectedItem: null,
+      jsonData: {
+          id: 'json-data',
+          title: '',
+          content: ''
+      },
+      dataFields: [{key: "key"}, {key: "value"}],
     };
   },
   mounted() {
     axios
-      .get(process.env.VUE_APP_HERMES_BACKEND_URL)
+      .get('http://hermes-dev.lco.gtn/api/v0/messages.json')
+      // .get(process.env.VUE_APP_HERMES_BACKEND_URL)
       .then((response) => (this.items = response.data))
       .catch((error) => console.log(error));
+  },
+  methods: {
+      info(item, index, button) {
+        this.jsonData.title = `Row index: ${index + 1}`
+        this.jsonData.content = JSON.stringify(item, null, 2)
+        this.$root.$emit('bv::show::modal', this.jsonData.id, button)
+      },
+      resetjsonData() {
+        this.jsonData.title = ''
+        this.jsonData.content = ''
+      },
+    getDataitems(item){
+      var kvList = [];
+      for (const [key, value] of Object.entries(item.data)) {
+        if (!(key == "body") && !(key == "header")) {
+          var dataDict = {};
+          dataDict['key']= key;
+          dataDict['value']= value;
+          kvList.push(dataDict);
+        } else if (key == "header") {
+          for (const [header_key, header_value] of Object.entries(value)) {
+            var dataDict = {};
+            dataDict['key']= header_key;
+            dataDict['value']= header_value;
+            kvList.push(dataDict);
+          }
+        }
+      }
+      return kvList;
+    }
   },
   filters: {
   format_date: function(datetime) {
