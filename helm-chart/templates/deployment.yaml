@@ -48,7 +48,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: app-configuration
-              mountPath: /app/
+              mountPath: /app/env-config.js
+              subPath: "env-config.js"
       volumes:
         - name: app-configuration
           configMap:

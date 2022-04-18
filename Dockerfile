@@ -20,5 +20,4 @@ RUN echo -e "	server {\n" \
             "	}\n" \
             > /etc/nginx/conf.d/hermes.conf
 
-COPY deploy/entrypoint.sh /entrypoint.sh
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
