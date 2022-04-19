@@ -145,7 +145,7 @@ export default {
   },
   mounted() {
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_URL"))
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
       .then((response) => (this.items = response.data))
       .catch((error) => console.log(error));
   },

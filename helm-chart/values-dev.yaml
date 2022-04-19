@@ -17,4 +17,4 @@ ingress:
       paths:
         - "/"
 hermes:
-  backendUrl: http://hermes-dev.lco.gtn/api/v0/messages.json
+  backendUrl: http://hermes-dev.lco.gtn/
