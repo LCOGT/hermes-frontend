@@ -5,4 +5,4 @@ metadata:
 
 data:
   env-config.js: |
-    _env_ = {VUE_APP_HERMES_BACKEND_URL: "{{ .Values.hermes.backendUrl -}}" };
+    _env_ = {VUE_APP_HERMES_BACKEND_ROOT_URL: "{{ .Values.hermes.backendUrl -}}" };

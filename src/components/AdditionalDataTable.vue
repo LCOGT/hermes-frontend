@@ -14,17 +14,31 @@
 
 <script>
 import BEditableTable from "bootstrap-vue-editable-table";
+import { mapGetters } from "vuex";
 
 export default {
   name: "AdditionalDataTable",
   components: {
       BEditableTable,
   },
+  mounted() {
+    this.items = [];
+  },
+  computed: {
+    ...mapGetters(["getCandidateExtraData"]),
+    items: {
+      get() {
+        return this.getCandidateExtraData
+      },
+      set(value) {
+        this.$store.commit('SET_CANDIDATE_EXTRA_DATA', value)
+      }
+    }
+  },
   data() {
     return {
       fields: [{key: "key", label: "Key", type: 'text', editable: true, placeholder: "Key", class: "key-column"},
         {key: "value", label: "Value", type: 'text', editable: true, placeholder: "Value", class: "value-column"}],
-      items: [],
       rowUpdate: {},
     };
   },

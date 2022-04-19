@@ -15,15 +15,31 @@
 <script>
 
 import BEditableTable from "bootstrap-vue-editable-table";
-
+import {mapGetters} from "vuex";
 export default {
   name: "CandidatesInputTable",
   components: {
     BEditableTable,
   },
+  mounted() {
+    this.items = [{
+      candidateId: null, ra: null, dec: null, discoveryDate: null, telescope: null, instrument: null,
+      band: null, brightness: null, brightnessError: null
+    }];
+  },
+  computed: {
+    ...mapGetters(["getCandidates"]),
+    items: {
+      get() {
+        return this.getCandidates
+      },
+      set(value) {
+        this.$store.commit("SET_CANDIDATES", value)
+      },
+    }
+  },
   data() {
     return {
-
       fields: [
         {key: 'candidateId', label: 'ID', type: 'text', editable: true, placeholder: "Candidate ID", class: "candidate-id-column"},
         {key: "ra", label: "RA", type: 'text', editable: true, placeholder: "RA", class: "ra-column"},
@@ -49,10 +65,6 @@ export default {
           class: "brightness-error-column"
         }
       ],
-      items: [{
-        candidateId: null, ra: null, dec: null, discoveryDate: null, telescope: null, instrument: null,
-        band: null, brightness: null, brightnessError: null
-      }],
       rowUpdate: {}
     };
   },
