@@ -35,7 +35,7 @@
 
       <!-- Style Header -->
       <template #head()="data">
-        <span variant="secondary">{{ data.label.toUpperCase() }}</span>
+        <span variant="secondary" class="data-column">{{ data.label.toUpperCase() }}</span>
       </template>
 
       <!-- Selection Behavior -->
@@ -62,6 +62,7 @@
               <b-table
                 small
                 reactive
+                class="kv-b-table"
                 :items="getDataitems(row.item)"
                 :fields="dataFields"
               >
@@ -71,7 +72,7 @@
           
           <b-row class="mb-2">
             <b-col sm="3" class="text-sm-right">
-              <b-button variant="outline-light" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
+              <b-button variant="outline-primary" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
                 <b> Show JSON: </b>
               </b-button>
             </b-col>
@@ -100,6 +101,7 @@
 <script>
 import getEnv from "@/utils/env.js"
 import axios from "axios";
+
 export default {
   name: "ViewMessages",
   data() {
@@ -113,24 +115,29 @@ export default {
           key: "selected",
           label: "",
           headerTitle: "selected",
+          class: "data-column"
         },
         {
           key: "index",
           label: "",
+          class: "data-column"
         },
         {
           key: "created",
           sortable: true,
           sortDirection: 'desc',
-          label: "Timestamp"
+          label: "Timestamp",
+          class: "data-column"
         },
         {
           key: "title",
           sortable: true,
+          class: "data-column"
         },
         {
           key: "author",
           sortable: true,
+          class: "data-column"
         },
       ],
       items: [],
@@ -140,7 +147,7 @@ export default {
           title: '',
           content: ''
       },
-      dataFields: [{key: "key"}, {key: "value"}],
+      dataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
     };
   },
   mounted() {
@@ -190,9 +197,24 @@ export default {
   format_time:  function(datetime) {
     if (!datetime) { return '(n/a)'; }
     datetime = new Date(datetime);
-    return datetime.getUTCHours() + ':' + datetime.getUTCMinutes() + ':' +
-      datetime.getUTCSeconds() + '.' + datetime.getUTCMilliseconds();
+    return ((datetime.getUTCHours() < 9) ? '0' : '') + datetime.getUTCHours() + ':' +
+      ((datetime.getUTCMinutes() < 9) ? '0' : '') + datetime.getUTCMinutes() + ':' +
+      ((datetime.getUTCSeconds() < 9) ? '0' : '') + datetime.getUTCSeconds() + '.' + datetime.getUTCMilliseconds();
   }
 }
 };
 </script>
+
+<style scoped>
+.message-b-table {
+  width: 100%
+}
+
+.message-b-table >>> .data-column{
+  padding : 0.3rem;
+}
+
+.kv-b-table {
+  width: 100%
+}
+</style>
