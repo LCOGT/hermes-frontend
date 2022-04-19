@@ -71,7 +71,7 @@
           
           <b-row class="mb-2">
             <b-col sm="3" class="text-sm-right">
-              <b-button variant="outline-light" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
+              <b-button variant="outline-primary" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
                 <b> Show JSON: </b>
               </b-button>
             </b-col>
