@@ -190,8 +190,9 @@ export default {
   format_time:  function(datetime) {
     if (!datetime) { return '(n/a)'; }
     datetime = new Date(datetime);
-    return datetime.getUTCHours() + ':' + datetime.getUTCMinutes() + ':' +
-      datetime.getUTCSeconds() + '.' + datetime.getUTCMilliseconds();
+    return ((datetime.getUTCHours() < 9) ? '0' : '') + datetime.getUTCHours() + ':' +
+      ((datetime.getUTCMinutes() < 9) ? '0' : '') + datetime.getUTCMinutes() + ':' +
+      ((datetime.getUTCSeconds() < 9) ? '0' : '') + datetime.getUTCSeconds() + '.' + datetime.getUTCMilliseconds();
   }
 }
 };
