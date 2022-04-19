@@ -9,6 +9,7 @@
         <b-navbar-nav>
           <b-nav-item to="/">Home</b-nav-item>
           <b-nav-item to="/report-candidates">Submit Candidates</b-nav-item>
+          <b-nav-item to="/report-photometry">Submit Photometry</b-nav-item>
         </b-navbar-nav>
 
         <!-- Right aligned nav items -->

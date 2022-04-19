@@ -1,23 +1,35 @@
 <template>
   <b-container fluid class="outside-container">
     <b-row>
-    <label for="title-input">Title:</label>
-    <b-form-input class="title-input" placeholder="Title"></b-form-input>
-    </b-row>
-    <b-row>
-      <b-col class="eventid-col">
-        <label for="eventid-input">Event ID:</label>
+    <b-col>
+      <b-row>
+        <label for="title-input">Title:</label>
+        <b-form-input class="title-input" placeholder="Title"></b-form-input>
+      </b-row>
+      <b-row>
+        <b-col class="eventid-col">
+          <label for="eventid-input">Event ID:</label>
 
-        <b-form-input class="eventid-input" placeholder="Event ID"></b-form-input>
-      </b-col>
-      <b-col class="authors-col">
-        <label for="authors-input">Authors:</label>
-        <b-form-input class="authors-input" placeholder="Authors"></b-form-input>
+          <b-form-input class="eventid-input" placeholder="Event ID"></b-form-input>
+        </b-col>
+        <b-col class="authors-col">
+          <label for="authors-input">Authors:</label>
+          <b-form-input class="authors-input" placeholder="Authors"></b-form-input>
+        </b-col>
+      </b-row>
+    </b-col>
+      <b-col>
+        <b-card title="Upload Data">
+          <b-card-text>
+            This space will contain information explaining the procedure for uploading a text file that will automatically fill the photometry table below.
+          </b-card-text>
+          <b-button class="submit-button" variant="primary">Import Data</b-button>
+        </b-card>
       </b-col>
     </b-row>
     <b-row>
-      <b-col class="candidates-input-col">
-      <candidates-input-table></candidates-input-table>
+      <b-col class="photometry-input-col">
+      <photometry-input-table></photometry-input-table>
       </b-col>
       <b-col class="extra-input-col">
         <label for="extra-input-table">Additional Data Elements:</label>
@@ -38,13 +50,13 @@
 
 <script lang="ts">
 
-import CandidatesInputTable from "@/components/CandidatesInputTable.vue"
+import PhotometryInputTable from "@/components/PhotometryInputTable.vue"
 import AdditionalDataTable from "@/components/AdditionalDataTable.vue"
 
 export default {
-  name: "SubmitCandidates",
+  name: "SubmitPhotometry",
   components: {
-    "candidates-input-table": CandidatesInputTable,
+    "photometry-input-table": PhotometryInputTable,
     "additional-data-input-table": AdditionalDataTable
   },
   data() {
@@ -83,6 +95,9 @@ export default {
   max-width: 20%;
 }
 .submit-button {
+  color: white
+}
+.import-button {
   color: white
 }
 </style>
