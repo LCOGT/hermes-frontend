@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-navbar toggleable="lg" type="dark" variant="primary">
-      <b-navbar-brand to="/">HERMES</b-navbar-brand>
+      <b-navbar-brand to="/"><img :src="require('@/assets/hermes_logo_white.png')" height="32px" width="32px"></b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
