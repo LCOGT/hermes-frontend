@@ -13,13 +13,34 @@ const routes = [
     component: ViewMessages
   },
   {
+    path: "/report-events",
+    name: "report-events",
+    component: SubmitCandidates},
+  {
     path: "/report-candidates",
     name: "report-candidates",
+    component: SubmitCandidates},
+  {
+    path: "/report-non-detections",
+    name: "report-non-detections",
+    component: SubmitCandidates},
+  {
+    path: "/report-search",
+    name: "report-search",
     component: SubmitCandidates},
   {
     path: "/report-photometry",
     name: "report-photometry",
     component: SubmitPhotometry},
+  {
+    path: "/report-spectroscopy",
+    name: "report-spectroscopy",
+    component: SubmitPhotometry},
+  {
+    path: "/report-availability",
+    name: "report-availability",
+    component: SubmitPhotometry},
+
 ]
 
 const router = new VueRouter({
