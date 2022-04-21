@@ -1,6 +1,8 @@
 <template>
   <div class="overflow-auto px-4" :style="{width: '100%'}">
 
+   <b-row>
+     <b-col>
    <b-pagination
       v-model="currentPage"
       :total-rows="items.length"
@@ -9,6 +11,22 @@
       last-number
       aria-controls="message-table"
     ></b-pagination>
+     </b-col>
+
+    <b-col>
+    <b-form-group label="Topics" label-for="topic_selector" label-cols-lg="2">
+      <b-form-select
+        id="topic_selector"
+        v-model="filter"
+      >
+          <b-form-select-option value="">-- All --</b-form-select-option>
+          <b-form-select-option value="hermes.test">Hermes Test</b-form-select-option>
+          <b-form-select-option value="gcn.circular">GCN Circular</b-form-select-option>
+
+      </b-form-select>
+    </b-form-group>
+    </b-col>
+   </b-row>
 
     <b-table
       hover
@@ -21,6 +39,9 @@
       @row-clicked="(item) => $set(item, '_showDetails', !item._showDetails)"
       class="message-b-table"
       id="message-table"
+      :filter="filter"
+      :filter-included-fields="topic"
+      @filtered="onFiltered"
       :per-page="perPage"
       :current-page="currentPage"
       :sort-by.sync="sortBy"
@@ -106,10 +127,13 @@ export default {
   name: "ViewMessages",
   data() {
     return {
+      topic_options: ['hermes.test', 'gcn.circular'],
       sortBy: 'created',
       sortDesc: true,
       perPage: 10,
       currentPage: 1,
+      filter: [],
+      filterOn: [],
       fields: [
         {
           key: "selected",
@@ -142,6 +166,7 @@ export default {
       ],
       items: [],
       selectedItem: null,
+      topic: null,
       jsonData: {
           id: 'json-data',
           title: '',
@@ -157,15 +182,20 @@ export default {
       .catch((error) => console.log(error));
   },
   methods: {
-      info(item, index, button) {
-        this.jsonData.title = `Row index: ${index + 1}`
-        this.jsonData.content = JSON.stringify(item, null, 2)
-        this.$root.$emit('bv::show::modal', this.jsonData.id, button)
-      },
-      resetjsonData() {
-        this.jsonData.title = ''
-        this.jsonData.content = ''
-      },
+    info(item, index, button) {
+      this.jsonData.title = `Row index: ${index + 1}`
+      this.jsonData.content = JSON.stringify(item, null, 2)
+      this.$root.$emit('bv::show::modal', this.jsonData.id, button)
+    },
+    resetjsonData() {
+      this.jsonData.title = ''
+      this.jsonData.content = ''
+    },
+    onFiltered(filteredItems) {
+      // Trigger pagination to update the number of buttons/pages due to filtering
+      this.totalRows = filteredItems.length
+      this.currentPage = 1
+    },
     getDataitems(item){
       var kvList = [];
       for (const [key, value] of Object.entries(item.data)) {
