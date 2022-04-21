@@ -1,8 +1,16 @@
 <template>
   <b-container fluid class="outside-container">
     <b-row>
-    <label for="title-input">Title:</label>
-    <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
+      <b-col>
+        <label for="title-input">Title:</label>
+        <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
+      </b-col>
+      <b-col>
+        <div>
+          <label for="topic-input">Topic:</label>
+          <b-form-select class="topic-input" v-model="topic" :options="['hermes.test']">Topic</b-form-select>
+        </div>
+      </b-col>
     </b-row>
     <b-row>
       <b-col class="eventid-col">
@@ -29,10 +37,7 @@
       <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
     </b-row>
     <b-row>
-      <b-col><div>
-        <label for="topic-input">Topic:</label>
-        <b-form-select class="topic-input" v-model="topic" :options="['hermes.test']">Topic</b-form-select>
-      </div></b-col>
+      
       <b-col>
       <div class="submit-container">
         <b-button class="submit-button" variant="success" @click="submitToHop">Submit</b-button>
