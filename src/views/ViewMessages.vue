@@ -19,9 +19,9 @@
         id="topic_selector"
         v-model="filter"
       >
-          <b-form-select-option value="">-- All --</b-form-select-option>
-          <b-form-select-option value="hermes.test">Hermes Test</b-form-select-option>
-          <b-form-select-option value="gcn.circular">GCN Circular</b-form-select-option>
+        <b-form-select-option value="">-- All --</b-form-select-option>
+        <b-form-select-option value="hermes.test">Hermes Test</b-form-select-option>
+        <b-form-select-option value="gcn.circular">GCN Circular</b-form-select-option>
 
       </b-form-select>
     </b-form-group>
@@ -132,7 +132,7 @@ export default {
       sortDesc: true,
       perPage: 10,
       currentPage: 1,
-      filter: [],
+      filter: "",
       filterOn: [],
       fields: [
         {
