@@ -53,7 +53,7 @@
         <b-card>
           <b-row class="mb-2">
             <b-col sm="3" class="text-sm-right"><b>Message:</b></b-col>
-            <b-col>{{ row.item.message_text }}</b-col>
+            <b-col><span style="white-space: pre-wrap;">{{ row.item.message_text }}</span></b-col>
           </b-row>
 
           <b-row class="mb-2">
