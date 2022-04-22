@@ -73,13 +73,14 @@
       <template slot="row-details" slot-scope="row">
         <b-card>
           <b-row class="mb-2">
-            <b-col sm="3" class="text-sm-right"><b>Message:</b></b-col>
-            <b-col><span style="white-space: pre-wrap;">{{ row.item.message_text }}</span></b-col>
-          </b-row>
-
-          <b-row class="mb-2">
-            <b-col sm="3" class="text-sm-right"><b>Additional Data:</b></b-col>
-            <b-col>
+            <b-col class="message-block">
+              <b-card>
+                <span style="white-space: pre-wrap;">{{ row.item.message_text }}</span>
+              </b-card>
+            </b-col>
+          <b-col>
+            <b-row sm="3" class="text-sm-right"><b>Additional Data:</b></b-row>
+            <b-row>
               <b-table
                 small
                 reactive
@@ -88,17 +89,16 @@
                 :fields="dataFields"
               >
               </b-table>
+            </b-row>
+              <b-row class="mb-2">
+                <b-col sm="3" class="text-sm-right">
+                  <b-button variant="outline-primary" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
+                    <b> Show JSON: </b>
+                  </b-button>
+                </b-col>
+              </b-row>
             </b-col>
           </b-row>
-          
-          <b-row class="mb-2">
-            <b-col sm="3" class="text-sm-right">
-              <b-button variant="outline-primary" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
-                <b> Show JSON: </b>
-              </b-button>
-            </b-col>
-          </b-row>
-          
         </b-card>
       </template>
 
@@ -132,6 +132,7 @@ export default {
       sortDesc: true,
       perPage: 10,
       currentPage: 1,
+      totalRows: 1,
       filter: "",
       filterOn: [],
       fields: [
@@ -179,7 +180,7 @@ export default {
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
       .then((response) => (this.items = response.data))
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error));    
   },
   methods: {
     info(item, index, button) {
@@ -237,7 +238,7 @@ export default {
 
 <style scoped>
 .message-b-table {
-  width: 100%
+  width: 100%;
 }
 
 .message-b-table >>> .data-column{
@@ -245,6 +246,10 @@ export default {
 }
 
 .kv-b-table {
-  width: 100%
+  width: 100%;
+}
+
+.message-block {
+  width: 60%;
 }
 </style>
