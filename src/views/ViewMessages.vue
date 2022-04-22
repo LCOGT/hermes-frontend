@@ -104,9 +104,8 @@
 
       <!-- Format Timestamp -->
       <template #cell(created)="data">
-        <b class="small">
+        <b class="small" v-b-tooltip.hover :title="data.item.created|format_time">
           {{ data.item.created | format_date }}
-          {{ data.item.created | format_time }}
         </b>
       </template>
     </b-table>
@@ -180,7 +179,7 @@ export default {
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
       .then((response) => (this.items = response.data))
-      .catch((error) => console.log(error));    
+      .catch((error) => console.log(error));
   },
   methods: {
     info(item, index, button) {
@@ -230,7 +229,7 @@ export default {
     datetime = new Date(datetime);
     return ((datetime.getUTCHours() < 9) ? '0' : '') + datetime.getUTCHours() + ':' +
       ((datetime.getUTCMinutes() < 9) ? '0' : '') + datetime.getUTCMinutes() + ':' +
-      ((datetime.getUTCSeconds() < 9) ? '0' : '') + datetime.getUTCSeconds() + '.' + datetime.getUTCMilliseconds();
+      ((datetime.getUTCSeconds() < 9) ? '0' : '') + datetime.getUTCSeconds();
   }
 }
 };
