@@ -24,7 +24,7 @@ export default {
   mounted() {
     this.items = [{
       candidateId: null, ra: null, dec: null, discoveryDate: null, telescope: null, instrument: null,
-      band: null, brightness: null, brightnessError: null
+      band: null, brightness: null, brightnessError: null, brightnessUnit: "AB mag"
     }];
   },
   computed: {
@@ -63,7 +63,20 @@ export default {
           editable: true,
           placeholder: "Brightness Error",
           class: "brightness-error-column"
-        }
+        },
+        {
+          key: "brightnessUnit",
+          label: "Brightness Unit",
+          type: "select",
+          editable: true,
+          class: "brightness-unit-col",
+          options: [
+            { value: "AB mag", text: "AB mag"},
+            { value: "Vega mag", text: "Vega mag"},
+            { value: "mJy", text: "mJy"},
+            { value: "erg / s / cm² / Å", text: "erg / s / cm² / Å" },
+          ],
+        },
       ],
       rowUpdate: {}
     };
@@ -86,6 +99,7 @@ export default {
           band: null,
           brightness: null,
           brightnessError: null,
+          brightnessUnit: "AB mag",
           isActive: false,
         },
       };
