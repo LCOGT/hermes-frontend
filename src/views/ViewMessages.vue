@@ -79,14 +79,25 @@
               </b-card>
             </b-col>
           <b-col>
+            <b-row sm="3" class="text-sm-right"><b>{{ getDataTitle(row.item) }}</b></b-row>
+            <b-row>
+              <b-table
+                small
+                reactive
+                class="data-b-table"
+                :items="getDataItems(row.item)"
+                :fields="getDataFields(row.item)"
+              >
+              </b-table>
+            </b-row>
             <b-row sm="3" class="text-sm-right"><b>Additional Data:</b></b-row>
             <b-row>
               <b-table
                 small
                 reactive
                 class="kv-b-table"
-                :items="getDataitems(row.item)"
-                :fields="dataFields"
+                :items="getKVDataItems(row.item)"
+                :fields="KVdataFields"
               >
               </b-table>
             </b-row>
@@ -172,7 +183,7 @@ export default {
           title: '',
           content: ''
       },
-      dataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
+      KVdataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
     };
   },
   mounted() {
@@ -196,10 +207,10 @@ export default {
       this.totalRows = filteredItems.length
       this.currentPage = 1
     },
-    getDataitems(item){
+    getKVDataItems(item){
       var kvList = [];
       for (const [key, value] of Object.entries(item.data)) {
-        if (!(key == "body") && !(key == "header")) {
+        if (!(key == "body") && !(key == "header") && !(Array.isArray(value))) {
           var dataDict = {};
           dataDict['key']= key;
           dataDict['value']= value;
@@ -214,7 +225,35 @@ export default {
         }
       }
       return kvList;
-    }
+    },
+    getDataTitle(item){
+      for (const [ key, value] of Object.entries(item.data)) {
+        if (Array.isArray(value)) {
+          return key.toUpperCase();
+        }
+      }
+    },
+    getDataItems(item){
+      for (const [ , value] of Object.entries(item.data)) {
+        if (Array.isArray(value)) {
+          return value;
+        }
+      }
+    },
+    getDataFields(item){
+      for (const [ , value] of Object.entries(item.data)) {
+        var fieldList = [];
+        if (Array.isArray(value)) {
+          for (const [data_key, ] of Object.entries(value[0])) {
+            var dataDict = {};
+            dataDict['key']= data_key;
+            dataDict['class']= "data-column";
+            fieldList.push(dataDict);
+          }
+        }
+        return fieldList;
+      }
+    },
   },
   filters: {
   format_date: function(datetime) {
