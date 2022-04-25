@@ -19,7 +19,7 @@
         id="topic_selector"
         v-model="filter"
       >
-        <b-form-select-option value="">-- All --</b-form-select-option>
+        <b-form-select-option value="">-- All Topics --</b-form-select-option>
         <b-form-select-option value="hermes.test">Hermes Test</b-form-select-option>
         <b-form-select-option value="gcn.circular">GCN Circular</b-form-select-option>
 
@@ -210,12 +210,14 @@ export default {
     getKVDataItems(item){
       var kvList = [];
       for (const [key, value] of Object.entries(item.data)) {
-        if (!(key == "body") && !(key == "header") && !(Array.isArray(value))) {
+        if (!(key == "body" && item.topic == 'gcn.circular') &&
+            !(key == "header" && item.topic == 'gcn.circular') &&
+            !(Array.isArray(value))) {
           var dataDict = {};
           dataDict['key']= key;
           dataDict['value']= value;
           kvList.push(dataDict);
-        } else if (key == "header") {
+        } else if (key == "header" && item.topic == 'gcn.circular') {
           for (const [header_key, header_value] of Object.entries(value)) {
             var headerDict = {};
             headerDict['key']= header_key;
