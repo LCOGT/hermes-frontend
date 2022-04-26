@@ -23,7 +23,7 @@
         </b-col>
         <b-col class="authors-col">
           <label for="authors-input">Authors:</label>
-          <b-form-input class="authors-input" v-model="author" placeholder="Authors"></b-form-input>
+          <b-form-input class="authors-input" v-model="authors" placeholder="Authors"></b-form-input>
         </b-col>
       </b-row>
     </b-card>
@@ -75,10 +75,11 @@ export default {
   data() {
     return {
       title: '',
-      author: '',
+      authors: '',
       topic: null,
       message: '',
       eventid: '',
+      user: 'Hermes User.guest',
     };
   },
   computed: {
@@ -99,12 +100,13 @@ export default {
       let payload = {
         "topic": this.topic,
         "title": this.title,
-        "author": this.author,
+        "author": this.user,
         "data": additionalDataObj,
         "message_text": this.message
       };
       payload.data.candidate_data = candidateData;
       payload.data.eventid = this.eventid;
+      payload.data.authors = this.authors;
       console.log(JSON.stringify(payload))
       axios({
         method: 'post',
