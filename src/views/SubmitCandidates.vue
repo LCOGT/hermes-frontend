@@ -3,7 +3,7 @@
     <!-- Form Title -->
     <h1>Candidate Submission Form</h1>
     <!-- Basic Info Form -->
-    <b-card>
+    <b-card class="mb-2 shadow" border-variant="primary">
       <b-row class=p-2>
         <b-col>
           <label for="title-input">Title:</label>
@@ -28,7 +28,7 @@
       </b-row>
     </b-card>
     <!-- Data Tables -->
-    <b-card>
+    <b-card class="mb-2 shadow" border-variant="primary">
       <b-row>
         <b-col class="candidates-input-col">
         <candidates-input-table></candidates-input-table>
@@ -40,15 +40,17 @@
       </b-row>
     </b-card>
     <!-- Message Form -->
-    <b-row class="py-3">
-      <label for="message-input">Message:</label>
-      <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
-    </b-row>
+    <b-card class="mb-2 shadow" border-variant="primary">
+      <b-row class="p-3">
+        <label for="message-input">Message:</label>
+        <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+      </b-row>
+    </b-card>
     <!-- Submit -->
     <b-row>
       <b-col>
       <div class="submit-container">
-        <b-button class="submit-button" variant="success" @click="submitToHop">Submit</b-button>
+        <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
       </div>
       </b-col>
     </b-row>
