@@ -172,7 +172,8 @@ export default {
         {
           key: "author",
           sortable: true,
-          class: "data-column"
+          class: "data-column",
+          label: "Submitter",
         },
       ],
       items: [],
