@@ -20,8 +20,8 @@
         v-model="filter"
       >
         <b-form-select-option value="">-- All Topics --</b-form-select-option>
-        <b-form-select-option value="hermes.test">Hermes Test</b-form-select-option>
-        <b-form-select-option value="gcn.circular">GCN Circular</b-form-select-option>
+        <b-form-select-option value="hermes.test">hermes.test</b-form-select-option>
+        <b-form-select-option value="gcn.circular">gcn.circular</b-form-select-option>
 
       </b-form-select>
     </b-form-group>
@@ -90,7 +90,7 @@
               >
               </b-table>
             </b-row>
-            <b-row sm="3" class="text-sm-right"><b>Additional Data:</b></b-row>
+            <b-row sm="3" class="text-sm-right"><b>ADDITIONAL DATA</b></b-row>
             <b-row>
               <b-table
                 small
@@ -115,9 +115,9 @@
 
       <!-- Format Timestamp -->
       <template #cell(created)="data">
-        <b class="small" v-b-tooltip.hover :title="data.item.created|format_time">
+        <div v-b-tooltip.hover :title="data.item.created|format_time">
           {{ data.item.created | format_date }}
-        </b>
+        </div>
       </template>
     </b-table>
 
@@ -230,9 +230,9 @@ export default {
       return kvList;
     },
     getDataTitle(item){
-      for (const [ key, value] of Object.entries(item.data)) {
+      for (const [key, value] of Object.entries(item.data)) {
         if (Array.isArray(value)) {
-          return key.toUpperCase();
+          return key.toUpperCase().replace("_", " ");
         }
       }
     },
