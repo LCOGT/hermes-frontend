@@ -85,13 +85,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCandidates", "getCandidateExtraData"])
+    ...mapGetters(["getCandidates", "getExtraData"])
   },
   methods: {
     submitToHop() {
         console.log("Submitting to hop");
-        console.log(this.getCandidateExtraData)
-      const additionalDataObj = this.getCandidateExtraData.reduce(
+        console.log(this.getExtraData)
+      const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       console.log(additionalDataObj)
       const candidateData = this.getCandidates

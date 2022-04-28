@@ -25,13 +25,13 @@ export default {
     this.items = [];
   },
   computed: {
-    ...mapGetters(["getCandidateExtraData"]),
+    ...mapGetters(["getExtraData"]),
     items: {
       get() {
-        return this.getCandidateExtraData
+        return this.getExtraData
       },
       set(value) {
-        this.$store.commit('SET_CANDIDATE_EXTRA_DATA', value)
+        this.$store.commit('SET_EXTRA_DATA', value)
       }
     }
   },

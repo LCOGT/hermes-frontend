@@ -91,23 +91,23 @@ export default {
     return {
       title: '',
       authors: '',
-      topic: null,
+      topic: '',
       message: '',
       eventid: '',
       user: 'Hermes User.guest',
     };
   },
   computed: {
-    ...mapGetters(["getPhotometry", "getPhotometryExtraData"])
+    ...mapGetters(["getCandidates", "getExtraData"])
   },
   methods: {
     submitToHop() {
         console.log("Submitting to hop");
-        console.log(this.getPhotometryExtraData)
-      const additionalDataObj = this.getPhotometryExtraData.reduce(
+        console.log(this.getExtraData)
+      const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       console.log(additionalDataObj)
-      const candidateData = this.getPhotometry
+      const candidateData = this.getCandidates
       candidateData.forEach(function (item) {
         delete item.isActive;
         delete item.id;
