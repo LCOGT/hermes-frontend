@@ -74,6 +74,9 @@
 
 import PhotometryInputTable from "@/components/PhotometryInputTable.vue"
 import AdditionalDataTable from "@/components/AdditionalDataTable.vue"
+import axios from "axios"
+import getEnv from "@/utils/env.js";
+import { mapGetters } from "vuex";
 
 export default {
   name: "SubmitPhotometry",
@@ -81,18 +84,59 @@ export default {
     "photometry-input-table": PhotometryInputTable,
     "additional-data-input-table": AdditionalDataTable
   },
+  mounted() {
+    this.topic = 'hermes.test'
+  },
   data() {
     return {
       title: '',
-      author: '',
-      topic: 'hermes.test',
+      authors: '',
+      topic: null,
       message: '',
       eventid: '',
+      user: 'Hermes User.guest',
     };
+  },
+  computed: {
+    ...mapGetters(["getPhotometry", "getPhotometryExtraData"])
   },
   methods: {
     submitToHop() {
-      console.log("Submitting to hop")
+        console.log("Submitting to hop");
+        console.log(this.getPhotometryExtraData)
+      const additionalDataObj = this.getPhotometryExtraData.reduce(
+          (obj, element) => ({...obj, [element.key]: element.value}), {});
+      console.log(additionalDataObj)
+      const candidateData = this.getPhotometry
+      candidateData.forEach(function (item) {
+        delete item.isActive;
+        delete item.id;
+      });
+      let payload = {
+        "topic": this.topic,
+        "title": this.title,
+        "author": this.user,
+        "data": additionalDataObj,
+        "message_text": this.message
+      };
+      payload.data.candidate_data = candidateData;
+      payload.data.eventid = this.eventid;
+      payload.data.authors = this.authors;
+      console.log(JSON.stringify(payload))
+      axios({
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
+
+        data: JSON.stringify(payload)
+      })
+          .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            location.href = '/.html'
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
     }
   }
 }
