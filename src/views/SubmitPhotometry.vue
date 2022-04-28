@@ -70,7 +70,7 @@
   </b-container>
 </template>
 
-<script lang="ts">
+<script>
 
 import PhotometryInputTable from "@/components/PhotometryInputTable.vue"
 import AdditionalDataTable from "@/components/AdditionalDataTable.vue"
@@ -91,7 +91,7 @@ export default {
     return {
       title: '',
       authors: '',
-      topic: '',
+      topic: null,
       message: '',
       eventid: '',
       user: 'Hermes User.guest',
