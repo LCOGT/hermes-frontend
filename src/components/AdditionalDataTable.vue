@@ -68,11 +68,8 @@ export default {
 }
 
 /* We need to use a deep selector here for the css because we are dynamically generating rows */
-.additional-data-table >>> .key-column {
+.additional-data-table /deep/ td {
   height: calc(1.5em + 0.75rem + 2px);
 }
 
-.additional-data-table >>> .value-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
 </style>

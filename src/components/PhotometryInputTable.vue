@@ -85,31 +85,8 @@ export default {
   color: white;
 }
 
-.photometry-data-table >>> .candidate-id-column {
+.photometry-data-table /deep/ td {
   height: calc(1.5em + 0.75rem + 2px);
 }
 
-.photometry-data-table >>> .observation-date-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.photometry-data-table >>> .telescope-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.photometry-data-table >>> .instrument-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.photometry-data-table >>> .band-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.photometry-data-table >>> .brightness-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.photometry-data-table >>> .brightness-error-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
 </style>

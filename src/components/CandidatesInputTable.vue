@@ -113,39 +113,8 @@ export default {
   color: white;
 }
 
-.candidate-data-table >>> .candidate-id-column {
+.candidate-data-table /deep/ td {
   height: calc(1.5em + 0.75rem + 2px);
 }
 
-.candidate-data-table >>> .ra-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .dec-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .discovery-date-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .telescope-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .instrument-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .band-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .brightness-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
-
-.candidate-data-table >>> .brightness-error-column {
-  height: calc(1.5em + 0.75rem + 2px);
-}
 </style>
