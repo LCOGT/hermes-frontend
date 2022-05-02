@@ -15,17 +15,34 @@
 <script>
 
 import BEditableTable from "bootstrap-vue-editable-table";
-
+import {mapGetters} from "vuex";
 export default {
   name: "PhotometryInputTable",
   components: {
     BEditableTable,
   },
+  mounted() {
+    this.items = [{
+        photometryId: null, dateObs: null, telescope: null, instrument: null,
+        band: null, brightness: null, brightnessError: null, brightnessUnit: "AB mag"
+      }];
+  },
+  computed: {
+    ...mapGetters(["getCandidates"]),
+    items: {
+      get() {
+        return this.getCandidates
+      },
+      set(value) {
+        this.$store.commit("SET_CANDIDATES", value)
+      },
+    }
+  },
   data() {
     return {
 
       fields: [
-        {key: 'candidateId', label: 'ID', type: 'text', editable: true, placeholder: "Candidate ID", class: "candidate-id-column"},
+        {key: 'photometryId', label: 'ID', type: 'text', editable: true, placeholder: "Target ID", class: "candidate-id-column"},
         {
           key: "dateObs",
           label: "Date-Obs",
@@ -45,12 +62,21 @@ export default {
           editable: true,
           placeholder: "Brightness Error",
           class: "brightness-error-column"
-        }
+        },
+        {
+          key: "brightnessUnit",
+          label: "Brightness Unit",
+          type: "select",
+          editable: true,
+          class: "brightness-unit-col",
+          options: [
+            { value: "AB mag", text: "AB mag"},
+            { value: "Vega mag", text: "Vega mag"},
+            { value: "mJy", text: "mJy"},
+            { value: "erg / s / cm² / Å", text: "erg / s / cm² / Å" },
+          ],
+        },
       ],
-      items: [{
-        candidateId: null, ra: null, dec: null, dateObs: null, telescope: null, instrument: null,
-        band: null, brightness: null, brightnessError: null
-      }],
       rowUpdate: {}
     };
   },
@@ -64,14 +90,13 @@ export default {
         data: {
           id: newId,
           photometryId: null,
-          ra: null,
-          dec: null,
           discoveryDate: null,
           telescope: null,
           instrument: null,
           band: null,
           brightness: null,
           brightnessError: null,
+          brightnessUnit: "AB mag",
           isActive: false,
         },
       };
