@@ -36,7 +36,10 @@
           <b-card-text>
             This space will contain information explaining the procedure for uploading a text file that will automatically fill the photometry table below.
           </b-card-text>
-          <b-button class="submit-button" variant="primary">Import Data</b-button>
+          <!-- <b-button class="submit-button" variant="primary">Import Data</b-button> -->
+          <form enctype="multipart/form-data">
+            <input type="file" @change="onFileChange">
+          </form>
         </b-card>
       </b-col>
     </b-row>
@@ -95,12 +98,67 @@ export default {
       message: '',
       eventid: '',
       user: 'Hermes User.guest',
+      fileinput: '',
     };
   },
   computed: {
     ...mapGetters(["getCandidates", "getExtraData"])
   },
+  watch: {
+    fileinput(newTable) {
+      var csvTable = this.csvToArray(newTable);
+      var fullTable = this.getCandidates
+      csvTable.forEach(function(row){
+        if (row != undefined){
+          const newId = Date.now();
+          row['id'] = newId;
+          row['isActive'] = false;
+          fullTable.push(row);
+        }
+      });
+    }
+  },
   methods: {
+    onFileChange(e) {
+      var files = e.target.files || e.dataTransfer.files;
+      if (!files.length)
+          return;
+      this.createInput(files[0]);
+    },
+    createInput(file) {
+      var reader = new FileReader();
+      var vm = this;
+      reader.onload = (e) => {
+      vm.fileinput = reader.result;
+      }
+      reader.readAsText(file);
+    },
+    csvToArray(str, delimiter = ",") {
+      // slice from start of text to the first \n index
+      // use split to create an array from string by delimiter
+      const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
+      // slice from \n index + 1 to the end of the text
+      // use split to create an array of each csv value row
+      const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+      // Map the rows
+      // split values from each row into an array
+      // use headers.reduce to create an object
+      // object properties derived from headers:values
+      // the object passed as an element of the array
+      const arr = rows.map(function (row) {
+        const values = row.split(delimiter);
+        // Skip blank lines
+        if (!(values.length == 1 && values[0] == '')){
+          const el = headers.reduce(function (object, header, index) {
+            object[header] = values[index];
+            return object;
+          }, {});
+          return el;
+        };
+      });
+      // return the array
+      return arr;
+    },
     submitToHop() {
         console.log("Submitting to hop");
         console.log(this.getExtraData)
