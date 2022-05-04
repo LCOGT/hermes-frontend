@@ -68,6 +68,9 @@ export default {
     }
   },
   props: ["pageTitle"],
+  mounted() {
+    this.topic = 'hermes.test'
+  },
   data() {
     return {
       title: '',

@@ -18,9 +18,6 @@ export default {
     MessageForm,
     "candidates-input-table": CandidatesInputTable,
   },
-  mounted() {
-    this.topic = 'hermes.test'
-  },
   computed: {
     ...mapGetters(["getCandidates", "getExtraData"])
   },

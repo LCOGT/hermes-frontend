@@ -1,79 +1,20 @@
 <template>
-  <b-container fluid class="outside-container">
-    <!-- Form Title -->
-    <h1>Photometry Reporting Form</h1>
-    <!-- Basic Info Form -->
-      <b-row>
-      <b-col class=pr-1>
-        <b-card class="mb-2 shadow" border-variant="primary">
-          <b-row class=p-2>
-            <b-col>
-              <label for="title-input">Title:</label>
-              <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
-            </b-col>
-            <b-col>
-              <div>
-                <label for="topic-input">Topic:</label>
-                <b-form-select class="topic-input" v-model="topic" :options="['hermes.test']">Topic</b-form-select>
-              </div>
-            </b-col>
-          </b-row>
-          <b-row class=p-2>
-            <b-col class="eventid-col">
-              <label for="eventid-input">Event ID:</label>
-              <b-form-input class="eventid-input" placeholder="Event ID"></b-form-input>
-            </b-col>
-            <b-col class="authors-col">
-              <label for="authors-input">Authors:</label>
-              <b-form-input class="authors-input" placeholder="Authors"></b-form-input>
-            </b-col>
-          </b-row>
-        </b-card>
-      </b-col>
-      <b-col class=pl-1>
-        <!-- Upload Data Card -->
-        <b-card title="Upload Data" class="upload-card mb-2 shadow" border-variant="primary">
-          <b-card-text>
-            This space will contain information explaining the procedure for uploading a text file that will automatically fill the photometry table below.
-          </b-card-text>
-          <b-button class="submit-button" variant="primary">Import Data</b-button>
-        </b-card>
-      </b-col>
-    </b-row>
-    <!-- Data Tables -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-    <b-row>
-      <b-col class="photometry-input-col">
-      <photometry-input-table></photometry-input-table>
-      </b-col>
-      <b-col class="extra-input-col">
-        <label for="extra-input-table">Additional Data Elements:</label>
-        <additional-data-input-table class="extra-input-table"></additional-data-input-table>
-      </b-col>
-    </b-row>
+  <message-form page-title="Photometry Reporting Form">
+    <photometry-input-table v-on:submit_message="submitToHop"></photometry-input-table>
+    <!-- Upload Data Card -->
+    <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
+      <b-card-text>
+        This space will contain information explaining the procedure for uploading a text file that will automatically fill the photometry table below.
+      </b-card-text>
+      <b-button class="submit-button" variant="primary">Import Data</b-button>
     </b-card>
-    <!-- Message Form -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-    <b-row class="p-3">
-      <label for="message-input">Message:</label>
-      <b-form-textarea id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
-    </b-row>
-    </b-card>
-    <!-- Submit -->
-    <b-row>
-      <b-col>
-      <div class="submit-container">
-        <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
-      </div>
-      </b-col>
-    </b-row>
-  </b-container>
+  </message-form>
 </template>
 
 <script>
 
 import PhotometryInputTable from "@/components/PhotometryInputTable.vue"
-import AdditionalDataTable from "@/components/AdditionalDataTable.vue"
+import MessageForm from "@/components/MessageForm";
 import axios from "axios"
 import getEnv from "@/utils/env.js";
 import { mapGetters } from "vuex";
@@ -81,21 +22,8 @@ import { mapGetters } from "vuex";
 export default {
   name: "SubmitPhotometry",
   components: {
+    MessageForm,
     "photometry-input-table": PhotometryInputTable,
-    "additional-data-input-table": AdditionalDataTable
-  },
-  mounted() {
-    this.topic = 'hermes.test'
-  },
-  data() {
-    return {
-      title: '',
-      authors: '',
-      topic: null,
-      message: '',
-      eventid: '',
-      user: 'Hermes User.guest',
-    };
   },
   computed: {
     ...mapGetters(["getCandidates", "getExtraData"])
@@ -170,8 +98,5 @@ export default {
 }
 .import-button {
   color: white
-}
-.upload-card {
-  height: 96%;
 }
 </style>
