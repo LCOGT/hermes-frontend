@@ -17,7 +17,7 @@
         </b-col>
       </b-row>
       <b-row class=p-2>
-        <b-col class="eventid-col">
+        <b-col v-if="nleId" class="eventid-col">
           <label for="eventid-input">Event ID:</label>
           <b-form-input class="eventid-input" v-model="eventid" placeholder="Event ID"></b-form-input>
         </b-col>
@@ -67,7 +67,13 @@ export default {
       this.$emit("submit_message")
     }
   },
-  props: ["pageTitle"],
+  props: {
+    "pageTitle": String,
+    nleId: {
+      type: Boolean,
+      default: true
+    },
+  },
   data() {
     return {
       title: '',

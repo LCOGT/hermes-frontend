@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import SubmitCandidates from "@/views/SubmitCandidates.vue"
 import SubmitPhotometry from "@/views/SubmitPhotometry.vue"
+import SubmitTelescopeEvents from "@/views/SubmitTelescopeEvents.vue"
 import ViewMessages from "@/views/ViewMessages.vue"
 
 Vue.use(VueRouter)
@@ -39,7 +40,7 @@ const routes = [
   {
     path: "/report-availability",
     name: "report-availability",
-    component: SubmitPhotometry},
+    component: SubmitTelescopeEvents},
 
 ]
 
