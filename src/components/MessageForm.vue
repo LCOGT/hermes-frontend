@@ -146,13 +146,14 @@ export default {
 .eventid-col {
   max-width: 20%;
   padding: 0;
-  padding-right: 3%;
   padding-left: 15px;
+  padding-right: 15px;
 }
 
 .authors-col {
   max-width: 100%;
   padding: 0;
+  padding-left: 15px;
   padding-right: 15px;
 }
 
