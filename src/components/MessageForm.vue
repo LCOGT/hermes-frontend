@@ -50,7 +50,7 @@
     <b-row>
       <b-col>
         <div class="submit-container">
-          <b-button class="submit-button shadow" variant="success" @click="submitMessage">Submit</b-button>
+          <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
         </div>
       </b-col>
     </b-row>
@@ -59,18 +59,19 @@
 
 <script>
 import AdditionalDataTable from "@/components/AdditionalDataTable";
+import axios from "axios"
+import getEnv from "@/utils/env.js";
+import { mapGetters } from "vuex";
 
 export default {
   name: "MessageForm",
-  methods: {
-    submitMessage() {
-      this.$emit("submit_message")
-    }
+  computed: {
+    ...mapGetters(["getMainData", "getExtraData"])
+  },
+  mounted() {
+    this.topic = 'hermes.test';
   },
   props: ["pageTitle"],
-  mounted() {
-    this.topic = 'hermes.test'
-  },
   data() {
     return {
       title: '',
@@ -83,7 +84,46 @@ export default {
   },
   components: {
     "additional-data-input-table": AdditionalDataTable
-  }
+  },
+   methods: {
+    submitToHop() {
+        console.log("Submitting to hop");
+        console.log(this.getExtraData)
+      const additionalDataObj = this.getExtraData.reduce(
+          (obj, element) => ({...obj, [element.key]: element.value}), {});
+      console.log(additionalDataObj)
+      const mainData = this.getMainData
+      mainData.forEach(function (item) {
+        delete item.isActive;
+        delete item.id;
+      });
+      let payload = {
+        "topic": this.topic,
+        "title": this.title,
+        "author": this.user,
+        "data": additionalDataObj,
+        "message_text": this.message
+      };
+      payload.data.main_data = mainData;
+      payload.data.eventid = this.eventid;
+      payload.data.authors = this.authors;
+      console.log(JSON.stringify(payload))
+      axios({
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
+
+        data: JSON.stringify(payload)
+      })
+          .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            location.href = '/.html'
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+  },
 }
 </script>
 

@@ -28,13 +28,13 @@ export default {
     }];
   },
   computed: {
-    ...mapGetters(["getCandidates"]),
+    ...mapGetters(["getMainData"]),
     items: {
       get() {
-        return this.getCandidates
+        return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_CANDIDATES", value)
+        this.$store.commit("SET_MAIN_DATA", value)
       },
     }
   },
