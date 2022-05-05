@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     main_data: [],
     extra_data: [],
+    telescope_events: [],
   },
   getters: {
     getMainData(state) {
@@ -14,6 +15,9 @@ export default new Vuex.Store({
     },
     getExtraData(state) {
       return state.extra_data;
+    },
+    getTelescopeEvents(state){
+      return state.telescope_events;
     }
   },
   mutations: {
@@ -22,6 +26,9 @@ export default new Vuex.Store({
     },
     SET_EXTRA_DATA(state, extra_data) {
       state.extra_data = extra_data;
+    },
+    SET_TELESCOPE_EVENTS(state, telescope_events) {
+      state.telescope_events = telescope_events;
     }
   },
   actions: {
