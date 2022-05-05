@@ -1,113 +1,42 @@
 <template>
-  <b-container fluid class="outside-container">
-    <!-- Form Title -->
-    <h1>Photometry Reporting Form</h1>
-    <!-- Basic Info Form -->
-      <b-row>
-      <b-col class=pr-1>
-        <b-card class="mb-2 shadow" border-variant="primary">
-          <b-row class=p-2>
-            <b-col>
-              <label for="title-input">Title:</label>
-              <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
-            </b-col>
-            <b-col>
-              <div>
-                <label for="topic-input">Topic:</label>
-                <b-form-select class="topic-input" v-model="topic" :options="['hermes.test']">Topic</b-form-select>
-              </div>
-            </b-col>
-          </b-row>
-          <b-row class=p-2>
-            <b-col class="eventid-col">
-              <label for="eventid-input">Event ID:</label>
-              <b-form-input class="eventid-input" placeholder="Event ID"></b-form-input>
-            </b-col>
-            <b-col class="authors-col">
-              <label for="authors-input">Authors:</label>
-              <b-form-input class="authors-input" placeholder="Authors"></b-form-input>
-            </b-col>
-          </b-row>
-        </b-card>
-      </b-col>
-      <b-col class=pl-1>
-        <!-- Upload Data Card -->
-        <b-card title="Upload Data" class="upload-card mb-2 shadow" border-variant="primary">
-          <b-card-text>
-            This space will contain information explaining the procedure for uploading a text file that will automatically fill the photometry table below.
-          </b-card-text>
-          <!-- <b-button class="submit-button" variant="primary">Import Data</b-button> -->
-          <form enctype="multipart/form-data">
-            <input type="file" @change="onFileChange">
-          </form>
-        </b-card>
-      </b-col>
-    </b-row>
-    <!-- Data Tables -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-    <b-row>
-      <b-col class="photometry-input-col">
-      <photometry-input-table></photometry-input-table>
-      </b-col>
-      <b-col class="extra-input-col">
-        <label for="extra-input-table">Additional Data Elements:</label>
-        <additional-data-input-table class="extra-input-table"></additional-data-input-table>
-      </b-col>
-    </b-row>
+  <message-form page-title="Photometry Reporting Form">
+    <photometry-input-table></photometry-input-table>
+    <!-- Upload Data Card -->
+    <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
+      <b-card-text>
+        This space will contain information explaining the procedure for uploading a text file that will automatically fill the photometry table below.
+      </b-card-text>
+      <form enctype="multipart/form-data">
+        <input type="file" @change="onFileChange">
+      </form>
     </b-card>
-    <!-- Message Form -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-    <b-row class="p-3">
-      <label for="message-input">Message:</label>
-      <b-form-textarea id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
-    </b-row>
-    </b-card>
-    <!-- Submit -->
-    <b-row>
-      <b-col>
-      <div class="submit-container">
-        <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
-      </div>
-      </b-col>
-    </b-row>
-  </b-container>
+  </message-form>
 </template>
 
 <script>
 
 import PhotometryInputTable from "@/components/PhotometryInputTable.vue"
-import AdditionalDataTable from "@/components/AdditionalDataTable.vue"
-import axios from "axios"
-import getEnv from "@/utils/env.js";
+import MessageForm from "@/components/MessageForm";
 import { mapGetters } from "vuex";
 
 export default {
   name: "SubmitPhotometry",
   components: {
+    MessageForm,
     "photometry-input-table": PhotometryInputTable,
-    "additional-data-input-table": AdditionalDataTable
   },
-  mounted() {
-    this.topic = 'hermes.test'
+  computed: {
+    ...mapGetters(["getMainData"])
   },
   data() {
     return {
-      title: '',
-      authors: '',
-      topic: null,
-      message: '',
-      eventid: '',
-      user: 'Hermes User.guest',
       fileinput: '',
-    };
-  },
-  computed: {
-    ...mapGetters(["getCandidates", "getExtraData"])
+    }
   },
   watch: {
     fileinput(newTable) {
       var csvTable = this.csvToArray(newTable);
-      var fullTable = this.getCandidates
+      var fullTable = this.getMainData
       csvTable.forEach(function(row){
         if (row != undefined){
           const newId = Date.now();
@@ -159,46 +88,8 @@ export default {
       // return the array
       return arr;
     },
-    submitToHop() {
-        console.log("Submitting to hop");
-        console.log(this.getExtraData)
-      const additionalDataObj = this.getExtraData.reduce(
-          (obj, element) => ({...obj, [element.key]: element.value}), {});
-      console.log(additionalDataObj)
-      const candidateData = this.getCandidates
-      candidateData.forEach(function (item) {
-        delete item.isActive;
-        delete item.id;
-      });
-      let payload = {
-        "topic": this.topic,
-        "title": this.title,
-        "author": this.user,
-        "data": additionalDataObj,
-        "message_text": this.message
-      };
-      payload.data.candidate_data = candidateData;
-      payload.data.eventid = this.eventid;
-      payload.data.authors = this.authors;
-      console.log(JSON.stringify(payload))
-      axios({
-        method: 'post',
-        headers: {'Content-Type': 'application/json'},
-        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
-
-        data: JSON.stringify(payload)
-      })
-          .then(function (response) {
-            console.log(JSON.stringify(response.data));
-            location.href = '/.html'
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-    }
   }
 }
-
 </script>
 
 <style scoped>
@@ -228,8 +119,5 @@ export default {
 }
 .import-button {
   color: white
-}
-.upload-card {
-  height: 96%;
 }
 </style>

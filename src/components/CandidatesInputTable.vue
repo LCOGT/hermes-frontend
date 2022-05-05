@@ -1,6 +1,6 @@
 <template>
     <div>
-      <b-editable-table bordered class="candidate-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+      <b-editable-table bordered class="candidate-data-table" nle-id v-model="items" :fields="fields" :rowUpdate="rowUpdate">
         <template #cell(isActive)="data">
           <span v-if="data.value">Yes</span>
           <span v-else>No</span>
@@ -28,13 +28,13 @@ export default {
     }];
   },
   computed: {
-    ...mapGetters(["getCandidates"]),
+    ...mapGetters(["getMainData"]),
     items: {
       get() {
-        return this.getCandidates
+        return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_CANDIDATES", value)
+        this.$store.commit("SET_MAIN_DATA", value)
       },
     }
   },
