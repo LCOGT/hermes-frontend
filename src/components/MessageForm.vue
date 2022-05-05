@@ -111,8 +111,12 @@ export default {
         "message_text": this.message
       };
       payload.data.main_data = mainData;
-      payload.data.eventid = this.eventid;
-      payload.data.authors = this.authors;
+      if (this.eventid) {
+        payload.data.eventid = this.eventid;
+        }
+      if (this.authors) {
+        payload.data.authors = this.authors;
+        }
       console.log(JSON.stringify(payload))
       axios({
         method: 'post',
