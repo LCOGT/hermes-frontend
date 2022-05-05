@@ -26,13 +26,13 @@ export default {
     this.items = [{ observatory: null, telescope: null, instrument: null, eventDate: null, description: null}];
   },
   computed: {
-    ...mapGetters(["getTelescopeEvents"]),
+    ...mapGetters(["getMainData"]),
     items: {
       get() {
-        return this.getTelescopeEvents
+        return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_TELESCOPE_EVENTS", value)
+        this.$store.commit("SET_MAIN_DATA", value)
       },
     }
   },
