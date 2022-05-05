@@ -4,6 +4,7 @@ import SubmitCandidates from "@/views/SubmitCandidates.vue"
 import SubmitNonDetections from "@/views/SubmitNonDetection.vue"
 import SubmitSearchPointings from "@/views/SubmitSearchPointing.vue"
 import SubmitPhotometry from "@/views/SubmitPhotometry.vue"
+import SubmitSpectroscopy from "@/views/SubmitSpectroscopy.vue"
 import SubmitTelescopeEvents from "@/views/SubmitTelescopeEvents.vue"
 import ViewMessages from "@/views/ViewMessages.vue"
 import SubmitNonLocalizedEvent from "@/views/SubmitNonLocalizedEvent.vue"
@@ -39,7 +40,7 @@ const routes = [
   {
     path: "/report-spectroscopy",
     name: "report-spectroscopy",
-    component: SubmitPhotometry},
+    component: SubmitSpectroscopy},
   {
     path: "/report-availability",
     name: "report-availability",
