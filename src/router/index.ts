@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import SubmitCandidates from "@/views/SubmitCandidates.vue"
+import SubmitNonDetections from "@/views/SubmitNonDetection.vue"
 import SubmitPhotometry from "@/views/SubmitPhotometry.vue"
 import SubmitTelescopeEvents from "@/views/SubmitTelescopeEvents.vue"
 import ViewMessages from "@/views/ViewMessages.vue"
@@ -25,7 +26,7 @@ const routes = [
   {
     path: "/report-non-detections",
     name: "report-non-detections",
-    component: SubmitCandidates},
+    component: SubmitNonDetections},
   {
     path: "/report-search",
     name: "report-search",
