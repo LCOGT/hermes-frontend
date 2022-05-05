@@ -4,6 +4,7 @@ import SubmitCandidates from "@/views/SubmitCandidates.vue"
 import SubmitPhotometry from "@/views/SubmitPhotometry.vue"
 import SubmitTelescopeEvents from "@/views/SubmitTelescopeEvents.vue"
 import ViewMessages from "@/views/ViewMessages.vue"
+import SubmitNonLocalizedEvent from "@/views/SubmitNonLocalizedEvent.vue"
 
 Vue.use(VueRouter)
 
@@ -16,7 +17,7 @@ const routes = [
   {
     path: "/report-events",
     name: "report-events",
-    component: SubmitCandidates},
+    component: SubmitNonLocalizedEvent},
   {
     path: "/report-candidates",
     name: "report-candidates",
