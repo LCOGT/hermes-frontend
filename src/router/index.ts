@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import SubmitCandidates from "@/views/SubmitCandidates.vue"
+import SubmitNonDetections from "@/views/SubmitNonDetection.vue"
+import SubmitSearchPointings from "@/views/SubmitSearchPointing.vue"
 import SubmitPhotometry from "@/views/SubmitPhotometry.vue"
+import SubmitSpectroscopy from "@/views/SubmitSpectroscopy.vue"
 import SubmitTelescopeEvents from "@/views/SubmitTelescopeEvents.vue"
 import ViewMessages from "@/views/ViewMessages.vue"
 import SubmitNonLocalizedEvent from "@/views/SubmitNonLocalizedEvent.vue"
@@ -25,11 +28,11 @@ const routes = [
   {
     path: "/report-non-detections",
     name: "report-non-detections",
-    component: SubmitCandidates},
+    component: SubmitNonDetections},
   {
     path: "/report-search",
     name: "report-search",
-    component: SubmitCandidates},
+    component: SubmitSearchPointings},
   {
     path: "/report-photometry",
     name: "report-photometry",
@@ -37,7 +40,7 @@ const routes = [
   {
     path: "/report-spectroscopy",
     name: "report-spectroscopy",
-    component: SubmitPhotometry},
+    component: SubmitSpectroscopy},
   {
     path: "/report-availability",
     name: "report-availability",
