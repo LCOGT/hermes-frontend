@@ -32,6 +32,15 @@
       <b-row>
         <b-col class="input-table-col">
         <slot></slot>
+          <!-- Upload Data Card -->
+          <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
+            <b-card-text>
+              Upload a csv file:
+            </b-card-text>
+            <form enctype="multipart/form-data">
+              <input type="file" @change="onFileChange">
+            </form>
+          </b-card>
         </b-col>
         <b-col class="extra-input-col">
           <label for="extra-input-table">Additional Data Elements:</label>
@@ -51,6 +60,11 @@
       <b-col>
         <div class="submit-container">
           <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
+            <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal" title="Submission Error">
+              <template>
+                <div>{{ errorModalText }}</div>
+              </template>
+            </b-modal>
         </div>
       </b-col>
     </b-row>
@@ -70,6 +84,7 @@ export default {
   },
   mounted() {
     this.topic = 'hermes.test';
+    this.showErrorModal = false;
   },
   props: {
     "pageTitle": String,
@@ -82,27 +97,80 @@ export default {
     return {
       title: '',
       authors: '',
-      topic: null,
+      topic: 'hermes.test',
       message: '',
       eventid: '',
       user: 'Hermes User.guest',
-    };
+      fileInput: null,
+      showErrorModal: false,
+      errorModalText: '',
+      }
   },
   components: {
-    "additional-data-input-table": AdditionalDataTable
+    "additional-data-input-table": AdditionalDataTable,
+  },
+  watch: {
+    fileInput(newTable) {
+      const loaded_array = this.csvToArray(newTable)
+      this.$store.commit("SET_MAIN_DATA", loaded_array)
+    }
   },
    methods: {
+    closeErrorModal() {
+      this.errorModalText = ''
+      this.showErrorModal = false;
+    },
+     sexagesimalToDeg(ra) {
+      const ra_arr = ra.trim().split(':')
+       if (ra_arr.length !== 3) {
+         throw Error("Invalid sexagesimal value.")
+       }
+       return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
+           parseFloat(ra_arr[2]) * 15.0 / 3600.0;
+     },
+     validateRA(table) {
+      table.forEach((row) => {
+          if ('ra' in row) {
+            let this_ra;
+            try {
+              this_ra = this.sexagesimalToDeg(row.ra);
+            }
+            catch {
+              try {
+                this_ra = parseFloat(row.ra)
+                if (isNaN(this_ra)) {
+                  throw Error("RA did not parse to a number.")
+                }
+              }
+              catch {
+                this.errorModalText = row.ra + ' is not a valid RA.';
+                this.showErrorModal = true;
+                throw Error("Invalid RA")
+              }
+            }
+          if (this_ra < 0.0 || this_ra >= 360.0) {
+            this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
+            this.showErrorModal = true;
+            throw Error("Invalid RA")
+          }
+          }
+        });
+     },
     submitToHop() {
-        console.log("Submitting to hop");
-        console.log(this.getExtraData)
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
-      console.log(additionalDataObj)
       const mainData = this.getMainData
       mainData.forEach(function (item) {
         delete item.isActive;
         delete item.id;
       });
+      try {
+        this.validateRA(mainData);
+      }
+      catch {
+        return
+      }
+
       let payload = {
         "topic": this.topic,
         "title": this.title,
@@ -122,7 +190,6 @@ export default {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
         url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
-
         data: JSON.stringify(payload)
       })
           .then(function (response) {
@@ -131,8 +198,44 @@ export default {
           })
           .catch(function (error) {
             console.log(error);
+            this.showErrorModal = true
+            this.errorModalText = error
           });
-    }
+    },
+     onFileChange(event) {
+       let files = event.target.files || event.dataTransfer.files;
+       if (!files.length)
+         return;
+       let reader = new FileReader();
+       reader.onload = () => {
+         this.fileInput = reader.result;
+       }
+       reader.readAsText(files[0]);
+     },
+     csvToArray(unparsed_string, delimiter = ",") {
+       // slice from start of text to the first \n index
+       // use split to create an array from string by delimiter
+       const headers = unparsed_string.slice(0, unparsed_string.indexOf("\n")).split(delimiter);
+       // slice from \n index + 1 to the end of the text
+       // use split to create an array of each csv value row
+       const rows = unparsed_string.slice(unparsed_string.indexOf("\n") + 1).split("\n");
+       // Map the rows
+       // split values from each row into an array
+       // use headers.reduce to create an object
+       // object properties derived from headers:values
+       // the object passed as an element of the array
+       return rows.filter(function (row) {
+         // skip blank lines
+         return !(row.length === 0)
+       }).map(function (row, rowindex) {
+         const values = row.split(delimiter);
+         return headers.reduce(function (object, header, index) {
+           object[header] = values[index];
+           object['id'] = rowindex;
+           return object;
+         }, {});
+       });
+     },
   },
 }
 </script>
