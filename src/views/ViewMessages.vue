@@ -5,7 +5,7 @@
      <b-col>
    <b-pagination
       v-model="currentPage"
-      :total-rows="items.length"
+      :total-rows="totalRows"
       :per-page="perPage"
       first-number
       last-number
@@ -190,7 +190,7 @@ export default {
   mounted() {
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
-      .then((response) => (this.items = response.data))
+      .then((response) => (this.items = response.data, this.totalRows = response.data.length))
       .catch((error) => console.log(error));
   },
   methods: {
@@ -206,7 +206,6 @@ export default {
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
       this.totalRows = filteredItems.length
-      this.currentPage = 1
     },
     getKVDataItems(item){
       var kvList = [];
