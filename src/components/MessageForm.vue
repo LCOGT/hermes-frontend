@@ -32,6 +32,15 @@
       <b-row>
         <b-col class="input-table-col">
         <slot></slot>
+          <!-- Upload Data Card -->
+          <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
+            <b-card-text>
+              Upload a csv file:
+            </b-card-text>
+            <form enctype="multipart/form-data">
+              <input type="file" @change="onFileChange">
+            </form>
+          </b-card>
         </b-col>
         <b-col class="extra-input-col">
           <label for="extra-input-table">Additional Data Elements:</label>
@@ -82,14 +91,21 @@ export default {
     return {
       title: '',
       authors: '',
-      topic: null,
+      topic: 'Hermes.test',
       message: '',
       eventid: '',
       user: 'Hermes User.guest',
-    };
+      fileInput: null,
+      }
   },
   components: {
     "additional-data-input-table": AdditionalDataTable
+  },
+  watch: {
+    fileInput(newTable) {
+      const loaded_array = this.csvToArray(newTable)
+      this.$store.commit("SET_MAIN_DATA", loaded_array)
+    }
   },
    methods: {
     submitToHop() {
@@ -132,7 +148,41 @@ export default {
           .catch(function (error) {
             console.log(error);
           });
-    }
+    },
+     onFileChange(event) {
+       let files = event.target.files || event.dataTransfer.files;
+       if (!files.length)
+         return;
+       let reader = new FileReader();
+       reader.onload = () => {
+         this.fileInput = reader.result;
+       }
+       reader.readAsText(files[0]);
+     },
+     csvToArray(unparsed_string, delimiter = ",") {
+       // slice from start of text to the first \n index
+       // use split to create an array from string by delimiter
+       const headers = unparsed_string.slice(0, unparsed_string.indexOf("\n")).split(delimiter);
+       // slice from \n index + 1 to the end of the text
+       // use split to create an array of each csv value row
+       const rows = unparsed_string.slice(unparsed_string.indexOf("\n") + 1).split("\n");
+       // Map the rows
+       // split values from each row into an array
+       // use headers.reduce to create an object
+       // object properties derived from headers:values
+       // the object passed as an element of the array
+       return rows.filter(function (row) {
+         // skip blank lines
+         return !(row.length === 0)
+       }).map(function (row, rowindex) {
+         const values = row.split(delimiter);
+         return headers.reduce(function (object, header, index) {
+           object[header] = values[index];
+           object['id'] = rowindex;
+           return object;
+         }, {});
+       });
+     },
   },
 }
 </script>
