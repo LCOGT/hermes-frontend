@@ -85,4 +85,7 @@ export default {
   height: calc(1.5em + 0.75rem + 2px);
 }
 
+.telescope-event-table /deep/ .data-cell {
+  padding: 0.5rem;
+}
 </style>
