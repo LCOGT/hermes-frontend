@@ -78,7 +78,6 @@
           <b-row class="mb-2">
             <b-col class="message-block">
               <b-card>
-              
                 <span style="white-space: pre-wrap;">{{ row.item.message_text.substr(0, 200) + '...' }}</span>
               </b-card>
             </b-col>
@@ -103,9 +102,15 @@
   <!-- Full Message Box -->
   <b-col>
     <b-card class="mb-2">
-      <pre v-if="selectedItem">
+      <div v-if="selectedItem">
         <b-card-title> {{selectedItem.title}} </b-card-title>
-        {{ selectedItem.message_text }}
+        <b-card-subtitle> {{selectedItem.author}} </b-card-subtitle>
+        <hr>
+        <b-row>
+          <span style="white-space: pre-wrap;">
+            {{ selectedItem.message_text}}
+          </span>
+        </b-row>
         <b-row sm="3" class="text-sm-right"><b>{{ getDataTitle(selectedItem) }}</b></b-row>
         <b-row>
           <b-table
@@ -135,7 +140,7 @@
             </b-button>
           </b-col>
         </b-row>
-      </pre>
+      </div>
       <h4 class="text-center" v-else>
         HERMES is a Message Exchange Service for Multi-Messenger Astronomy applications that allow users to both send and review messages related to a variety of events and targets of interest.
       </h4>
@@ -218,7 +223,6 @@ export default {
   methods: {
     onRowClicked(item) {
       this.selectedItem = item
-      console.log(item.message_text)
     },
     info(item, button) {
       this.jsonData.content = JSON.stringify(item, null, 2)
