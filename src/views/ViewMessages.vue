@@ -1,6 +1,7 @@
 <template>
   <div class="overflow-auto px-4" :style="{width: '100%'}">
-
+  <b-row>
+  <b-col>
    <b-row>
      <b-col>
    <b-pagination
@@ -33,10 +34,11 @@
       small
       noCollapse
       outlined
+      select-mode="single"
       striped
       sort-icon-left
       head-variant="light"
-      @row-clicked="(item) => $set(item, '_showDetails', !item._showDetails)"
+      @row-clicked="item=>$set(item, '_showDetails', !item._showDetails)"
       class="message-b-table"
       id="message-table"
       :filter="filter"
@@ -72,42 +74,18 @@
       <!-- Detail Card -->
       <template slot="row-details" slot-scope="row">
         <b-card>
+          <b-card-title>Message Snippet</b-card-title>
           <b-row class="mb-2">
             <b-col class="message-block">
               <b-card>
-                <span style="white-space: pre-wrap;">{{ row.item.message_text }}</span>
+              
+                <span style="white-space: pre-wrap;">{{ row.item.message_text.substr(0, 200) + '...' }}</span>
               </b-card>
             </b-col>
-          <b-col>
-            <b-row sm="3" class="text-sm-right"><b>{{ getDataTitle(row.item) }}</b></b-row>
-            <b-row>
-              <b-table
-                small
-                reactive
-                class="data-b-table"
-                :items="getDataItems(row.item)"
-                :fields="getDataFields(row.item)"
-              >
-              </b-table>
-            </b-row>
-            <b-row sm="3" class="text-sm-right"><b>ADDITIONAL DATA</b></b-row>
-            <b-row>
-              <b-table
-                small
-                reactive
-                class="kv-b-table"
-                :items="getKVDataItems(row.item)"
-                :fields="KVdataFields"
-              >
-              </b-table>
-            </b-row>
-              <b-row class="mb-2">
-                <b-col sm="3" class="text-sm-right">
-                  <b-button variant="outline-primary" size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
-                    <b> Show JSON: </b>
-                  </b-button>
-                </b-col>
-              </b-row>
+            <b-col>
+              <b-button variant="outline-primary" size="sm" @click="onRowClicked(row.item)" class="mr-1">
+              <b> Expand Message &#10144; </b>
+            </b-button>
             </b-col>
           </b-row>
         </b-card>
@@ -120,6 +98,50 @@
         </div>
       </template>
     </b-table>
+  </b-col>
+
+  <!-- Full Message Box -->
+  <b-col>
+    <b-card class="mb-2">
+      <pre v-if="selectedItem">
+        <b-card-title> {{selectedItem.title}} </b-card-title>
+        {{ selectedItem.message_text }}
+        <b-row sm="3" class="text-sm-right"><b>{{ getDataTitle(selectedItem) }}</b></b-row>
+        <b-row>
+          <b-table
+            small
+            reactive
+            class="data-b-table"
+            :items="getDataItems(selectedItem)"
+            :fields="getDataFields(selectedItem)"
+          >
+          </b-table>
+        </b-row>
+        <b-row sm="3" class="text-sm-right"><b>ADDITIONAL DATA</b></b-row>
+        <b-row>
+          <b-table
+            small
+            reactive
+            class="kv-b-table"
+            :items="getKVDataItems(selectedItem)"
+            :fields="KVdataFields"
+          >
+          </b-table>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="3" class="text-sm-right">
+            <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
+              <b> Show JSON: </b>
+            </b-button>
+          </b-col>
+        </b-row>
+      </pre>
+      <h4 class="text-center" v-else>
+        HERMES is a Message Exchange Service for Multi-Messenger Astronomy applications that allow users to both send and review messages related to a variety of events and targets of interest.
+      </h4>
+    </b-card>
+  </b-col>
+  </b-row>
 
     <!-- JSON DATA -->
     <b-modal :id="jsonData.id" :title="jsonData.title" ok-only @hide="resetjsonData">
@@ -194,8 +216,11 @@ export default {
       .catch((error) => console.log(error));
   },
   methods: {
-    info(item, index, button) {
-      this.jsonData.title = `Row index: ${index + 1}`
+    onRowClicked(item) {
+      this.selectedItem = item
+      console.log(item.message_text)
+    },
+    info(item, button) {
       this.jsonData.content = JSON.stringify(item, null, 2)
       this.$root.$emit('bv::show::modal', this.jsonData.id, button)
     },
