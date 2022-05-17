@@ -81,7 +81,7 @@
                 <span style="white-space: pre-wrap;">{{ row.item.message_text.substr(0, 200) + '...' }}</span>
               </b-card>
             </b-col>
-            <b-col>
+            <b-col class="expand-button">
               <b-button variant="outline-primary" size="sm" @click="onRowClicked(row.item)" class="mr-1">
               <b> Expand Message &#10144; </b>
             </b-button>
@@ -330,7 +330,10 @@ export default {
 }
 
 .message-block {
-  width: 60%;
+  max-width: 80%;
+}
+.expand-button {
+  max-width: 20%;
 }
 .collapse-table-head:hover {
   opacity: 0.5;
