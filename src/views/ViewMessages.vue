@@ -101,7 +101,7 @@
 
   <!-- Full Message Box -->
   <b-col>
-    <b-card class="mb-2" >
+    <b-card class="mb-2" style="max-height: 50rem; overflow: auto;">
       <div v-if="selectedItem">
         <b-card-title> {{selectedItem.title}} </b-card-title>
         <b-card-sub-title> {{selectedItem.author}} </b-card-sub-title>
