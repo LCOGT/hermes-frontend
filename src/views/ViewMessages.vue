@@ -101,44 +101,55 @@
 
   <!-- Full Message Box -->
   <b-col>
-    <b-card class="mb-2">
+    <b-card class="mb-2" >
       <div v-if="selectedItem">
         <b-card-title> {{selectedItem.title}} </b-card-title>
-        <b-card-subtitle> {{selectedItem.author}} </b-card-subtitle>
+        <b-card-sub-title> {{selectedItem.author}} </b-card-sub-title>
         <hr>
         <b-row>
-          <span style="white-space: pre-wrap;">
+          <span class="m-2" style="white-space: pre-wrap;">
             {{ selectedItem.message_text}}
           </span>
         </b-row>
-        <b-row sm="3" class="text-sm-right"><b>{{ getDataTitle(selectedItem) }}</b></b-row>
-        <b-row>
-          <b-table
-            small
-            reactive
-            class="data-b-table"
-            :items="getDataItems(selectedItem)"
-            :fields="getDataFields(selectedItem)"
-          >
-          </b-table>
+        <hr>
+        <div v-if="getDataTitle(selectedItem)">
+          <b-row sm="3" v-b-toggle.collapse-main-data class="text-sm-right mx-2">
+            <h4 class="collapse-table-head">{{ getDataTitle(selectedItem) }} TABLE &#9776;</h4>
+          </b-row>
+          <b-collapse id="collapse-main-data">
+            <b-row  class="mx-2">
+              <b-table
+                small
+                reactive
+                class="data-b-table"
+                :items="getDataItems(selectedItem)"
+                :fields="getDataFields(selectedItem)"
+              >
+              </b-table>
+            </b-row>
+          </b-collapse>
+          <hr>
+        </div>
+        <b-row sm="3" v-b-toggle.collapse-additional-data class="text-sm-right mx-2">
+          <h4 class="collapse-table-head">ADDITIONAL DATA TABLE &#9776;</h4>
         </b-row>
-        <b-row sm="3" class="text-sm-right"><b>ADDITIONAL DATA</b></b-row>
-        <b-row>
-          <b-table
-            small
-            reactive
-            class="kv-b-table"
-            :items="getKVDataItems(selectedItem)"
-            :fields="KVdataFields"
-          >
-          </b-table>
-        </b-row>
-        <b-row class="mb-2">
-          <b-col sm="3" class="text-sm-right">
+        <b-collapse id="collapse-additional-data">
+          <b-row class="mx-2">
+            <b-table
+              small
+              reactive
+              class="kv-b-table"
+              :items="getKVDataItems(selectedItem)"
+              :fields="KVdataFields"
+            >
+            </b-table>
+          </b-row>
+        </b-collapse>
+        <hr>
+        <b-row class="mb-2 mx-2">
             <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
               <b> Show JSON: </b>
             </b-button>
-          </b-col>
         </b-row>
       </div>
       <h4 class="text-center" v-else>
@@ -321,4 +332,12 @@ export default {
 .message-block {
   width: 60%;
 }
+.collapse-table-head:hover {
+  opacity: 0.5;
+}
+
+.collapse-table-head {
+  opacity: 1;
+}
+
 </style>
