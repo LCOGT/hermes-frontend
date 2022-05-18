@@ -80,7 +80,7 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-    ...mapGetters(["getMainData", "getExtraData"])
+    ...mapGetters(["getMainData", "getExtraData", "getMainTableName"])
   },
   mounted() {
     this.topic = 'hermes.test';
@@ -159,7 +159,7 @@ export default {
     submitToHop() {
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
-      const mainData = this.getMainData
+      const mainData = this.getMainData;
       mainData.forEach(function (item) {
         delete item.isActive;
         delete item.id;
@@ -178,7 +178,12 @@ export default {
         "data": additionalDataObj,
         "message_text": this.message
       };
-      payload.data.main_data = mainData;
+      if (this.getMainTableName) {
+        payload.data[this.getMainTableName] = mainData;
+      } else {
+        payload.data['main_data'] = mainData;
+      }
+
       if (this.eventid) {
         payload.data.eventid = this.eventid;
         }

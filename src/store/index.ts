@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     main_data: [],
     extra_data: [],
-    telescope_events: [],
+    name: '',
   },
   getters: {
     getMainData(state) {
@@ -16,6 +16,9 @@ export default new Vuex.Store({
     getExtraData(state) {
       return state.extra_data;
     },
+    getMainTableName(state) {
+      return state.name;
+    }
   },
   mutations: {
     SET_MAIN_DATA(state, main_data) {
@@ -23,6 +26,9 @@ export default new Vuex.Store({
     },
     SET_EXTRA_DATA(state, extra_data) {
       state.extra_data = extra_data;
+    },
+    SET_MAIN_TABLE_NAME(state, name) {
+      state.name = name;
     },
   },
   actions: {

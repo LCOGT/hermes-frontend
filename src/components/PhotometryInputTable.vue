@@ -35,6 +35,7 @@ export default {
       },
       set(value) {
         this.$store.commit("SET_MAIN_DATA", value)
+        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry_data")
       },
     },
   },
