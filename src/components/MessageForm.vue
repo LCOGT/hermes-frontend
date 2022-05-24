@@ -34,12 +34,21 @@
         <slot></slot>
           <!-- Upload Data Card -->
           <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
-            <b-card-text>
-              Upload a csv file:
-            </b-card-text>
-            <form enctype="multipart/form-data">
-              <input type="file" @change="onFileChange">
-            </form>
+            <!-- Get CSV Header -->
+            <b-row>
+              <div class="mx-2">
+                A CSV file with the proper header can be uploaded to automatically fill the above table.
+                Click the button below to copy this header to your clipboard.
+              </div>
+            </b-row>
+            <b-row>
+              <b-button variant="outline-primary" size="sm" @click="copy()" class="m-2">
+                <b> Copy CSV Header </b>
+              </b-button>
+              <form enctype="multipart/form-data" class="my-2">
+                <input type="file" @change="onFileChange">
+              </form>
+            </b-row>
           </b-card>
         </b-col>
         <b-col class="extra-input-col">
@@ -104,6 +113,11 @@ export default {
       fileInput: null,
       showErrorModal: false,
       errorModalText: '',
+      csvHeader: {
+          id: 'csv-header',
+          title: '',
+          content: ''
+      },
       }
   },
   components: {
@@ -116,6 +130,17 @@ export default {
     }
   },
    methods: {
+    copy() {
+      const mainData = this.getMainData;
+      var mainDataKeyString = '';
+      if (mainData[0]){
+        for (const [key, ] of Object.entries(mainData[0])) {
+          mainDataKeyString = mainDataKeyString.concat(key, ',')
+        }
+      }
+      navigator.clipboard.writeText(mainDataKeyString);
+      alert("CSV Header coppied to Clipboard");
+    },
     closeErrorModal() {
       this.errorModalText = ''
       this.showErrorModal = false;
