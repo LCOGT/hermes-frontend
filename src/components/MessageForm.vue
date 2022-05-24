@@ -49,8 +49,20 @@
                 <input type="file" @change="onFileChange">
               </form>
             </b-row>
+            <b-row>
+              <b-alert
+                variant="success"
+                dismissible
+                fade
+                :show="showCopyAlert"
+                @dismissed="showCopyAlert=false"
+              >
+                {{ getMainTableName.replace("_", " ").toUpperCase() }} CSV Header coppied to Clipboard.
+              </b-alert>
+            </b-row>
           </b-card>
         </b-col>
+        <!-- Add additional Data Elements -->
         <b-col class="extra-input-col">
           <label for="extra-input-table">Additional Data Elements:</label>
           <additional-data-input-table class="extra-input-table"></additional-data-input-table>
@@ -118,6 +130,7 @@ export default {
           title: '',
           content: ''
       },
+       showCopyAlert: false
       }
   },
   components: {
@@ -139,7 +152,7 @@ export default {
         }
       }
       navigator.clipboard.writeText(mainDataKeyString);
-      alert("CSV Header coppied to Clipboard");
+      this.showCopyAlert = true;
     },
     closeErrorModal() {
       this.errorModalText = ''
