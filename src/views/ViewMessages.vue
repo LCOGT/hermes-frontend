@@ -146,7 +146,7 @@
           </b-row>
         </b-collapse>
         <hr>
-        <b-row class="mb-2 mx-2">
+        <b-row class="mb-2 mx-2 pb-3">
             <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
               <b> Show JSON: </b>
             </b-button>
