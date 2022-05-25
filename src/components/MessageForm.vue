@@ -73,7 +73,16 @@
     <b-card class="mb-2 shadow" border-variant="primary">
       <b-row class="p-3">
         <label for="message-input">Message:</label>
-        <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+
+          <b-tabs class="message-tabs" content-class="mt-2">
+            <b-tab title="Edit" active>
+              <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+            </b-tab>
+            <b-tab title="Preview"><span style="white-space: pre;">
+              {{ formattedMessage }}
+            </span></b-tab>
+          </b-tabs>
+
       </b-row>
     </b-card>
     <!-- Submit -->
@@ -101,7 +110,10 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-    ...mapGetters(["getMainData", "getExtraData", "getMainTableName"])
+      ...mapGetters(["getMainData", "getExtraData", "getMainTableName"]),
+      formattedMessage() {
+      return this.formatMessage(this.message)
+    }
   },
   mounted() {
     this.topic = 'hermes.test';
@@ -154,6 +166,19 @@ export default {
       navigator.clipboard.writeText(mainDataKeyString);
       this.showCopyAlert = true;
     },
+    formatMessage(value) {
+      let formatted_string = value;
+      // This nasty regex makes a list of elements that are in curly brackets
+      const keys_to_format = value.match(/[^{}]+(?=})/g);
+      const additionalDataObj = this.getExtraData.reduce(
+          (obj, element) => ({...obj, [element.key]: element.value}), {});
+      for (let i in keys_to_format) {
+        if (keys_to_format[i] in additionalDataObj) {
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keys_to_format[i]])
+        }
+      }
+      return formatted_string;
+      },
     closeErrorModal() {
       this.errorModalText = ''
       this.showErrorModal = false;
@@ -214,7 +239,7 @@ export default {
         "title": this.title,
         "author": this.user,
         "data": additionalDataObj,
-        "message_text": this.message
+        "message_text": this.formatedMessage
       };
       if (this.getMainTableName) {
         payload.data[this.getMainTableName] = mainData;
@@ -301,6 +326,10 @@ export default {
   padding: 0;
   padding-left: 15px;
   padding-right: 15px;
+}
+
+.message-tabs {
+  width: 100%;
 }
 
 .extra-input-col {
