@@ -150,50 +150,50 @@ export default {
         for (const [key, ] of Object.entries(mainData[0])) {
           mainDataKeyString = mainDataKeyString.concat(key, ',')
         }
+        navigator.clipboard.writeText(mainDataKeyString);
+        this.showCopyAlert = true;
       }
-      navigator.clipboard.writeText(mainDataKeyString);
-      this.showCopyAlert = true;
     },
     closeErrorModal() {
       this.errorModalText = ''
       this.showErrorModal = false;
     },
-     sexagesimalToDeg(ra) {
-      const ra_arr = ra.trim().split(':')
-       if (ra_arr.length !== 3) {
-         throw Error("Invalid sexagesimal value.")
-       }
-       return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
-           parseFloat(ra_arr[2]) * 15.0 / 3600.0;
-     },
-     validateRA(table) {
-      table.forEach((row) => {
-          if ('ra' in row) {
-            let this_ra;
+    sexagesimalToDeg(ra) {
+    const ra_arr = ra.trim().split(':')
+      if (ra_arr.length !== 3) {
+        throw Error("Invalid sexagesimal value.")
+      }
+      return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
+          parseFloat(ra_arr[2]) * 15.0 / 3600.0;
+    },
+    validateRA(table) {
+    table.forEach((row) => {
+        if ('ra' in row) {
+          let this_ra;
+          try {
+            this_ra = this.sexagesimalToDeg(row.ra);
+          }
+          catch {
             try {
-              this_ra = this.sexagesimalToDeg(row.ra);
+              this_ra = parseFloat(row.ra)
+              if (isNaN(this_ra)) {
+                throw Error("RA did not parse to a number.")
+              }
             }
             catch {
-              try {
-                this_ra = parseFloat(row.ra)
-                if (isNaN(this_ra)) {
-                  throw Error("RA did not parse to a number.")
-                }
-              }
-              catch {
-                this.errorModalText = row.ra + ' is not a valid RA.';
-                this.showErrorModal = true;
-                throw Error("Invalid RA")
-              }
+              this.errorModalText = row.ra + ' is not a valid RA.';
+              this.showErrorModal = true;
+              throw Error("Invalid RA")
             }
-          if (this_ra < 0.0 || this_ra >= 360.0) {
-            this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
-            this.showErrorModal = true;
-            throw Error("Invalid RA")
           }
-          }
-        });
-     },
+        if (this_ra < 0.0 || this_ra >= 360.0) {
+          this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
+          this.showErrorModal = true;
+          throw Error("Invalid RA")
+        }
+        }
+      });
+    },
     submitToHop() {
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
