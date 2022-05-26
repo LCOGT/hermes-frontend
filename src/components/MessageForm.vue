@@ -34,14 +34,35 @@
         <slot></slot>
           <!-- Upload Data Card -->
           <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
-            <b-card-text>
-              Upload a csv file:
-            </b-card-text>
-            <form enctype="multipart/form-data">
-              <input type="file" @change="onFileChange">
-            </form>
+            <!-- Get CSV Header -->
+            <b-row>
+              <div class="mx-2">
+                A CSV file with the proper header can be uploaded to automatically fill the above table.
+                Click the button below to copy this header to your clipboard.
+              </div>
+            </b-row>
+            <b-row>
+              <b-button variant="outline-primary" size="sm" @click="copy()" class="m-2">
+                <b> Copy CSV Header </b>
+              </b-button>
+              <form enctype="multipart/form-data" class="my-2">
+                <input type="file" @change="onFileChange">
+              </form>
+            </b-row>
+            <b-row>
+              <b-alert
+                variant="success"
+                dismissible
+                fade
+                :show="showCopyAlert"
+                @dismissed="showCopyAlert=false"
+              >
+                {{ getMainTableName.replace("_", " ").toUpperCase() }} CSV Header coppied to Clipboard.
+              </b-alert>
+            </b-row>
           </b-card>
         </b-col>
+        <!-- Add additional Data Elements -->
         <b-col class="extra-input-col">
           <label for="extra-input-table">Additional Data Elements:</label>
           <additional-data-input-table class="extra-input-table"></additional-data-input-table>
@@ -52,7 +73,16 @@
     <b-card class="mb-2 shadow" border-variant="primary">
       <b-row class="p-3">
         <label for="message-input">Message:</label>
-        <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+
+          <b-tabs class="message-tabs" content-class="mt-2">
+            <b-tab title="Edit" active>
+              <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+            </b-tab>
+            <b-tab title="Preview"><span style="white-space: pre;">
+              {{ formattedMessage }}
+            </span></b-tab>
+          </b-tabs>
+
       </b-row>
     </b-card>
     <!-- Submit -->
@@ -80,7 +110,10 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-    ...mapGetters(["getMainData", "getExtraData", "getMainTableName"])
+      ...mapGetters(["getMainData", "getExtraData", "getMainTableName"]),
+      formattedMessage() {
+      return this.formatMessage(this.message)
+    }
   },
   mounted() {
     this.topic = 'hermes.test';
@@ -104,6 +137,12 @@ export default {
       fileInput: null,
       showErrorModal: false,
       errorModalText: '',
+      csvHeader: {
+          id: 'csv-header',
+          title: '',
+          content: ''
+      },
+       showCopyAlert: false
       }
   },
   components: {
@@ -116,46 +155,70 @@ export default {
     }
   },
    methods: {
+    copy() {
+      const mainData = this.getMainData;
+      var mainDataKeyString = '';
+      if (mainData[0]){
+        for (const [key, ] of Object.entries(mainData[0])) {
+          mainDataKeyString = mainDataKeyString.concat(key, ',')
+        }
+        navigator.clipboard.writeText(mainDataKeyString);
+        this.showCopyAlert = true;
+      }
+    },
+    formatMessage(value) {
+      let formatted_string = value;
+      // This nasty regex makes a list of elements that are in curly brackets
+      const keys_to_format = value.match(/[^{}]+(?=})/g);
+      const additionalDataObj = this.getExtraData.reduce(
+          (obj, element) => ({...obj, [element.key]: element.value}), {});
+      for (let i in keys_to_format) {
+        if (keys_to_format[i] in additionalDataObj) {
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keys_to_format[i]])
+        }
+      }
+      return formatted_string;
+      },
     closeErrorModal() {
       this.errorModalText = ''
       this.showErrorModal = false;
     },
-     sexagesimalToDeg(ra) {
-      const ra_arr = ra.trim().split(':')
-       if (ra_arr.length !== 3) {
-         throw Error("Invalid sexagesimal value.")
-       }
-       return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
-           parseFloat(ra_arr[2]) * 15.0 / 3600.0;
-     },
-     validateRA(table) {
-      table.forEach((row) => {
-          if ('ra' in row) {
-            let this_ra;
+    sexagesimalToDeg(ra) {
+    const ra_arr = ra.trim().split(':')
+      if (ra_arr.length !== 3) {
+        throw Error("Invalid sexagesimal value.")
+      }
+      return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
+          parseFloat(ra_arr[2]) * 15.0 / 3600.0;
+    },
+    validateRA(table) {
+    table.forEach((row) => {
+        if ('ra' in row) {
+          let this_ra;
+          try {
+            this_ra = this.sexagesimalToDeg(row.ra);
+          }
+          catch {
             try {
-              this_ra = this.sexagesimalToDeg(row.ra);
+              this_ra = parseFloat(row.ra)
+              if (isNaN(this_ra)) {
+                throw Error("RA did not parse to a number.")
+              }
             }
             catch {
-              try {
-                this_ra = parseFloat(row.ra)
-                if (isNaN(this_ra)) {
-                  throw Error("RA did not parse to a number.")
-                }
-              }
-              catch {
-                this.errorModalText = row.ra + ' is not a valid RA.';
-                this.showErrorModal = true;
-                throw Error("Invalid RA")
-              }
+              this.errorModalText = row.ra + ' is not a valid RA.';
+              this.showErrorModal = true;
+              throw Error("Invalid RA")
             }
-          if (this_ra < 0.0 || this_ra >= 360.0) {
-            this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
-            this.showErrorModal = true;
-            throw Error("Invalid RA")
           }
-          }
-        });
-     },
+        if (this_ra < 0.0 || this_ra >= 360.0) {
+          this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
+          this.showErrorModal = true;
+          throw Error("Invalid RA")
+        }
+        }
+      });
+    },
     submitToHop() {
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
@@ -176,7 +239,7 @@ export default {
         "title": this.title,
         "author": this.user,
         "data": additionalDataObj,
-        "message_text": this.message
+        "message_text": this.formatedMessage
       };
       if (this.getMainTableName) {
         payload.data[this.getMainTableName] = mainData;
@@ -263,6 +326,10 @@ export default {
   padding: 0;
   padding-left: 15px;
   padding-right: 15px;
+}
+
+.message-tabs {
+  width: 100%;
 }
 
 .extra-input-col {
