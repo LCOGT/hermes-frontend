@@ -1,16 +1,18 @@
 <template>
   <div>
+    <!-- Build Additional Data Table -->
     <b-editable-table bordered class="additional-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
       <template #cell(isActive)="data">
         <span v-if="data.value">Yes</span>
         <span v-else>No</span>
       </template>
     </b-editable-table>
-      <div class="add-row-additional-data">
-        <b-button class="add-row-additional-data-button" variant="primary" @click="handleAdd()">Add Row</b-button>
-      </div>
+    <div class="add-row-additional-data">
+      <!-- Add Row Button -->
+      <b-button class="add-row-additional-data-button" variant="primary" @click="handleAdd()">Add Row</b-button>
+    </div>
   </div>
-  </template>
+</template>
 
 <script>
 import BEditableTable from "bootstrap-vue-editable-table";
@@ -28,7 +30,7 @@ export default {
     ...mapGetters(["getExtraData"]),
     items: {
       get() {
-        return this.getExtraData
+        return this.getExtraData;
       },
       set(value) {
         this.$store.commit('SET_EXTRA_DATA', value)

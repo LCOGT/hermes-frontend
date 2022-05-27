@@ -4,31 +4,32 @@
   <b-col>
    <b-row>
      <b-col>
-   <b-pagination
-      v-model="currentPage"
-      :total-rows="totalRows"
-      :per-page="perPage"
-      first-number
-      last-number
-      aria-controls="message-table"
-    ></b-pagination>
-     </b-col>
+       <!-- Pagination -->
+        <b-pagination
+            v-model="currentPage"
+            :total-rows="totalRows"
+            :per-page="perPage"
+            first-number
+            last-number
+            aria-controls="message-table"
+          ></b-pagination>
+      </b-col>
+      <b-col>
+        <!-- Topic Filter -->
+        <b-form-group label="Topics" label-for="topic_selector" label-cols-lg="2">
+          <b-form-select
+            id="topic_selector"
+            v-model="filter"
+          >
+            <b-form-select-option value="">-- All Topics --</b-form-select-option>
+            <b-form-select-option value="hermes.test">hermes.test</b-form-select-option>
+            <b-form-select-option value="gcn.circular">gcn.circular</b-form-select-option>
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+    </b-row>
 
-    <b-col>
-    <b-form-group label="Topics" label-for="topic_selector" label-cols-lg="2">
-      <b-form-select
-        id="topic_selector"
-        v-model="filter"
-      >
-        <b-form-select-option value="">-- All Topics --</b-form-select-option>
-        <b-form-select-option value="hermes.test">hermes.test</b-form-select-option>
-        <b-form-select-option value="gcn.circular">gcn.circular</b-form-select-option>
-
-      </b-form-select>
-    </b-form-group>
-    </b-col>
-   </b-row>
-
+    <!-- Main Message Table -->
     <b-table
       hover
       small
@@ -103,15 +104,18 @@
   <b-col>
     <b-card border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
       <div v-if="selectedItem">
+        <!-- Header -->
         <b-card-title> {{selectedItem.title}} </b-card-title>
         <b-card-sub-title> {{selectedItem.author}} </b-card-sub-title>
         <hr>
+        <!-- Main Message -->
         <b-row>
           <span class="m-2" style="white-space: pre-wrap;">
             {{ selectedItem.message_text}}
           </span>
         </b-row>
         <hr>
+        <!-- Main Data Table -->
         <div v-if="getDataTitle(selectedItem)">
           <b-row sm="3" v-b-toggle.collapse-main-data class="text-sm-right mx-2">
             <h4 class="collapse-table-head">{{ getDataTitle(selectedItem) }} TABLE &#9776;</h4>
@@ -130,6 +134,7 @@
           </b-collapse>
           <hr>
         </div>
+        <!-- Additional Data Table -->
         <b-row sm="3" v-b-toggle.collapse-additional-data class="text-sm-right mx-2">
           <h4 class="collapse-table-head">ADDITIONAL DATA TABLE &#9776;</h4>
         </b-row>
@@ -146,12 +151,14 @@
           </b-row>
         </b-collapse>
         <hr>
+        <!-- Show JSON Button -->
         <b-row class="mb-2 mx-2 pb-3">
             <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
               <b> Show JSON: </b>
             </b-button>
         </b-row>
       </div>
+      <!-- Initial Message Box Display -->
       <h4 class="text-center" v-else>
         HERMES is a Message Exchange Service for Multi-Messenger Astronomy applications that allow users to both send and review messages related to a variety of events and targets of interest.
       </h4>
@@ -226,6 +233,7 @@ export default {
     };
   },
   mounted() {
+    // Retrieve messages and store data
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
       .then((response) => (this.items = response.data, this.totalRows = response.data.length))
@@ -233,13 +241,17 @@ export default {
   },
   methods: {
     onRowClicked(item) {
+      // Define Behavior when Row Clicked
       this.selectedItem = item
     },
     info(item, button) {
+      // Get full message info as JSON String
       this.jsonData.content = JSON.stringify(item, null, 2)
+      // raise modal
       this.$root.$emit('bv::show::modal', this.jsonData.id, button)
     },
     resetjsonData() {
+      // clear JSON data when window closed
       this.jsonData.title = ''
       this.jsonData.content = ''
     },
@@ -248,16 +260,23 @@ export default {
       this.totalRows = filteredItems.length
     },
     getKVDataItems(item){
+      // Retrieve Key/Value data from JSON message
       var kvList = [];
       for (const [key, value] of Object.entries(item.data)) {
+        // Carve out exceptions:
+        // For GCN circulars, we use "body" to store the message and the
+        // "header" contains a dictionary we want to parse for its own table.
+        // If the value is an array, we want to display it as its own table.
         if (!(key == "body" && item.topic == 'gcn.circular') &&
             !(key == "header" && item.topic == 'gcn.circular') &&
             !(Array.isArray(value))) {
+          // Build Additional Data Table
           var dataDict = {};
           dataDict['key']= key;
           dataDict['value']= value;
           kvList.push(dataDict);
         } else if (key == "header" && item.topic == 'gcn.circular') {
+          // Convert GCN circular Header into Additional Data Table
           for (const [header_key, header_value] of Object.entries(value)) {
             var headerDict = {};
             headerDict['key']= header_key;
@@ -269,6 +288,7 @@ export default {
       return kvList;
     },
     getDataTitle(item){
+      // Return the Table Title for the Main Data Table
       for (const [key, value] of Object.entries(item.data)) {
         if (Array.isArray(value)) {
           return key.toUpperCase().replace("_", " ");
@@ -276,6 +296,7 @@ export default {
       }
     },
     getDataItems(item){
+      // Return the Main Data Table
       for (const [ , value] of Object.entries(item.data)) {
         if (Array.isArray(value)) {
           return value;
@@ -283,6 +304,7 @@ export default {
       }
     },
     getDataFields(item){
+      // Create the fields for the Main Data Table
       for (const [ , value] of Object.entries(item.data)) {
         var fieldList = [];
         if (Array.isArray(value)) {
@@ -299,6 +321,7 @@ export default {
   },
   filters: {
   format_date: function(datetime) {
+    // Convert the timestamp into a user friendly DATE
     if (!datetime) { return '(n/a)'; }
     datetime = new Date(datetime);
     return datetime.getUTCFullYear() + "/" +
@@ -306,6 +329,7 @@ export default {
       ((datetime.getUTCDate() < 10) ? '0' : '') + datetime.getUTCDate();
   },
   format_time:  function(datetime) {
+    // Convert the timestamp into a user friendly TIME
     if (!datetime) { return '(n/a)'; }
     datetime = new Date(datetime);
     return ((datetime.getUTCHours() < 9) ? '0' : '') + datetime.getUTCHours() + ':' +
@@ -335,10 +359,11 @@ export default {
 .expand-button {
   max-width: 20%;
 }
+
+/* Show mouseover for Collapsable Data Table */
 .collapse-table-head:hover {
   opacity: 0.5;
 }
-
 .collapse-table-head {
   opacity: 1;
 }

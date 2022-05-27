@@ -45,11 +45,13 @@
               <b-button variant="outline-primary" size="sm" @click="copy()" class="m-2">
                 <b> Copy CSV Header </b>
               </b-button>
+              <!-- upload csv -->
               <form enctype="multipart/form-data" class="my-2">
                 <input type="file" @change="onFileChange">
               </form>
             </b-row>
             <b-row>
+              <!-- Alert User of Successful Copy -->
               <b-alert
                 variant="success"
                 dismissible
@@ -103,7 +105,7 @@
 
 <script>
 import AdditionalDataTable from "@/components/AdditionalDataTable";
-import axios from "axios"
+import axios from "axios";
 import getEnv from "@/utils/env.js";
 import { mapGetters } from "vuex";
 
@@ -112,7 +114,7 @@ export default {
   computed: {
       ...mapGetters(["getMainData", "getExtraData", "getMainTableName"]),
       formattedMessage() {
-      return this.formatMessage(this.message)
+      return this.formatMessage(this.message);
     }
   },
   mounted() {
@@ -150,23 +152,29 @@ export default {
   },
   watch: {
     fileInput(newTable) {
-      const loaded_array = this.csvToArray(newTable)
-      this.$store.commit("SET_MAIN_DATA", loaded_array)
+      // Build Main Data when new file uploaded
+      const loaded_array = this.csvToArray(newTable);
+      this.$store.commit("SET_MAIN_DATA", loaded_array);
     }
   },
    methods: {
     copy() {
+      // Create and Copy Sample Table Header to Clipboard
       const mainData = this.getMainData;
       var mainDataKeyString = '';
       if (mainData[0]){
+        // Once Main Data Table has been built, pull out Keys and format Header.
         for (const [key, ] of Object.entries(mainData[0])) {
-          mainDataKeyString = mainDataKeyString.concat(key, ',')
+          mainDataKeyString = mainDataKeyString.concat(key, ',');
         }
+        // Copy Header to Clipboard. Only works with HTTPS or local
         navigator.clipboard.writeText(mainDataKeyString);
+        // Trigger alert to show sucessful copy
         this.showCopyAlert = true;
       }
     },
     formatMessage(value) {
+      // Convert message to plaintext with values inserted
       let formatted_string = value;
       // This nasty regex makes a list of elements that are in curly brackets
       const keys_to_format = value.match(/[^{}]+(?=})/g);
@@ -180,19 +188,22 @@ export default {
       return formatted_string;
       },
     closeErrorModal() {
-      this.errorModalText = ''
+      // Clear error text when closed
+      this.errorModalText = '';
       this.showErrorModal = false;
     },
     sexagesimalToDeg(ra) {
-    const ra_arr = ra.trim().split(':')
+      // Convert ra to degrees if in HH:MM:SS.s
+      const ra_arr = ra.trim().split(':');
       if (ra_arr.length !== 3) {
-        throw Error("Invalid sexagesimal value.")
+        throw Error("Invalid sexagesimal value.");
       }
       return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
-          parseFloat(ra_arr[2]) * 15.0 / 3600.0;
+        parseFloat(ra_arr[2]) * 15.0 / 3600.0;
     },
     validateRA(table) {
-    table.forEach((row) => {
+      // Check if RA makes sense.
+      table.forEach((row) => {
         if ('ra' in row) {
           let this_ra;
           try {
@@ -211,29 +222,32 @@ export default {
               throw Error("Invalid RA")
             }
           }
-        if (this_ra < 0.0 || this_ra >= 360.0) {
-          this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
-          this.showErrorModal = true;
-          throw Error("Invalid RA")
-        }
+          if (this_ra < 0.0 || this_ra >= 360.0) {
+            this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
+            this.showErrorModal = true;
+            throw Error("Invalid RA");
+          }
         }
       });
     },
     submitToHop() {
+      // Compile message and submit to HOPSKOTCH
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       const mainData = this.getMainData;
+      // Remove elements used for Table maintenance and display
       mainData.forEach(function (item) {
         delete item.isActive;
         delete item.id;
       });
+      // Run Validation
       try {
         this.validateRA(mainData);
       }
       catch {
         return
       }
-
+      // Build Basic Payload to match backend Model Structure
       let payload = {
         "topic": this.topic,
         "title": this.title,
@@ -241,69 +255,74 @@ export default {
         "data": additionalDataObj,
         "message_text": this.formatedMessage
       };
+      // Apply common elements to JSON field "data"
       if (this.getMainTableName) {
         payload.data[this.getMainTableName] = mainData;
       } else {
         payload.data['main_data'] = mainData;
       }
-
       if (this.eventid) {
         payload.data.eventid = this.eventid;
-        }
+      }
       if (this.authors) {
         payload.data.authors = this.authors;
-        }
-      console.log(JSON.stringify(payload))
+      }
+      // Post message via axios
+      console.log(JSON.stringify(payload));
       axios({
         method: 'post',
         headers: {'Content-Type': 'application/json'},
         url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
         data: JSON.stringify(payload)
       })
-          .then(function (response) {
-            console.log(JSON.stringify(response.data));
-            location.href = '/.html'
-          })
-          .catch(function (error) {
-            console.log(error);
-            this.showErrorModal = true
-            this.errorModalText = error
-          });
+      .then(function (response) {
+        // log response, redirect to homepage
+        console.log(JSON.stringify(response.data));
+        location.href = '/.html';
+      })
+      .catch(function (error) {
+        // If error, show modal
+        console.log(error);
+        this.showErrorModal = true;
+        this.errorModalText = error;
+      });
     },
-     onFileChange(event) {
-       let files = event.target.files || event.dataTransfer.files;
-       if (!files.length)
-         return;
-       let reader = new FileReader();
-       reader.onload = () => {
-         this.fileInput = reader.result;
-       }
-       reader.readAsText(files[0]);
-     },
-     csvToArray(unparsed_string, delimiter = ",") {
-       // slice from start of text to the first \n index
-       // use split to create an array from string by delimiter
-       const headers = unparsed_string.slice(0, unparsed_string.indexOf("\n")).split(delimiter);
-       // slice from \n index + 1 to the end of the text
-       // use split to create an array of each csv value row
-       const rows = unparsed_string.slice(unparsed_string.indexOf("\n") + 1).split("\n");
-       // Map the rows
-       // split values from each row into an array
-       // use headers.reduce to create an object
-       // object properties derived from headers:values
-       // the object passed as an element of the array
-       return rows.filter(function (row) {
-         // skip blank lines
-         return !(row.length === 0)
-       }).map(function (row, rowindex) {
-         const values = row.split(delimiter);
-         return headers.reduce(function (object, header, index) {
-           object[header] = values[index];
-           object['id'] = rowindex;
-           return object;
-         }, {});
-       });
-     },
+    onFileChange(event) {
+      // Upload CSV from file and return text
+      let files = event.target.files || event.dataTransfer.files;
+      if (!files.length)
+        return;
+      let reader = new FileReader();
+      reader.onload = () => {
+        this.fileInput = reader.result;
+      }
+      reader.readAsText(files[0]);
+    },
+    csvToArray(unparsed_string, delimiter = ",") {
+      // Convert Plain Text CSV String to an Array.
+      // slice from start of text to the first \n index
+      // use split to create an array from string by delimiter
+      const headers = unparsed_string.slice(0, unparsed_string.indexOf("\n")).split(delimiter);
+      // slice from \n index + 1 to the end of the text
+      // use split to create an array of each csv value row
+      const rows = unparsed_string.slice(unparsed_string.indexOf("\n") + 1).split("\n");
+      // Map the rows
+      // split values from each row into an array
+      // use headers.reduce to create an object
+      // object properties derived from headers:values
+      // the object passed as an element of the array
+      return rows.filter(function (row) {
+        // skip blank lines
+        return !(row.length === 0)
+      }).map(function (row, rowindex) {
+        const values = row.split(delimiter);
+        return headers.reduce(function (object, header, index) {
+          object[header] = values[index];
+          object['id'] = rowindex;
+          return object;
+        }, {});
+      });
+    },
   },
 }
 </script>
