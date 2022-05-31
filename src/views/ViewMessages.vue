@@ -36,10 +36,11 @@
       noCollapse
       outlined
       select-mode="single"
+      selectable
       striped
       sort-icon-left
       head-variant="light"
-      @row-clicked="item=>$set(item, '_showDetails', !item._showDetails)"
+      @row-clicked="item=>onRowClicked(item)"
       class="message-b-table"
       id="message-table"
       :filter="filter"
@@ -64,31 +65,12 @@
 
       <!-- Selection Behavior -->
       <template #cell(selected)="row">
-        <template v-if="row.detailsShowing">
-          <span aria-hidden="true">&#10507;</span>
+        <template v-if="row.rowSelected">
+          <span aria-hidden="true">&#8667;</span>
         </template>
         <template v-else>
           <span aria-hidden="true">&#10624;</span>
         </template>
-      </template>
-
-      <!-- Detail Card -->
-      <template slot="row-details" slot-scope="row">
-        <b-card>
-          <b-card-title>Message Snippet</b-card-title>
-          <b-row class="mb-2">
-            <b-col class="message-block">
-              <b-card>
-                <span style="white-space: pre-wrap;">{{ row.item.message_text.substr(0, 200) + '...' }}</span>
-              </b-card>
-            </b-col>
-            <b-col class="expand-button">
-              <b-button variant="outline-primary" size="sm" @click="onRowClicked(row.item)" class="mr-1">
-              <b> Expand Message &#10144; </b>
-            </b-button>
-            </b-col>
-          </b-row>
-        </b-card>
       </template>
 
       <!-- Format Timestamp -->
