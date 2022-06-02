@@ -280,11 +280,11 @@ export default {
         console.log(JSON.stringify(response.data));
         location.href = '/.html';
       })
-      .catch(function (error) {
+      .catch(error => {
         // If error, show modal
         console.log(error);
         this.showErrorModal = true;
-        this.errorModalText = error;
+        this.errorModalText = error.message;
       });
     },
     onFileChange(event) {
