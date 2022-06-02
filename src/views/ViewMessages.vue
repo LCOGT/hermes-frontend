@@ -100,7 +100,7 @@
         <!-- Main Data Table -->
         <div v-if="getDataTitle(selectedItem)">
           <b-row sm="3" v-b-toggle.collapse-main-data class="text-sm-right mx-2">
-            <h4 class="collapse-table-head">{{ getDataTitle(selectedItem) }} TABLE &#9776;</h4>
+            <h4 class="collapse-table-head">{{ getDataTitle(selectedItem).toUpperCase().replace("_", " ") }} TABLE &#9776;</h4>
           </b-row>
           <b-collapse id="collapse-main-data">
             <b-row  class="mx-2">
@@ -273,32 +273,31 @@ export default {
       // Return the Table Title for the Main Data Table
       for (const [key, value] of Object.entries(item.data)) {
         if (Array.isArray(value)) {
-          return key.toUpperCase().replace("_", " ");
+          return key;
         }
       }
     },
     getDataItems(item){
       // Return the Main Data Table
-      for (const [ , value] of Object.entries(item.data)) {
-        if (Array.isArray(value)) {
-          return value;
-        }
-      }
+      return item.data[this.getDataTitle(item)];
     },
     getDataFields(item){
       // Create the fields for the Main Data Table
-      for (const [ , value] of Object.entries(item.data)) {
-        var fieldList = [];
-        if (Array.isArray(value)) {
-          for (const [data_key, ] of Object.entries(value[0])) {
-            var dataDict = {};
-            dataDict['key']= data_key;
-            dataDict['class']= "data-column";
-            fieldList.push(dataDict);
-          }
-        }
-        return fieldList;
+      var fieldList = [];
+      var column_list = []
+      // Use ordered list if provided, otherwise get list from 1st row
+      if (item.data.mainDataOrder){
+        column_list = item.data.mainDataOrder
+      } else {
+        column_list = Object.keys(item.data[this.getDataTitle(item)][0])
       }
+      for (const data_key of column_list) {
+        var dataDict = {};
+        dataDict['key']= data_key;
+        dataDict['class']= "data-column";
+        fieldList.push(dataDict);
+      }
+      return fieldList;
     },
   },
   filters: {
