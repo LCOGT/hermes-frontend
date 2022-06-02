@@ -92,7 +92,10 @@
       <b-col>
         <div class="submit-container">
           <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
-            <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal" title="Submission Error">
+            <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal" 
+              title="Submission Error"
+              header-bg-variant="danger"
+            >
               <template>
                 <div>{{ errorModalText }}</div>
               </template>
