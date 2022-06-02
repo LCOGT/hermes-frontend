@@ -5,6 +5,12 @@
           <span v-if="data.value">Yes</span>
           <span v-else>No</span>
         </template>
+        <!-- Delete Row -->
+        <template #cell(delete)="row">
+          <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
+            &#128465;
+          </div>
+        </template>
       </b-editable-table>
       <div class="add-row-photometry">
         <b-button class="add-row-photometry-button" variant="primary" @click="handleAdd">Add Row</b-button>
@@ -77,6 +83,12 @@ export default {
             { value: "erg / s / cm² / Å", text: "erg / s / cm² / Å" },
           ],
         },
+        {
+          key: "delete",
+          label: "",
+          headerTitle: "delete",
+          class: "delete-column"
+        },
       ],
       rowUpdate: {}
     };
@@ -101,7 +113,10 @@ export default {
           isActive: false,
         },
       };
-    }
+    },
+    removeRow(row){
+      this.getMainData.splice(row.index, 1)
+    },
   }
 }
 </script>
