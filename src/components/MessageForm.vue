@@ -247,6 +247,11 @@ export default {
       catch {
         return
       }
+      // get Main Data column order
+      let mainDataOrder = [];
+      for (const [key, ] of Object.entries(mainData[0])) {
+        mainDataOrder.push(key);
+      }
       // Build Basic Payload to match backend Model Structure
       let payload = {
         "topic": this.topic,
@@ -260,6 +265,9 @@ export default {
         payload.data[this.getMainTableName] = mainData;
       } else {
         payload.data['main_data'] = mainData;
+      }
+      if (mainDataOrder) {
+        payload.data.mainDataOrder = mainDataOrder;
       }
       if (this.eventid) {
         payload.data.eventid = this.eventid;
