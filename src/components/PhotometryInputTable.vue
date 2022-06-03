@@ -1,6 +1,6 @@
 <template>
     <div>
-      <b-editable-table bordered class="photometry-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+      <b-editable-table outlined class="photometry-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
         <template #cell(isActive)="data">
           <span v-if="data.value">Yes</span>
           <span v-else>No</span>
@@ -87,7 +87,7 @@ export default {
           key: "delete",
           label: "",
           headerTitle: "delete",
-          class: "delete-column"
+          class: "delete-column",
         },
       ],
       rowUpdate: {}
