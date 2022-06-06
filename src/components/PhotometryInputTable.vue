@@ -1,6 +1,6 @@
 <template>
     <div>
-      <b-editable-table striped outlined class="photometry-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+      <b-editable-table striped bordered class="photometry-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
         <template #cell(isActive)="data">
           <span v-if="data.value">Yes</span>
           <span v-else>No</span>

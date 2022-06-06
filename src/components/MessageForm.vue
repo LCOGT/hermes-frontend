@@ -46,7 +46,7 @@
                 <b> Copy CSV Header </b>
               </b-button>
               <!-- upload csv -->
-              <form enctype="multipart/form-data" class="my-2">
+              <form id=csvForm enctype="multipart/form-data" class="my-2">
                 <input type="file" @change="onFileChange">
               </form>
             </b-row>
@@ -101,6 +101,9 @@
               </template>
             </b-modal>
         </div>
+      </b-col>
+      <b-col>
+        <b-button class="clear-button shadow" variant="outline-primary" @click="clearForm">Clear Form</b-button>
       </b-col>
     </b-row>
   </b-container>
@@ -161,6 +164,18 @@ export default {
     }
   },
    methods: {
+    clearForm() {
+      // completely reset form data
+      this.title = '';
+      this.authors = '';
+      this.topic = 'hermes.test';
+      this.message = '';
+      this.eventid = '';
+      this.fileInput = null;
+      this.$store.commit("SET_MAIN_DATA", []);
+      this.$store.commit("SET_EXTRA_DATA", []);
+      document.getElementById("csvForm").reset();
+    },
     copy() {
       // Create and Copy Sample Table Header to Clipboard
       const mainData = this.getMainData;
@@ -366,6 +381,9 @@ export default {
   max-width: 20%;
 }
 .submit-button {
-  color: white
+  color: white;
+}
+.clear-button {
+  float: right;
 }
 </style>
