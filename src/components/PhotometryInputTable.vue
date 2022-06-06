@@ -103,7 +103,7 @@ export default {
         data: {
           id: newId,
           photometryId: null,
-          discoveryDate: null,
+          dateObs: null,
           telescope: null,
           instrument: null,
           band: null,
