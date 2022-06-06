@@ -1,9 +1,15 @@
 <template>
   <div>
-    <b-editable-table bordered class="telescope-event-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+    <b-editable-table striped bordered class="telescope-event-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
       <template #cell(isActive)="data">
         <span v-if="data.value">Yes</span>
         <span v-else>No</span>
+      </template>
+      <!-- Delete Row -->
+      <template #cell(delete)="row">
+        <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
+          &#128465;
+        </div>
       </template>
     </b-editable-table>
     <div class="add-row-telescope-event">
@@ -50,6 +56,12 @@ export default {
           class: "event-date-column"},
         {key: "description", label: "Description of Event", type: 'text', editable: true,
           placeholder: "Event Description", class: "event-description-column"},
+        {
+          key: "delete",
+          label: "",
+          headerTitle: "delete",
+          class: "delete-column",
+        },
 
       ],
       rowUpdate: {}
@@ -72,7 +84,10 @@ export default {
           isActive: false,
         },
       };
-    }
+    },
+    removeRow(row){
+      this.getMainData.splice(row.index, 1)
+    },
   }
 }
 </script>

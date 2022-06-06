@@ -1,9 +1,15 @@
 <template>
     <div>
-      <b-editable-table bordered class="search-pointing-data-table" nle-id v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+      <b-editable-table striped bordered class="search-pointing-data-table" nle-id v-model="items" :fields="fields" :rowUpdate="rowUpdate">
         <template #cell(isActive)="data">
           <span v-if="data.value">Yes</span>
           <span v-else>No</span>
+        </template>
+        <!-- Delete Row -->
+        <template #cell(delete)="row">
+          <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
+            &#128465;
+          </div>
         </template>
       </b-editable-table>
       <div class="add-row-search-pointing">
@@ -70,6 +76,12 @@ export default {
             { value: "erg / s / cm² / Å", text: "erg / s / cm² / Å" },
           ],
         },
+        {
+          key: "delete",
+          label: "",
+          headerTitle: "delete",
+          class: "delete-column",
+        },
       ],
       rowUpdate: {}
     };
@@ -95,7 +107,10 @@ export default {
           isActive: false,
         },
       };
-    }
+    },
+    removeRow(row){
+      this.getMainData.splice(row.index, 1)
+    },
   }
 }
 </script>

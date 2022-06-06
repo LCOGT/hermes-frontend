@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Build Additional Data Table -->
-    <b-editable-table striped outlined class="additional-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
+    <b-editable-table striped bordered class="additional-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate">
       <template #cell(isActive)="data">
         <span v-if="data.value">Yes</span>
         <span v-else>No</span>
