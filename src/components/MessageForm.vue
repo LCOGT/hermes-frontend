@@ -33,7 +33,7 @@
         <b-col class="input-table-col">
         <slot></slot>
           <!-- Upload Data Card -->
-          <b-card title="Upload Data" class="upload-card my-2" border-variant="light">
+          <b-card title="Upload Data to Main Table" class="upload-card my-2" border-variant="light">
             <!-- Get CSV Header -->
             <b-row>
               <div class="mx-2">
@@ -78,7 +78,7 @@
 
           <b-tabs class="message-tabs" content-class="mt-2">
             <b-tab title="Edit" active>
-              <b-form-textarea v-model="message" id="message-input" placeholder="Message" rows="3" max-rows="6"></b-form-textarea>
+              <b-form-textarea v-model="message" id="message-input" placeholder="Enter Message. Use '{key}' to reference values in Additional Data Table." rows="3" max-rows="6"></b-form-textarea>
             </b-tab>
             <b-tab title="Preview"><span style="white-space: pre;">
               {{ formattedMessage }}
