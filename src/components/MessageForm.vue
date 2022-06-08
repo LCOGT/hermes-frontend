@@ -276,7 +276,7 @@ export default {
         "title": this.title,
         "author": this.user,
         "data": additionalDataObj,
-        "message_text": this.formatedMessage
+        "message_text": this.formattedMessage
       };
       // Apply common elements to JSON field "data"
       if (this.getMainTableName) {
