@@ -341,6 +341,7 @@ export default {
       }).map(function (row, rowindex) {
         const values = row.split(delimiter);
         return headers.reduce(function (object, header, index) {
+          // Only include expected columns
           if (expectedHeader.includes(header)){
             object[header] = values[index];
             object['id'] = rowindex;
@@ -348,6 +349,7 @@ export default {
           return object;
         }, {});
       });
+      // add empty cells for unused columns
       for (let row of outArray) {
         for (let headerKey of expectedHeader){
           if (!(headerKey in row)){
