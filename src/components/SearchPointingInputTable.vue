@@ -42,6 +42,7 @@ export default {
       set(value) {
         this.$store.commit("SET_MAIN_DATA", value)
         this.$store.commit("SET_MAIN_TABLE_NAME", "pointing_data")
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "ra,dec,obsStatus,obsDate,telescope,instrument,band,depth,depthUnit");
       },
     }
   },

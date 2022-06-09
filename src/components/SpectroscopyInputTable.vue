@@ -41,7 +41,8 @@ export default {
       },
       set(value) {
         this.$store.commit("SET_MAIN_DATA", value)
-        this.$store.commit("SET_MAIN_TABLE_NAME", "spectroscopy_data")
+        this.$store.commit("SET_MAIN_TABLE_NAME", "spectroscopy_data");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "spectroscopyId,dateObs,telescope,instrument,exptime,classification,spectrumURL");
       },
     }
   },

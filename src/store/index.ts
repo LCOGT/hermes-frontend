@@ -8,6 +8,7 @@ export default new Vuex.Store({
     main_data: [],
     extra_data: [],
     name: '',
+    header: '',
   },
   getters: {
     getMainData(state) {
@@ -18,7 +19,11 @@ export default new Vuex.Store({
     },
     getMainTableName(state) {
       return state.name;
+    },
+    getMainTableHeader(state) {
+      return state.header;
     }
+
   },
   mutations: {
     SET_MAIN_DATA(state, main_data) {
@@ -29,6 +34,9 @@ export default new Vuex.Store({
     },
     SET_MAIN_TABLE_NAME(state, name) {
       state.name = name;
+    },
+    SET_MAIN_TABLE_HEADER(state, header) {
+      state.header = header;
     },
   },
   actions: {

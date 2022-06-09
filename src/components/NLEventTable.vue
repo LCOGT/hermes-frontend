@@ -38,8 +38,9 @@ export default {
         return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_MAIN_DATA", value)
-        this.$store.commit("SET_MAIN_TABLE_NAME", "nle_data")
+        this.$store.commit("SET_MAIN_DATA", value);
+        this.$store.commit("SET_MAIN_TABLE_NAME", "nle_data");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "eventId,discoveryDate,instrument,skymapLink,falseAlarmRate");
       },
     }
   },

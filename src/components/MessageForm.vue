@@ -33,7 +33,7 @@
         <b-col class="input-table-col">
         <slot></slot>
           <!-- Upload Data Card -->
-          <b-card title="Upload Data to Main Table" class="upload-card my-2" border-variant="light">
+          <b-card title="Upload Row Data to Main Table" class="upload-card my-2" border-variant="light">
             <!-- Get CSV Header -->
             <b-row>
               <div class="mx-2">
@@ -118,7 +118,7 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-      ...mapGetters(["getMainData", "getExtraData", "getMainTableName"]),
+      ...mapGetters(["getMainData", "getExtraData", "getMainTableName", "getMainTableHeader"]),
       formattedMessage() {
       return this.formatMessage(this.message);
     }
@@ -178,15 +178,9 @@ export default {
     },
     copy() {
       // Create and Copy Sample Table Header to Clipboard
-      const mainData = this.getMainData;
-      var mainDataKeyString = '';
-      if (mainData[0]){
-        // Once Main Data Table has been built, pull out Keys and format Header.
-        for (const [key, ] of Object.entries(mainData[0])) {
-          mainDataKeyString = mainDataKeyString.concat(key, ',');
-        }
+      if (this.getMainTableHeader){
         // Copy Header to Clipboard. Only works with HTTPS or local
-        navigator.clipboard.writeText(mainDataKeyString);
+        navigator.clipboard.writeText(this.getMainTableHeader);
         // Trigger alert to show sucessful copy
         this.showCopyAlert = true;
       }

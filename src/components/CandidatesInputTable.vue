@@ -40,8 +40,10 @@ export default {
         return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_MAIN_DATA", value)
-        this.$store.commit("SET_MAIN_TABLE_NAME", "candidate_data")
+        this.$store.commit("SET_MAIN_DATA", value);
+        this.$store.commit("SET_MAIN_TABLE_NAME", "candidate_data");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "candidateId,ra,dec,discoveryDate,telescope,instrument,band,brightness,brightnessError,brightnessUnit");
+
       },
     }
   },
