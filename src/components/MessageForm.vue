@@ -322,6 +322,8 @@ export default {
     },
     csvToArray(unparsed_string, delimiter = ",") {
       // Convert Plain Text CSV String to an Array.
+      // Pull in expected header and convert to array
+      const expectedHeader = this.getMainTableHeader.split(',');
       // slice from start of text to the first \n index
       // use split to create an array from string by delimiter
       const headers = unparsed_string.slice(0, unparsed_string.indexOf("\n")).split(delimiter);
@@ -333,17 +335,27 @@ export default {
       // use headers.reduce to create an object
       // object properties derived from headers:values
       // the object passed as an element of the array
-      return rows.filter(function (row) {
+      var outArray = rows.filter(function (row) {
         // skip blank lines
         return !(row.length === 0)
       }).map(function (row, rowindex) {
         const values = row.split(delimiter);
         return headers.reduce(function (object, header, index) {
-          object[header] = values[index];
-          object['id'] = rowindex;
+          if (expectedHeader.includes(header)){
+            object[header] = values[index];
+            object['id'] = rowindex;
+          }
           return object;
         }, {});
       });
+      for (let row of outArray) {
+        for (let headerKey of expectedHeader){
+          if (!(headerKey in row)){
+            row[headerKey] = null;
+          }
+        }
+      }
+      return outArray;
     },
   },
 }
