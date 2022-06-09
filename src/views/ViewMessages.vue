@@ -271,9 +271,12 @@ export default {
     },
     getDataTitle(item){
       // Return the Table Title for the Main Data Table
+      // Search for data with dicts within array
       for (const [key, value] of Object.entries(item.data)) {
         if (Array.isArray(value)) {
-          return key;
+          if (value[0].constructor == Object){
+            return key;
+          }
         }
       }
     },
