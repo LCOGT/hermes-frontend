@@ -274,7 +274,7 @@ export default {
       // Search for data with dicts within array
       for (const [key, value] of Object.entries(item.data)) {
         if (Array.isArray(value)) {
-          if (value[0].constructor == Object){
+          if (value[0] && value[0].constructor == Object){
             return key;
           }
         }

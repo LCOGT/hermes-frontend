@@ -267,8 +267,10 @@ export default {
       }
       // get Main Data column order
       let mainDataOrder = [];
-      for (const [key, ] of Object.entries(mainData[0])) {
-        mainDataOrder.push(key);
+      if (mainData[0]) {
+        for (const [key, ] of Object.entries(mainData[0])) {
+          mainDataOrder.push(key);
+        }
       }
       // Build Basic Payload to match backend Model Structure
       let payload = {
