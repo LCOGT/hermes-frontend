@@ -135,9 +135,9 @@
         <hr>
         <!-- Show JSON Button -->
         <b-row class="mb-2 mx-2 pb-3">
-            <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
-              <b> Show JSON: </b>
-            </b-button>
+          <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
+            <b> Show JSON: </b>
+          </b-button>
         </b-row>
       </div>
       <!-- Initial Message Box Display -->
@@ -149,8 +149,26 @@
   </b-row>
 
     <!-- JSON DATA -->
-    <b-modal :id="jsonData.id" :title="jsonData.title" ok-only @hide="resetjsonData">
-      <pre>{{ jsonData.content }}</pre>
+    <b-modal :id="jsonData.id" :title="jsonData.title" @hidden="resetjsonData"
+    cancel-title="Copy"
+    cancel-variant="outline-primary"
+    @cancel="copy"
+    >
+      <b-row>
+        <pre>{{ jsonData.content }}</pre>
+      </b-row>
+      <b-row>
+        <!-- Alert User of Successful Copy -->
+        <b-alert
+          variant="success"
+          dismissible
+          fade
+          :show="showCopyAlert"
+          @dismissed="showCopyAlert=false"
+        >
+          JSON coppied to Clipboard.
+        </b-alert>
+      </b-row>
     </b-modal>
 
   </div>
@@ -211,6 +229,7 @@ export default {
           title: '',
           content: ''
       },
+      showCopyAlert: false,
       KVdataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
     };
   },
@@ -232,10 +251,22 @@ export default {
       // raise modal
       this.$root.$emit('bv::show::modal', this.jsonData.id, button)
     },
+    copy(bvModalEvent) {
+      // Prevent modal from closing with redirected cancel
+      bvModalEvent.preventDefault();
+      // Copy JSON data and trigger alert
+      if (this.jsonData.content){
+        // Copy JSON to Clipboard. Only works with HTTPS or local
+        navigator.clipboard.writeText(this.jsonData.content);
+        // Trigger alert to show sucessful copy
+        this.showCopyAlert = true;
+      }
+    },
     resetjsonData() {
-      // clear JSON data when window closed
-      this.jsonData.title = ''
-      this.jsonData.content = ''
+      // clear JSON data and remove copy alert when window closed
+      this.jsonData.title = '';
+      this.jsonData.content = '';
+      this.showCopyAlert=false;
     },
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
