@@ -268,9 +268,7 @@ export default {
       // raise modal
       this.$root.$emit('bv::show::modal', this.jsonData.id, button);
     },
-    copy(bvModalEvent) {
-      // Prevent modal from closing with redirected cancel
-      bvModalEvent.preventDefault();
+    copy() {
       // Copy JSON data and trigger alert
       if (this.jsonData.content){
         // Copy JSON to Clipboard. Only works with HTTPS or local
