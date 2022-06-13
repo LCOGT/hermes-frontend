@@ -180,7 +180,9 @@ export default {
       // Create and Copy Sample Table Header to Clipboard
       if (this.getMainTableHeader){
         // Copy Header to Clipboard. Only works with HTTPS or local
-        navigator.clipboard.writeText(this.getMainTableHeader);
+        navigator.clipboard.writeText(this.getMainTableHeader).catch(error => {
+          console.log(error);
+        });
         // Trigger alert to show sucessful copy
         this.showCopyAlert = true;
       }
