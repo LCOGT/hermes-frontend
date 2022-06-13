@@ -149,11 +149,7 @@
   </b-row>
 
     <!-- JSON DATA -->
-    <b-modal :id="jsonData.id" :title="jsonData.title" @hidden="resetjsonData"
-    cancel-title="Copy"
-    cancel-variant="outline-primary"
-    @cancel="copy"
-    >
+    <b-modal :id="jsonData.id" :title="jsonData.title" @hidden="resetjsonData">
       <b-row>
         <pre>{{ jsonData.content }}</pre>
       </b-row>
@@ -169,6 +165,26 @@
           JSON coppied to Clipboard.
         </b-alert>
       </b-row>
+      <template #modal-footer="{ hide }">
+        <div class="w-100">
+          <b-button
+            variant="outline-primary"
+            size="sm"
+            class="float-left"
+            @click="copy"
+          >
+            Copy
+          </b-button>
+          <b-button
+            variant="primary"
+            size="sm"
+            class="float-right"
+            @click="hide()"
+          >
+            Done
+          </b-button>
+        </div>
+      </template>
     </b-modal>
 
   </div>
@@ -247,9 +263,10 @@ export default {
     },
     info(item, button) {
       // Get full message info as JSON String
-      this.jsonData.content = JSON.stringify(item, null, 2)
+      this.jsonData.content = JSON.stringify(item, null, 2);
+      this.jsonData.title = "JSON for " + item.topic + " message.";
       // raise modal
-      this.$root.$emit('bv::show::modal', this.jsonData.id, button)
+      this.$root.$emit('bv::show::modal', this.jsonData.id, button);
     },
     copy(bvModalEvent) {
       // Prevent modal from closing with redirected cancel
