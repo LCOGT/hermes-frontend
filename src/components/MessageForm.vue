@@ -194,9 +194,13 @@ export default {
       const keys_to_format = value.match(/[^{}]+(?=})/g);
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
+      const generalDataKeys = ['title', 'authors', 'topic', 'user', 'eventid'];
       for (let i in keys_to_format) {
         if (keys_to_format[i] in additionalDataObj) {
           formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keys_to_format[i]])
+        }
+        if (generalDataKeys.includes(keys_to_format[i])) {
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this[keys_to_format[i]])
         }
       }
       return formatted_string;
