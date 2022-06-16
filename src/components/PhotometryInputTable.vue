@@ -40,8 +40,9 @@ export default {
         return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_MAIN_DATA", value)
-        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry_data")
+        this.$store.commit("SET_MAIN_DATA", value);
+        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry_data");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "photometryId,dateObs,telescope,instrument,band,brightness,brightnessError,brightnessUnit");
       },
     },
   },

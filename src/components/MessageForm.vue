@@ -180,9 +180,7 @@ export default {
       // Create and Copy Sample Table Header to Clipboard
       if (this.getMainTableHeader){
         // Copy Header to Clipboard. Only works with HTTPS or local
-        navigator.clipboard.writeText(this.getMainTableHeader).catch(error => {
-          console.log(error);
-        });
+        navigator.clipboard.writeText(this.getMainTableHeader);
         // Trigger alert to show sucessful copy
         this.showCopyAlert = true;
       }
@@ -353,6 +351,8 @@ export default {
         const values = row.split(delimiter);
         return headers.reduce(function (object, header, index) {
           // Only include expected columns
+          console.log(header)
+          console.log(expectedHeader)
           if (expectedHeader.includes(header)){
             object[header] = values[index];
             object['id'] = rowindex;
