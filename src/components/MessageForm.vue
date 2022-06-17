@@ -20,7 +20,7 @@
         <b-row class=p-2>
           <b-col v-if="nleId" class="eventid-col">
             <label for="eventid-input">Event ID:</label>
-            <b-form-input class="eventid-input" v-model="eventid" placeholder="Event ID"></b-form-input>
+            <b-form-input class="eventid-input" v-model="eventId" placeholder="Event ID"></b-form-input>
           </b-col>
           <b-col class="authors-col">
             <label for="authors-input">Authors:</label>
@@ -140,7 +140,7 @@ export default {
       authors: '',
       topic: 'hermes.test',
       message: '',
-      eventid: '',
+      eventId: '',
       user: 'Hermes User.guest',
       fileInput: null,
       showErrorModal: false,
@@ -170,7 +170,7 @@ export default {
       this.authors = '';
       this.topic = 'hermes.test';
       this.message = '';
-      this.eventid = '';
+      this.eventId = '';
       this.fileInput = null;
       this.$store.commit("SET_MAIN_DATA", []);
       this.$store.commit("SET_EXTRA_DATA", []);
@@ -192,19 +192,18 @@ export default {
       const keys_to_format = value.match(/[^{}]+(?=})/g);
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
-      // const mainDataList = this.getMainTableHeader.split(',');
-      const generalDataKeys = ['title', 'authors', 'topic', 'user', 'eventid'];
+      const mainDataList = this.getMainTableHeader.split(',');
+      const generalDataKeys = ['title', 'authors', 'topic', 'user', 'eventId'];
       for (let i in keys_to_format) {
-        let keyChain = keys_to_format[i].split(".")
+        var keyChain = keys_to_format[i].split(".")
+        const camelCaseKey = keyChain[0].toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
         if (keyChain[0] in additionalDataObj) {
-          formatted_string = formatted_string.replace(RegExp('{' + keyChain[0] + '}', 'g'), additionalDataObj[keyChain[0]])
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keyChain[0]]);
+        } else if (generalDataKeys.includes(camelCaseKey)) {
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this[camelCaseKey]);
+        } else if (mainDataList.includes(camelCaseKey)) {
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][camelCaseKey]);
         }
-        if (generalDataKeys.includes(keyChain[0])) {
-          formatted_string = formatted_string.replace(RegExp('{' + keyChain[0] + '}', 'g'), this[keyChain[0]])
-        }
-        // if (mainDataList.includes(keyChain[0])) {
-        //   formatted_string = formatted_string.replace(RegExp('{' + keyChain[0] + '}', 'g'), this.getMainData[keyChain[0]][keyChain[1]])
-        // }
       }
       return formatted_string;
       },
@@ -292,8 +291,8 @@ export default {
       if (mainDataOrder) {
         payload.data.mainDataOrder = mainDataOrder;
       }
-      if (this.eventid) {
-        payload.data.eventid = this.eventid;
+      if (this.eventId) {
+        payload.data.eventId = this.eventId;
       }
       if (this.authors) {
         payload.data.authors = this.authors;
