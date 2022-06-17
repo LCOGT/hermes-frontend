@@ -351,8 +351,6 @@ export default {
         const values = row.split(delimiter);
         return headers.reduce(function (object, header, index) {
           // Only include expected columns
-          console.log(header)
-          console.log(expectedHeader)
           if (expectedHeader.includes(header)){
             object[header] = values[index];
             object['id'] = rowindex;
