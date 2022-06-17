@@ -201,8 +201,16 @@ export default {
           formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keyChain[0]]);
         } else if (generalDataKeys.includes(camelCaseKey)) {
           formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this[camelCaseKey]);
-        } else if (mainDataList.includes(camelCaseKey)) {
-          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][camelCaseKey]);
+        } else if (mainDataList.includes(camelCaseKey) && keyChain[1]) {
+          if (keyChain[1] < this.getMainData.length) {
+            formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][camelCaseKey]);
+          }
+        } else if (camelCaseKey.toLowerCase().includes("id") && keyChain[1] && keyChain[1] < this.getMainData.length){
+          for (let mainDataKey of mainDataList){
+            if (mainDataKey.toLowerCase().includes("id")) {
+              formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][mainDataKey]);
+            }
+          }
         }
       }
       return formatted_string;
