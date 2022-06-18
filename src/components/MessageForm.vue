@@ -190,22 +190,29 @@ export default {
       let formatted_string = value;
       // This nasty regex makes a list of elements that are in curly brackets
       const keys_to_format = value.match(/[^{}]+(?=})/g);
+      // Store comparison lists for keys
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       const mainDataList = this.getMainTableHeader.split(',');
       const generalDataKeys = ['title', 'authors', 'topic', 'user', 'eventId'];
+      // Loop through potential keys to search for matches
       for (let i in keys_to_format) {
+        // Check for row references and convert to Camel Case
         var keyChain = keys_to_format[i].split(".")
         const camelCaseKey = keyChain[0].toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
         if (keyChain[0] in additionalDataObj) {
+          // Check Additional Data
           formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keyChain[0]]);
         } else if (generalDataKeys.includes(camelCaseKey)) {
+          // Check General Header
           formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this[camelCaseKey]);
         } else if (mainDataList.includes(camelCaseKey) && keyChain[1]) {
           if (keyChain[1] < this.getMainData.length) {
+            // Check Main Data Table for column.row
             formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][camelCaseKey]);
           }
         } else if (camelCaseKey.toLowerCase().includes("id") && keyChain[1] && keyChain[1] < this.getMainData.length){
+          // Perform necessary gymnastics to account for our use of specific "ID" for each table
           for (let mainDataKey of mainDataList){
             if (mainDataKey.toLowerCase().includes("id")) {
               formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][mainDataKey]);
