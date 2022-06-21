@@ -247,6 +247,15 @@ export default {
       },
       showCopyAlert: false,
       KVdataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
+      preSetTableOrder: {
+        nle_data: "eventId,discoveryDate,instrument,skymapLink,falseAlarmRate",
+        candidate_data: "candidateId,ra,dec,discoveryDate,telescope,instrument,band,brightness,brightnessError,brightnessUnit",
+        non_detection_data: "ra,dec,obsDate,telescope,instrument,band,depth,depthUnit",
+        pointing_data: "ra,dec,obsStatus,obsDate,telescope,instrument,band,depth,depthUnit",
+        photometry_data: "photometryId,dateObs,telescope,instrument,band,brightness,brightnessError,brightnessUnit",
+        spectroscopy_data: "spectroscopyId,dateObs,telescope,instrument,exptime,classification,spectrumURL",
+        telescope_events: "observatory,telescope,instrument,eventDate,description"
+      }
     };
   },
   mounted() {
@@ -334,10 +343,14 @@ export default {
       // Create the fields for the Main Data Table
       var fieldList = [];
       var column_list = []
-      // Use ordered list if provided, otherwise get list from 1st row
-      if (item.data.mainDataOrder){
+      if (this.getDataTitle(item) in this.preSetTableOrder) {
+        // If Hermes Table, pull Preset Order
+        column_list = this.preSetTableOrder[this.getDataTitle(item)].split(',');
+      } else if (item.data.mainDataOrder){
+        // Otherwise use provided Ordered List
         column_list = item.data.mainDataOrder
       } else {
+        // Otherwise just use first row of Table Data
         column_list = Object.keys(item.data[this.getDataTitle(item)][0])
       }
       for (const data_key of column_list) {
