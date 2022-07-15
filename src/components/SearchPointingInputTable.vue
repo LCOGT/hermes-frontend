@@ -8,7 +8,7 @@
         <!-- Delete Row -->
         <template #cell(delete)="row">
           <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-            &#128465;
+            &#128465; <!-- Little Trashcan Icon -->
           </div>
         </template>
       </b-editable-table>

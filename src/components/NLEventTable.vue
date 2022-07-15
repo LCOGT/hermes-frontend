@@ -8,7 +8,7 @@
       <!-- Delete Row -->
       <template #cell(delete)="row">
         <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-          &#128465;
+          &#128465; <!-- Little Trashcan Icon -->
         </div>
       </template>
     </b-editable-table>
@@ -57,13 +57,7 @@ export default {
           class: "skymap-link-column"},
         {key: "falseAlarmRate", label: "False Alarm Rate", type: 'text', editable: true,
           placeholder: "False Alarm Rate", class: "false-alarm-rate-column"},
-        {
-          key: "delete",
-          label: "",
-          headerTitle: "delete",
-          class: "delete-column",
-        },
-
+        {key: "delete", label: "", headerTitle: "delete", class: "delete-column"},
       ],
       rowUpdate: {}
     };

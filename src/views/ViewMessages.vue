@@ -66,10 +66,10 @@
       <!-- Selection Behavior -->
       <template #cell(selected)="row">
         <template v-if="row.rowSelected">
-          <span aria-hidden="true">&#8667;</span>
+          <span aria-hidden="true">&#8667;<!-- Tripple rightarrow --></span>
         </template>
         <template v-else>
-          <span aria-hidden="true">&#10624;</span>
+          <span aria-hidden="true">&#10624;<!-- Three Bars --></span>
         </template>
       </template>
 
