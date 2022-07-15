@@ -1,14 +1,24 @@
+import '@babel/polyfill'
+import 'mutationobserver-shim'
 import Vue, { VNode } from "vue";
-import App from "./App.vue";
-import VueCompositionAPI from "@vue/composition-api";
-import "@jsonforms/vue2-vanilla/vanilla.css";
-import vuetify from './plugins/vuetify'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
-Vue.use(VueCompositionAPI);
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './plugins/bootstrap-vue'
+import App from "./App.vue";
+import router from "./router";
+import vuetify from './plugins/vuetify'
+import store from './store'
+
+Vue.use(BootstrapVue)
+Vue.use(IconsPlugin)
 
 Vue.config.productionTip = false;
 
 new Vue({
+  router,
   vuetify,
+  store,
   render: (h): VNode => h(App)
 }).$mount("#app");
