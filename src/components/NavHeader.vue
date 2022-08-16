@@ -24,8 +24,9 @@
           <template #button-content>
             <em>User</em>
           </template>
-          <b-dropdown-item href="#">Login</b-dropdown-item>
+          <b-dropdown-item @click="authenticate">Login</b-dropdown-item>
         </b-nav-item-dropdown>
+
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
@@ -33,8 +34,29 @@
 </template>
 
 <script>
+//import axios from "axios";
+import getEnv from "@/utils/env.js";
 export default {
   methods: {
+    authenticate() {
+      console.log("in authenticate....");
+      location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/"
+
+//      axios({
+//        method: 'get',
+//        headers: {'Content-Type': 'application/json'},
+//        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/",
+//      })
+//      .then(function (response) {
+//        // log response, redirect to homepage
+//        console.log("authenticate:" + JSON.stringify(response.data));
+//        location.href = '/.html';
+//      })
+//      .catch((error) => console.log(error));
+//
+
+      console.log("leaving authenticate....");
+    } // authenticate
   },
   data() {
     return {
