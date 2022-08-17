@@ -22,11 +22,12 @@
            <b-nav-item-dropdown right>
           <!-- Using 'button-content' slot -->
           <template #button-content>
-            <em>User</em>
+            <em v-if="username">{{username}}</em>
+            <em v-else>User</em>
           </template>
-          <b-dropdown-item @click="authenticate">Login</b-dropdown-item>
+          <b-dropdown-item v-if="!username" @click="authenticate">Log In</b-dropdown-item>
+          <b-dropdown-item v-else @click="unauthenticate">Log Out</b-dropdown-item>
         </b-nav-item-dropdown>
-
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
@@ -36,7 +37,19 @@
 <script>
 //import axios from "axios";
 import getEnv from "@/utils/env.js";
+import { mapGetters } from "vuex";
 export default {
+  computed: {
+      ...mapGetters(["getUserName"])
+  },
+  mounted() {
+    if (this.$route.query.user){
+      console.log(this.$route.query.user)
+      this.$store.commit('SET_USER_NAME', this.$route.query.user)
+      this.$router.replace({'query.user':null})
+    }
+    this.username = this.getUserName;
+  },
   methods: {
     authenticate() {
       console.log("in authenticate....");
@@ -56,10 +69,15 @@ export default {
 //
 
       console.log("leaving authenticate....");
-    } // authenticate
+    }, // authenticate
+    unauthenticate() {
+      this.$store.commit('SET_USER_NAME', null);
+      this.username = null;
+    }
   },
   data() {
     return {
+      username: null
     };
   }
 };

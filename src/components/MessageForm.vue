@@ -163,7 +163,7 @@ export default {
       this.$store.commit("SET_MAIN_DATA", loaded_array);
     }
   },
-   methods: {
+  methods: {
     clearForm() {
       // completely reset form data
       this.title = '';

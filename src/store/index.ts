@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import createPersistedState from 'vuex-persistedstate';
 
 Vue.use(Vuex)
 
@@ -9,6 +10,7 @@ export default new Vuex.Store({
     extra_data: [],
     name: '',
     header: '',
+    username: ''
   },
   getters: {
     getMainData(state) {
@@ -22,9 +24,13 @@ export default new Vuex.Store({
     },
     getMainTableHeader(state) {
       return state.header;
+    },
+    getUserName(state) {
+      return state.username;
     }
 
   },
+  plugins: [createPersistedState()],
   mutations: {
     SET_MAIN_DATA(state, main_data) {
       state.main_data = main_data;
@@ -37,6 +43,9 @@ export default new Vuex.Store({
     },
     SET_MAIN_TABLE_HEADER(state, header) {
       state.header = header;
+    },
+    SET_USER_NAME(state, username) {
+      state.username = username;
     },
   },
   actions: {
