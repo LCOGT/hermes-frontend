@@ -26,7 +26,7 @@
             <em v-else>User</em>
           </template>
           <b-dropdown-item v-if="!username" @click="authenticate">Log In</b-dropdown-item>
-          <b-dropdown-item v-else @click="unauthenticate">Log Out</b-dropdown-item>
+          <b-dropdown-item v-else @click="deauthenticate">Log Out</b-dropdown-item>
         </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -43,6 +43,8 @@ export default {
       ...mapGetters(["getUserName"])
   },
   mounted() {
+    console.log('mounted: this.$route: ')
+    console.log(this.$route)
     if (this.$route.query.user){
       console.log(this.$route.query.user)
       this.$store.commit('SET_USER_NAME', this.$route.query.user)
@@ -55,24 +57,52 @@ export default {
       console.log("in authenticate....");
       location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/"
 
+//      var csrf_token = '';
+//  
 //      axios({
 //        method: 'get',
 //        headers: {'Content-Type': 'application/json'},
-//        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/",
+//        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-token/",
 //      })
 //      .then(function (response) {
 //        // log response, redirect to homepage
 //        console.log("authenticate:" + JSON.stringify(response.data));
-//        location.href = '/.html';
+//        csrf_token = response.data['token'];
+//        //location.href = '/.html';
 //      })
-//      .catch((error) => console.log(error));
+//
+     const front_end_origin = 'http://127.0.0.1:8000';
+     const back_end_origin = 'http://127.0.0.1:8001';
+     console.log('front_end_origin: ' + front_end_origin);
+     console.log('back_end_origin: ' + back_end_origin);
+
+//      axios({
+//        method: 'get',
+//        headers: {'Content-Type': 'application/json',
+//                  'Access-Control-Allow-Origin': front_end_origin,
+//                  'X-CSRFToken': csrf_token},
+//        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/",
+//      })
+//      .then(function (response) {
+//        // log response, redirect to homepage
+//        console.log("authenticate then:" + JSON.stringify(response.data));
+//        //location.href = '/.html';
+//      })
+//      .catch(function (error) {
+//        console.log('authenticate catch: ')
+//        console.log(error)
+//      });
 //
 
       console.log("leaving authenticate....");
     }, // authenticate
-    unauthenticate() {
+    deauthenticate() {
+      console.log("in deauthenticate....");
       this.$store.commit('SET_USER_NAME', null);
       this.username = null;
+
+      location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/"
+      console.log("leaving deauthenticate....");
     }
   },
   data() {
