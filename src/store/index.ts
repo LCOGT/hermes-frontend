@@ -10,7 +10,7 @@ export default new Vuex.Store({
     extra_data: [],
     name: '',
     header: '',
-    username: ''
+    username: 'HERMES Guest'
   },
   getters: {
     getMainData(state) {

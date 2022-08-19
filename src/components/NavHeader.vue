@@ -22,11 +22,11 @@
            <b-nav-item-dropdown right>
           <!-- Using 'button-content' slot -->
           <template #button-content>
-            <em v-if="username">{{username}}</em>
-            <em v-else>User</em>
+            <em>{{username}}</em>
           </template>
-          <b-dropdown-item v-if="!username" @click="authenticate">Log In</b-dropdown-item>
+          <b-dropdown-item v-if="username === 'HERMES Guest'" @click="authenticate">Log In</b-dropdown-item>
           <b-dropdown-item v-else @click="unauthenticate">Log Out</b-dropdown-item>
+          <b-dropdown-item v-if="username === 'HERMES Guest'" href="https://hop.scimma.org/" target="_blank" rel="noopener noreferrer">Register</b-dropdown-item>
         </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -44,7 +44,6 @@ export default {
   },
   mounted() {
     if (this.$route.query.user){
-      console.log(this.$route.query.user)
       this.$store.commit('SET_USER_NAME', this.$route.query.user)
       this.$router.replace({'query.user':null})
     }
@@ -71,8 +70,8 @@ export default {
       console.log("leaving authenticate....");
     }, // authenticate
     unauthenticate() {
-      this.$store.commit('SET_USER_NAME', null);
-      this.username = null;
+      this.$store.commit('SET_USER_NAME', 'HERMES Guest');
+      this.username = 'HERMES Guest';
     }
   },
   data() {

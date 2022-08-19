@@ -118,12 +118,13 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-      ...mapGetters(["getMainData", "getExtraData", "getMainTableName", "getMainTableHeader"]),
+      ...mapGetters(["getUserName", "getMainData", "getExtraData", "getMainTableName", "getMainTableHeader"]),
       formattedMessage() {
       return this.formatMessage(this.message);
     }
   },
   mounted() {
+    this.user = this.getUserName;
     this.topic = 'hermes.test';
     this.showErrorModal = false;
   },
