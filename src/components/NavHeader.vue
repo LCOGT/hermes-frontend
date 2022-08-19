@@ -25,7 +25,7 @@
             <em>{{username}}</em>
           </template>
           <b-dropdown-item v-if="username === 'HERMES Guest'" @click="authenticate">Log In</b-dropdown-item>
-          <b-dropdown-item v-else @click="unauthenticate">Log Out</b-dropdown-item>
+          <b-dropdown-item v-else @click="deauthenticate">Log Out</b-dropdown-item>
           <b-dropdown-item v-if="username === 'HERMES Guest'" href="https://hop.scimma.org/" target="_blank" rel="noopener noreferrer">Register</b-dropdown-item>
         </b-nav-item-dropdown>
         </b-navbar-nav>
@@ -43,6 +43,8 @@ export default {
       ...mapGetters(["getUserName"])
   },
   mounted() {
+    console.log('mounted: this.$route: ')
+    console.log(this.$route)
     if (this.$route.query.user){
       this.$store.commit('SET_USER_NAME', this.$route.query.user)
       this.$router.replace({'query.user':null})
@@ -54,24 +56,16 @@ export default {
       console.log("in authenticate....");
       location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/"
 
-//      axios({
-//        method: 'get',
-//        headers: {'Content-Type': 'application/json'},
-//        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/",
-//      })
-//      .then(function (response) {
-//        // log response, redirect to homepage
-//        console.log("authenticate:" + JSON.stringify(response.data));
-//        location.href = '/.html';
-//      })
-//      .catch((error) => console.log(error));
-//
-
       console.log("leaving authenticate....");
-    }, // authenticate
-    unauthenticate() {
+    },
+
+    deauthenticate() {
+      console.log("in deauthenticate....");
       this.$store.commit('SET_USER_NAME', 'HERMES Guest');
       this.username = 'HERMES Guest';
+
+      location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/"
+      console.log("leaving deauthenticate....");
     }
   },
   data() {
