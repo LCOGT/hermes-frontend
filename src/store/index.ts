@@ -10,7 +10,8 @@ export default new Vuex.Store({
     extra_data: [],
     name: '',
     header: '',
-    username: 'HERMES Guest'
+    username: 'HERMES Guest',
+    csrf_token: '',
   },
   getters: {
     getMainData(state) {
@@ -26,6 +27,9 @@ export default new Vuex.Store({
       return state.header;
     },
     getUserName(state) {
+      return state.username;
+    },
+    getCsrfToken(state) {
       return state.username;
     }
 
@@ -46,6 +50,9 @@ export default new Vuex.Store({
     },
     SET_USER_NAME(state, username) {
       state.username = username;
+    },
+    SET_CSRF_TOKEN(state, csrf_token) {
+      state.csrf_token = csrf_token;
     },
   },
   actions: {

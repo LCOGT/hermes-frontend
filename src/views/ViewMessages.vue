@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import getEnv from "@/utils/env.js"
+import getEnv from "@/utils/env.js";
 import axios from "axios";
 
 export default {
