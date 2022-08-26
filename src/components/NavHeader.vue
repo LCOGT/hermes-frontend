@@ -42,19 +42,22 @@ import axios from "axios";
 
 export default {
   computed: {
-      ...mapGetters(["getUserName"])
+      ...mapGetters(["getUserName", "getCsrfToken"])
   },
   mounted() {
     // Retrieve messages and store data
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
-      .then(function (response) {
-        console.log('get-csrf-token CSRF Token: ' + response.data['token']);
-        // TODO: add token to store
-        //this.$store.commit('CSRF_TOKEN', response.data['token']);  // TypeError: this is undefined
-        //console.log('get-csrf-token Token added to store as CSRF_TOKEN');
-      })
+      .then((response) => this.$store.commit('SET_CSRF_TOKEN', response.data['token']))
+//      .then(function (response) {
+//        console.log('get-csrf-token CSRF Token: ' + response.data['token']);
+//        // TODO: add token to store
+//        this.$store.commit('SET_CSRF_TOKEN', response.data['token']);
+//        console.log('get-csrf-token Token added to store as CSRF_TOKEN');
+//      })
       .catch((error) => console.log(error));
+
+    console.log('get-csrf-token CSRF Token from Vuex store:: ' + this.getCsrfToken);
 
     // Get username
     if (this.$route.query.user){
