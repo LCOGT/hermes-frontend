@@ -307,7 +307,11 @@ export default {
       console.log(JSON.stringify(payload));
       axios({
         method: 'post',
-        headers: {'Content-Type': 'application/json'},
+        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
+        headers: {'Content-Type': 'application/json',
+                  // extract CSRF_TOKEN from vuex store and add it to the request header
+                  //'X-CSRFToken': this.$store.query(CSRF_TOKEN) // TODO: how to extract value from store?
+                  },
         url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
         data: JSON.stringify(payload)
       })
