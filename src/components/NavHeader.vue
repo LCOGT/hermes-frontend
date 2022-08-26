@@ -45,19 +45,11 @@ export default {
       ...mapGetters(["getUserName", "getCsrfToken"])
   },
   mounted() {
-    // Retrieve messages and store data
+    // get CSRF token and store it for submission
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
       .then((response) => this.$store.commit('SET_CSRF_TOKEN', response.data['token']))
-//      .then(function (response) {
-//        console.log('get-csrf-token CSRF Token: ' + response.data['token']);
-//        // TODO: add token to store
-//        this.$store.commit('SET_CSRF_TOKEN', response.data['token']);
-//        console.log('get-csrf-token Token added to store as CSRF_TOKEN');
-//      })
       .catch((error) => console.log(error));
-
-    console.log('get-csrf-token CSRF Token from Vuex store:: ' + this.getCsrfToken);
 
     // Get username
     if (this.$route.query.user){
