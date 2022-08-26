@@ -48,7 +48,12 @@ export default {
     // Retrieve messages and store data
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
-      .then((response) => (console.log(response)))
+      .then(function (response) {
+        console.log('get-csrf-token CSRF Token: ' + response.data['token']);
+        // TODO: add token to store
+        //this.$store.commit('CSRF_TOKEN', response.data['token']);  // TypeError: this is undefined
+        //console.log('get-csrf-token Token added to store as CSRF_TOKEN');
+      })
       .catch((error) => console.log(error));
 
     // Get username
