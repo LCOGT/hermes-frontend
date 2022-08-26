@@ -30,7 +30,7 @@ export default new Vuex.Store({
       return state.username;
     },
     getCsrfToken(state) {
-      return state.username;
+      return state.csrf_token;
     }
 
   },
