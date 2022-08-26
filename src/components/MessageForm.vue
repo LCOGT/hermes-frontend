@@ -118,7 +118,7 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-      ...mapGetters(["getUserName", "getMainData", "getExtraData", "getMainTableName", "getMainTableHeader"]),
+      ...mapGetters(["getUserName", "getMainData", "getExtraData", "getMainTableName", "getMainTableHeader", "getCsrfToken"]),
       formattedMessage() {
       return this.formatMessage(this.message);
     }
@@ -304,20 +304,19 @@ export default {
         payload.data.authors = this.authors;
       }
       // Post message via axios
-      console.log(JSON.stringify(payload));
+      console.log('submitToHop payload: ' + JSON.stringify(payload));
       axios({
         method: 'post',
         // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
         headers: {'Content-Type': 'application/json',
-                  // extract CSRF_TOKEN from vuex store and add it to the request header
-                  //'X-CSRFToken': this.$store.query(CSRF_TOKEN) // TODO: how to extract value from store?
+                  'X-CSRFToken': this.getCsrfToken
                   },
         url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
         data: JSON.stringify(payload)
       })
       .then(function (response) {
         // log response, redirect to homepage
-        console.log(JSON.stringify(response.data));
+        console.log('submitToHop response.data: ' + JSON.stringify(response.data));
         location.href = '/.html';
       })
       .catch(error => {
