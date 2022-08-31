@@ -20,10 +20,11 @@
           <b-form-select
             id="topic_selector"
             v-model="filter"
+            :options="topic_options"
           >
-            <b-form-select-option value="">-- All Topics --</b-form-select-option>
-            <b-form-select-option value="hermes.test">hermes.test</b-form-select-option>
-            <b-form-select-option value="gcn.circular">gcn.circular</b-form-select-option>
+            <template #first>
+              <b-form-select-option value="">-- All Topics --</b-form-select-option>
+            </template>
           </b-form-select>
         </b-form-group>
       </b-col>
@@ -198,7 +199,7 @@ export default {
   name: "ViewMessages",
   data() {
     return {
-      topic_options: ['hermes.test', 'gcn.circular'],
+      topic_options: [],
       sortBy: 'created',
       sortDesc: true,
       perPage: 10,
@@ -259,6 +260,11 @@ export default {
     };
   },
   mounted() {
+    // Get available topics
+    axios
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
+      .then((response) => (this.topic_options = response.data.read))
+      .catch((error) => console.log(error));
     // Retrieve messages and store data
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")

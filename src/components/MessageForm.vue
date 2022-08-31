@@ -13,7 +13,7 @@
           <b-col>
             <div>
               <label for="topic-input">Topic:</label>
-              <b-form-select class="topic-input" v-model="topic" :options="['hermes.test']">Topic</b-form-select>
+              <b-form-select class="topic-input" v-model="topic" :options="topicOptions">Topic</b-form-select>
             </div>
           </b-col>
         </b-row>
@@ -124,8 +124,12 @@ export default {
     }
   },
   mounted() {
+    // Get available topics
+    axios
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
+      .then((response) => (this.topicOptions = response.data.write, this.topic = response.data.write[0]))
+      .catch((error) => console.log(error));
     this.user = this.getUserName;
-    this.topic = 'hermes.test';
     this.showErrorModal = false;
   },
   props: {
@@ -139,7 +143,8 @@ export default {
     return {
       title: '',
       authors: '',
-      topic: 'hermes.test',
+      topic: '',
+      topicOptions: [],
       message: '',
       eventId: '',
       user: 'Hermes User.guest',
@@ -169,7 +174,7 @@ export default {
       // completely reset form data
       this.title = '';
       this.authors = '';
-      this.topic = 'hermes.test';
+      this.topic = this.topicOptions[0];
       this.message = '';
       this.eventId = '';
       this.fileInput = null;
