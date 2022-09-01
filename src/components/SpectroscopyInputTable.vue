@@ -50,7 +50,14 @@ export default {
     return {
 
       fields: [
-        {key: 'spectroscopyId', label: 'ID', type: 'text', editable: true, placeholder: "Target ID", class: "spectroscopy-id-column"},
+        {
+          key: 'spectroscopyId',
+          label: 'ID',
+          type: 'text',
+          editable: true,
+          placeholder: "Target ID",
+          class: "spectroscopy-id-column"
+        },
         {
           key: "dateObs",
           label: "Date-Obs",
@@ -59,9 +66,30 @@ export default {
           placeholder: "Observation Date",
           class: "observation-date-column"
         },
-        {key: 'telescope', label: 'Telescope', type: 'text', editable: true, placeholder: "Telescope", class: "telescope-column"},
-        {key: "instrument", label: "Instrument", type: 'text', editable: true, placeholder: "Instrument", class: "instrument-column"},
-        {key: "exptime", label: 'Exposure Time', type: 'text', editable: true, placeholder: "ExpTime", class: "exptime-column"},
+        {
+          key: 'telescope',
+          label: 'Telescope',
+          type: 'text',
+          editable: true,
+          placeholder: "Telescope",
+          class: "telescope-column"
+        },
+        {
+          key: "instrument",
+          label: "Instrument",
+          type: 'text',
+          editable: true,
+          placeholder: "Instrument",
+          class: "instrument-column"
+        },
+        {
+          key: "exptime",
+          label: 'Exposure Time',
+          type: 'text',
+          editable: true,
+          placeholder: "ExpTime",
+          class: "exptime-column"
+        },
         {
           key: "classification",
           label: "Classification", 

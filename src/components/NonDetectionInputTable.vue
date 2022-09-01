@@ -49,8 +49,22 @@ export default {
   data() {
     return {
       fields: [
-        {key: "ra", label: "RA", type: 'text', editable: true, placeholder: "RA", class: "ra-column"},
-        {key: "dec", label: "Dec", type: 'text', editable: true, placeholder: "Dec", class: "dec-column"},
+        {
+          key: "ra",
+          label: "RA",
+          type: 'text',
+          editable: true,
+          placeholder: "RA",
+          class: "ra-column"
+        },
+        {
+          key: "dec",
+          label: "Dec",
+          type: 'text',
+          editable: true,
+          placeholder: "Dec",
+          class: "dec-column"
+        },
         {
           key: "obsDate",
           label: "Observation Date",
@@ -59,10 +73,38 @@ export default {
           placeholder: "Observation Date",
           class: "observation-date-column"
         },
-        {key: 'telescope', label: 'Telescope', type: 'text', editable: true, placeholder: "Telescope", class: "telescope-column"},
-        {key: "instrument", label: "Instrument", type: 'text', editable: true, placeholder: "Instrument", class: "instrument-column"},
-        {key: "band", label: 'Band', type: 'text', editable: true, placeholder: "Band", class: "band-column"},
-        {key: "depth", label: "Depth", type: 'text', editable: true, placeholder: "Depth", class: "depth-column"},
+        {
+          key: 'telescope',
+          label: 'Telescope',
+          type: 'text',
+          editable: true,
+          placeholder: "Telescope",
+          class: "telescope-column"
+        },
+        {
+          key: "instrument",
+          label: "Instrument",
+          type: 'text',
+          editable: true,
+          placeholder: "Instrument",
+          class: "instrument-column"
+        },
+        {
+          key: "band",
+          label: 'Band',
+          type: 'text',
+          editable: true,
+          placeholder: "Band",
+          class: "band-column"
+        },
+        {
+          key: "depth",
+          label: "Depth",
+          type: 'text',
+          editable: true,
+          placeholder: "Depth",
+          class: "depth-column"
+        },
         {
           key: "depthUnit",
           label: "Depth Unit",

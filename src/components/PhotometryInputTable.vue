@@ -50,7 +50,14 @@ export default {
     return {
 
       fields: [
-        {key: 'photometryId', label: 'ID', type: 'text', editable: true, placeholder: "Target ID", class: "candidate-id-column"},
+        {
+          key: 'photometryId',
+          label: 'ID',
+          type: 'text',
+          editable: true,
+          placeholder: "Target ID",
+          class: "candidate-id-column"
+        },
         {
           key: "dateObs",
           label: "Date-Obs",
@@ -59,10 +66,38 @@ export default {
           placeholder: "Observation Date",
           class: "observation-date-column"
         },
-        {key: 'telescope', label: 'Telescope', type: 'text', editable: true, placeholder: "Telescope", class: "telescope-column"},
-        {key: "instrument", label: "Instrument", type: 'text', editable: true, placeholder: "Instrument", class: "instrument-column"},
-        {key: "band", label: 'Band', type: 'text', editable: true, placeholder: "Band", class: "band-column"},
-        {key: "brightness", label: "Brightness", type: 'text', editable: true, placeholder: "Brightness", class: "brightness-column"},
+        {
+          key: 'telescope',
+          label: 'Telescope',
+          type: 'text',
+          editable: true,
+          placeholder: "Telescope",
+          class: "telescope-column"
+        },
+        {
+          key: "instrument",
+          label: "Instrument",
+          type: 'text',
+          editable: true,
+          placeholder: "Instrument",
+          class: "instrument-column"
+        },
+        {
+          key: "band",
+          label: 'Band',
+          type: 'text',
+          editable: true,
+          placeholder: "Band",
+          class: "band-column"
+        },
+        {
+          key: "brightness",
+          label: "Brightness",
+          type: 'text',
+          editable: true,
+          placeholder: "Brightness",
+          class: "brightness-column"
+        },
         {
           key: "brightnessError",
           label: "Brightness Error",
