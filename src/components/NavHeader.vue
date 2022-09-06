@@ -38,20 +38,11 @@
 //import axios from "axios";
 import getEnv from "@/utils/env.js";
 import { mapGetters } from "vuex";
-import axios from "axios";
-
 export default {
   computed: {
-      ...mapGetters(["getUserName", "getCsrfToken"])
+      ...mapGetters(["getUserName"])
   },
   mounted() {
-    // get CSRF token and store it for submission
-    axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
-      .then((response) => this.$store.commit('SET_CSRF_TOKEN', response.data['token']))
-      .catch((error) => console.log(error));
-
-    // Get username
     if (this.$route.query.user){
       this.$store.commit('SET_USER_NAME', this.$route.query.user)
       this.$router.replace({'query.user':null})
@@ -66,6 +57,7 @@ export default {
     deauthenticate() {
       this.$store.commit('SET_USER_NAME', 'HERMES Guest');
       this.username = 'HERMES Guest';
+
       location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/"
     }
   },

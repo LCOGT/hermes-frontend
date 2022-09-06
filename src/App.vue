@@ -2,15 +2,18 @@
   <div id="app">
     <div id="nav"> <nav-header></nav-header></div>
     <router-view />
+    <div id="footer"> <footer-bar></footer-bar></div>
   </div>
 </template>
 
 <script lang="ts">
 import NavHeader from "@/components/NavHeader.vue"
+import FooterBar from "@/components/FooterBar.vue"
 
 export default {
   components: {
-    "nav-header": NavHeader
+    "nav-header": NavHeader,
+    "footer-bar": FooterBar
   }
 };
 </script>
@@ -32,6 +35,12 @@ export default {
   width: 100%;
 }
 #nav {
+  padding: 30px;
+  padding-top: 10px;
+  width: 100%;
+
+}
+#footer {
   padding: 30px;
   padding-top: 10px;
   width: 100%;
