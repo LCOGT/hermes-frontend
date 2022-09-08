@@ -8,7 +8,7 @@
       <!-- Delete Row -->
       <template #cell(delete)="row">
         <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-          &#128465;
+          &#128465; <!-- Little Trashcan Icon -->
         </div>
       </template>
     </b-editable-table>
@@ -47,23 +47,52 @@ export default {
   data() {
     return {
       fields: [
-        {key: 'eventId', label: 'Event ID', type: 'text', editable: true, placeholder: "Event ID",
-          class: "event-id-column"},
-        {key: "discoveryDate", label: "Discovery Date", type: 'text', editable: true, placeholder: "Discovery Date",
-          class: "discovery-date-column"},
-        {key: "instrument", label: "Instrument", type: 'text', editable: true, placeholder: "Instrument",
-          class: "instrument-column"},
-        {key: 'skymapLink', label: 'Link to Skymap', type: 'text', editable: true, placeholder: "Skymap Link",
-          class: "skymap-link-column"},
-        {key: "falseAlarmRate", label: "False Alarm Rate", type: 'text', editable: true,
-          placeholder: "False Alarm Rate", class: "false-alarm-rate-column"},
+        {
+          key: 'eventId',
+          label: 'Event ID',
+          type: 'text',
+          editable: true,
+          placeholder: "Event ID",
+          class: "event-id-column"
+        },
+        {
+          key: "discoveryDate",
+          label: "Discovery Date",
+          type: 'text',
+          editable: true,
+          placeholder: "Discovery Date",
+          class: "discovery-date-column"
+        },
+        {
+          key: "instrument",
+          label: "Instrument",
+          type: 'text',
+          editable: true,
+          placeholder: "Instrument",
+          class: "instrument-column"
+        },
+        {
+          key: 'skymapLink',
+          label: 'Link to Skymap',
+          type: 'text',
+          editable: true,
+          placeholder: "Skymap Link",
+          class: "skymap-link-column"
+        },
+        {
+          key: "falseAlarmRate",
+          label: "False Alarm Rate",
+          type: 'text',
+          editable: true,
+          placeholder: "False Alarm Rate",
+          class: "false-alarm-rate-column"
+        },
         {
           key: "delete",
           label: "",
           headerTitle: "delete",
-          class: "delete-column",
+          class: "delete-column"
         },
-
       ],
       rowUpdate: {}
     };

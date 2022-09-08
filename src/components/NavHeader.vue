@@ -22,9 +22,11 @@
            <b-nav-item-dropdown right>
           <!-- Using 'button-content' slot -->
           <template #button-content>
-            <em>User</em>
+            <em>{{username}}</em>
           </template>
-          <b-dropdown-item href="#">Login</b-dropdown-item>
+          <b-dropdown-item v-if="username === 'HERMES Guest'" @click="authenticate">Log In</b-dropdown-item>
+          <b-dropdown-item v-else @click="deauthenticate">Log Out</b-dropdown-item>
+          <b-dropdown-item v-if="username === 'HERMES Guest'" href="https://hop.scimma.org/" target="_blank" rel="noopener noreferrer">Register</b-dropdown-item>
         </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -33,11 +35,43 @@
 </template>
 
 <script>
+//import axios from "axios";
+import getEnv from "@/utils/env.js";
+import { mapGetters } from "vuex";
+import axios from "axios";
+
 export default {
+  computed: {
+      ...mapGetters(["getUserName", "getCsrfToken"])
+  },
+  mounted() {
+    // get CSRF token and store it for submission
+    axios
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
+      .then((response) => this.$store.commit('SET_CSRF_TOKEN', response.data['token']))
+      .catch((error) => console.log(error));
+
+    // Get username
+    if (this.$route.query.user){
+      this.$store.commit('SET_USER_NAME', this.$route.query.user)
+      this.$router.replace({'query.user':null})
+    }
+    this.username = this.getUserName;
+  },
   methods: {
+    authenticate() {
+      location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/"
+    },
+
+    deauthenticate() {
+      this.$store.commit('SET_USER_NAME', 'HERMES Guest');
+      this.username = 'HERMES Guest';
+      location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/"
+    }
   },
   data() {
     return {
+      username: null
     };
   }
 };

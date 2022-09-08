@@ -1,111 +1,111 @@
 <template>
   <b-container fluid class="outside-container">
-    <!-- Form Title -->
-    <h1>{{ pageTitle }}</h1>
-    <!-- Basic Info Form -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-      <b-row class=p-2>
+    <b-container fluid class="inside-container">
+      <!-- Form Title -->
+      <h1>{{ pageTitle }}</h1>
+      <!-- Basic Info Form -->
+      <b-card class="mb-2 shadow" border-variant="primary">
+        <b-row class=p-2>
+          <b-col>
+            <label for="title-input">Title:</label>
+            <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
+          </b-col>
+          <b-col>
+            <div>
+              <label for="topic-input">Topic:</label>
+              <b-form-select class="topic-input" v-model="topic" :options="topicOptions">Topic</b-form-select>
+            </div>
+          </b-col>
+        </b-row>
+        <b-row class=p-2>
+          <b-col v-if="nleId" class="eventid-col">
+            <label for="eventid-input">Event ID:</label>
+            <b-form-input class="eventid-input" v-model="eventId" placeholder="Event ID"></b-form-input>
+          </b-col>
+          <b-col class="authors-col">
+            <label for="authors-input">Authors:</label>
+            <b-form-input class="authors-input" v-model="authors" placeholder="Authors"></b-form-input>
+          </b-col>
+        </b-row>
+      </b-card>
+      <!-- Data Tables -->
+      <b-card class="mb-2 shadow" border-variant="primary">
+        <b-row>
+          <b-col class="input-table-col">
+          <slot></slot>
+            <!-- Upload Data Card -->
+            <b-card title="Upload Row Data to Main Table" class="upload-card my-2" border-variant="light">
+              <!-- Get CSV Header -->
+              <b-row>
+                <div class="mx-2">
+                  A CSV file with the proper header can be uploaded to automatically fill the above table.
+                  Click the button below to copy this header to your clipboard.
+                </div>
+              </b-row>
+              <b-row>
+                <b-button variant="outline-primary" size="sm" @click="copy()" class="m-2">
+                  <b> Copy CSV Header </b>
+                </b-button>
+                <!-- upload csv -->
+                <form id=csvForm enctype="multipart/form-data" class="my-2">
+                  <input type="file" @change="onFileChange">
+                </form>
+              </b-row>
+              <b-row>
+                <!-- Alert User of Successful Copy -->
+                <b-alert
+                  variant="success"
+                  dismissible
+                  fade
+                  :show="showCopyAlert"
+                  @dismissed="showCopyAlert=false"
+                >
+                  {{ getMainTableName.replace("_", " ").toUpperCase() }} CSV Header coppied to Clipboard.
+                </b-alert>
+              </b-row>
+            </b-card>
+          </b-col>
+          <!-- Add additional Data Elements -->
+          <b-col class="extra-input-col">
+            <label for="extra-input-table">Additional Data Elements:</label>
+            <additional-data-input-table class="extra-input-table"></additional-data-input-table>
+          </b-col>
+        </b-row>
+      </b-card>
+      <!-- Message Form -->
+      <b-card class="mb-2 shadow" border-variant="primary">
+        <b-row class="p-3">
+          <label for="message-input">Message:</label>
+            <b-tabs class="message-tabs" content-class="mt-2">
+              <b-tab title="Edit" active>
+                <b-form-textarea v-model="message" id="message-input" placeholder="Enter Message. Use '{key}' to reference values in Additional Data Table." rows="3" max-rows="6"></b-form-textarea>
+              </b-tab>
+              <b-tab title="Preview"><span style="white-space: pre;">
+                {{ formattedMessage }}
+              </span></b-tab>
+            </b-tabs>
+        </b-row>
+      </b-card>
+      <!-- Submit -->
+      <b-row>
         <b-col>
-          <label for="title-input">Title:</label>
-          <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
-        </b-col>
-        <b-col>
-          <div>
-            <label for="topic-input">Topic:</label>
-            <b-form-select class="topic-input" v-model="topic" :options="['hermes.test']">Topic</b-form-select>
+          <div class="submit-container">
+            <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
+              <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal"
+                title="Submission Error"
+                header-bg-variant="danger"
+              >
+                <template>
+                  <div>{{ errorModalText }}</div>
+                </template>
+              </b-modal>
           </div>
         </b-col>
-      </b-row>
-      <b-row class=p-2>
-        <b-col v-if="nleId" class="eventid-col">
-          <label for="eventid-input">Event ID:</label>
-          <b-form-input class="eventid-input" v-model="eventid" placeholder="Event ID"></b-form-input>
-        </b-col>
-        <b-col class="authors-col">
-          <label for="authors-input">Authors:</label>
-          <b-form-input class="authors-input" v-model="authors" placeholder="Authors"></b-form-input>
+        <b-col>
+          <b-button class="clear-button shadow mb-2" variant="outline-primary" @click="clearForm">Clear Form</b-button>
         </b-col>
       </b-row>
-    </b-card>
-    <!-- Data Tables -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-      <b-row>
-        <b-col class="input-table-col">
-        <slot></slot>
-          <!-- Upload Data Card -->
-          <b-card title="Upload Row Data to Main Table" class="upload-card my-2" border-variant="light">
-            <!-- Get CSV Header -->
-            <b-row>
-              <div class="mx-2">
-                A CSV file with the proper header can be uploaded to automatically fill the above table.
-                Click the button below to copy this header to your clipboard.
-              </div>
-            </b-row>
-            <b-row>
-              <b-button variant="outline-primary" size="sm" @click="copy()" class="m-2">
-                <b> Copy CSV Header </b>
-              </b-button>
-              <!-- upload csv -->
-              <form id=csvForm enctype="multipart/form-data" class="my-2">
-                <input type="file" @change="onFileChange">
-              </form>
-            </b-row>
-            <b-row>
-              <!-- Alert User of Successful Copy -->
-              <b-alert
-                variant="success"
-                dismissible
-                fade
-                :show="showCopyAlert"
-                @dismissed="showCopyAlert=false"
-              >
-                {{ getMainTableName.replace("_", " ").toUpperCase() }} CSV Header coppied to Clipboard.
-              </b-alert>
-            </b-row>
-          </b-card>
-        </b-col>
-        <!-- Add additional Data Elements -->
-        <b-col class="extra-input-col">
-          <label for="extra-input-table">Additional Data Elements:</label>
-          <additional-data-input-table class="extra-input-table"></additional-data-input-table>
-        </b-col>
-      </b-row>
-    </b-card>
-    <!-- Message Form -->
-    <b-card class="mb-2 shadow" border-variant="primary">
-      <b-row class="p-3">
-        <label for="message-input">Message:</label>
-
-          <b-tabs class="message-tabs" content-class="mt-2">
-            <b-tab title="Edit" active>
-              <b-form-textarea v-model="message" id="message-input" placeholder="Enter Message. Use '{key}' to reference values in Additional Data Table." rows="3" max-rows="6"></b-form-textarea>
-            </b-tab>
-            <b-tab title="Preview"><span style="white-space: pre;">
-              {{ formattedMessage }}
-            </span></b-tab>
-          </b-tabs>
-
-      </b-row>
-    </b-card>
-    <!-- Submit -->
-    <b-row>
-      <b-col>
-        <div class="submit-container">
-          <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
-            <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal" 
-              title="Submission Error"
-              header-bg-variant="danger"
-            >
-              <template>
-                <div>{{ errorModalText }}</div>
-              </template>
-            </b-modal>
-        </div>
-      </b-col>
-      <b-col>
-        <b-button class="clear-button shadow" variant="outline-primary" @click="clearForm">Clear Form</b-button>
-      </b-col>
-    </b-row>
+    </b-container>
   </b-container>
 </template>
 
@@ -118,13 +118,18 @@ import { mapGetters } from "vuex";
 export default {
   name: "MessageForm",
   computed: {
-      ...mapGetters(["getMainData", "getExtraData", "getMainTableName", "getMainTableHeader"]),
+      ...mapGetters(["getUserName", "getMainData", "getExtraData", "getMainTableName", "getMainTableHeader", "getCsrfToken"]),
       formattedMessage() {
       return this.formatMessage(this.message);
     }
   },
   mounted() {
-    this.topic = 'hermes.test';
+    // Get available topics
+    axios
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
+      .then((response) => (this.topicOptions = response.data.write, this.topic = response.data.write[0]))
+      .catch((error) => console.log(error));
+    this.user = this.getUserName;
     this.showErrorModal = false;
   },
   props: {
@@ -138,9 +143,10 @@ export default {
     return {
       title: '',
       authors: '',
-      topic: 'hermes.test',
+      topic: '',
+      topicOptions: [],
       message: '',
-      eventid: '',
+      eventId: '',
       user: 'Hermes User.guest',
       fileInput: null,
       showErrorModal: false,
@@ -163,14 +169,14 @@ export default {
       this.$store.commit("SET_MAIN_DATA", loaded_array);
     }
   },
-   methods: {
+  methods: {
     clearForm() {
       // completely reset form data
       this.title = '';
       this.authors = '';
-      this.topic = 'hermes.test';
+      this.topic = this.topicOptions[0];
       this.message = '';
-      this.eventid = '';
+      this.eventId = '';
       this.fileInput = null;
       this.$store.commit("SET_MAIN_DATA", []);
       this.$store.commit("SET_EXTRA_DATA", []);
@@ -190,11 +196,34 @@ export default {
       let formatted_string = value;
       // This nasty regex makes a list of elements that are in curly brackets
       const keys_to_format = value.match(/[^{}]+(?=})/g);
+      // Store comparison lists for keys
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
+      const mainDataList = this.getMainTableHeader.split(',');
+      const generalDataKeys = ['title', 'authors', 'topic', 'user', 'eventId'];
+      // Loop through potential keys to search for matches
       for (let i in keys_to_format) {
-        if (keys_to_format[i] in additionalDataObj) {
-          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keys_to_format[i]])
+        // Check for row references and convert to Camel Case
+        var keyChain = keys_to_format[i].split(".")
+        const camelCaseKey = keyChain[0].toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
+        if (keyChain[0] in additionalDataObj) {
+          // Check Additional Data
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), additionalDataObj[keyChain[0]]);
+        } else if (generalDataKeys.includes(camelCaseKey)) {
+          // Check General Header
+          formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this[camelCaseKey]);
+        } else if (mainDataList.includes(camelCaseKey) && keyChain[1]) {
+          if (keyChain[1] < this.getMainData.length) {
+            // Check Main Data Table for column.row
+            formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][camelCaseKey]);
+          }
+        } else if (camelCaseKey.toLowerCase().includes("id") && keyChain[1] && keyChain[1] < this.getMainData.length){
+          // Perform necessary gymnastics to account for our use of specific "ID" for each table
+          for (let mainDataKey of mainDataList){
+            if (mainDataKey.toLowerCase().includes("id")) {
+              formatted_string = formatted_string.replace(RegExp('{' + keys_to_format[i] + '}', 'g'), this.getMainData[keyChain[1]][mainDataKey]);
+            }
+          }
         }
       }
       return formatted_string;
@@ -259,13 +288,6 @@ export default {
       catch {
         return
       }
-      // get Main Data column order
-      let mainDataOrder = [];
-      if (mainData[0]) {
-        for (const [key, ] of Object.entries(mainData[0])) {
-          mainDataOrder.push(key);
-        }
-      }
       // Build Basic Payload to match backend Model Structure
       let payload = {
         "topic": this.topic,
@@ -280,9 +302,6 @@ export default {
       } else {
         payload.data['main_data'] = mainData;
       }
-      if (mainDataOrder) {
-        payload.data.mainDataOrder = mainDataOrder;
-      }
       if (this.eventid) {
         payload.data.eventid = this.eventid;
       }
@@ -290,16 +309,19 @@ export default {
         payload.data.authors = this.authors;
       }
       // Post message via axios
-      console.log(JSON.stringify(payload));
+      console.log('submitToHop payload: ' + JSON.stringify(payload));
       axios({
         method: 'post',
-        headers: {'Content-Type': 'application/json'},
+        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
+        headers: {'Content-Type': 'application/json',
+                  'X-CSRFToken': this.getCsrfToken
+                  },
         url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
         data: JSON.stringify(payload)
       })
       .then(function (response) {
         // log response, redirect to homepage
-        console.log(JSON.stringify(response.data));
+        console.log('submitToHop response.data: ' + JSON.stringify(response.data));
         location.href = '/.html';
       })
       .catch(error => {
@@ -365,7 +387,13 @@ export default {
 
 <style scoped>
 .outside-container {
-  width: 75%;
+  overflow-x: auto;
+  margin: auto;
+}
+
+.inside-container {
+  max-width: 75%;
+  min-width: min-content;
   margin: auto;
 }
 

@@ -9,7 +9,7 @@
       <!-- Delete Row -->
       <template #cell(delete)="row">
         <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-          &#128465;
+          &#128465; <!-- Little Trashcan Icon -->
         </div>
       </template>
     </b-editable-table>
@@ -45,10 +45,30 @@ export default {
   },
   data() {
     return {
-      fields: [{key: "key", label: "Key", type: 'text', editable: true, placeholder: "Key", class: "key-column"},
-        {key: "value", label: "Value", type: 'text', editable: true, placeholder: "Value", class: "value-column"},
-        {key: "delete",label: "", headerTitle: "delete", class: "delete-column",}
-        ],
+      fields: [
+        {
+          key: "key",
+          label: "Key",
+          type: 'text',
+          editable: true,
+          placeholder: "Key",
+          class: "key-column"
+        },
+        {
+          key: "value",
+          label: "Value",
+          type: 'text',
+          editable: true,
+          placeholder: "Value",
+          class: "value-column"
+        },
+        {
+          key: "delete",
+          label: "",
+          headerTitle: "delete",
+          class: "delete-column",
+        }
+      ],
       rowUpdate: {},
     };
   },

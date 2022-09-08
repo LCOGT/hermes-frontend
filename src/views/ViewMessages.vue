@@ -20,10 +20,11 @@
           <b-form-select
             id="topic_selector"
             v-model="filter"
+            :options="topic_options"
           >
-            <b-form-select-option value="">-- All Topics --</b-form-select-option>
-            <b-form-select-option value="hermes.test">hermes.test</b-form-select-option>
-            <b-form-select-option value="gcn.circular">gcn.circular</b-form-select-option>
+            <template #first>
+              <b-form-select-option value="">-- All Topics --</b-form-select-option>
+            </template>
           </b-form-select>
         </b-form-group>
       </b-col>
@@ -66,10 +67,10 @@
       <!-- Selection Behavior -->
       <template #cell(selected)="row">
         <template v-if="row.rowSelected">
-          <span aria-hidden="true">&#8667;</span>
+          <span aria-hidden="true">&#8667;<!-- Tripple rightarrow --></span>
         </template>
         <template v-else>
-          <span aria-hidden="true">&#10624;</span>
+          <span aria-hidden="true">&#10624;<!-- Three Bars --></span>
         </template>
       </template>
 
@@ -135,9 +136,9 @@
         <hr>
         <!-- Show JSON Button -->
         <b-row class="mb-2 mx-2 pb-3">
-            <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
-              <b> Show JSON: </b>
-            </b-button>
+          <b-button variant="outline-primary" size="sm" @click="info(selectedItem, $event.target)" class="mr-1">
+            <b> Show JSON: </b>
+          </b-button>
         </b-row>
       </div>
       <!-- Initial Message Box Display -->
@@ -149,22 +150,56 @@
   </b-row>
 
     <!-- JSON DATA -->
-    <b-modal :id="jsonData.id" :title="jsonData.title" ok-only @hide="resetjsonData">
-      <pre>{{ jsonData.content }}</pre>
+    <b-modal :id="jsonData.id" :title="jsonData.title" @hidden="resetjsonData">
+      <b-row>
+        <pre>{{ jsonData.content }}</pre>
+      </b-row>
+      <b-row>
+        <!-- Alert User of Successful Copy -->
+        <b-alert
+          variant="success"
+          dismissible
+          fade
+          :show="showCopyAlert"
+          @dismissed="showCopyAlert=false"
+        >
+          JSON coppied to Clipboard.
+        </b-alert>
+      </b-row>
+      <template #modal-footer="{ hide }">
+        <div class="w-100">
+          <b-button
+            variant="outline-primary"
+            size="sm"
+            class="float-left"
+            @click="copy"
+          >
+            Copy
+          </b-button>
+          <b-button
+            variant="primary"
+            size="sm"
+            class="float-right"
+            @click="hide()"
+          >
+            Done
+          </b-button>
+        </div>
+      </template>
     </b-modal>
 
   </div>
 </template>
 
 <script>
-import getEnv from "@/utils/env.js"
+import getEnv from "@/utils/env.js";
 import axios from "axios";
 
 export default {
   name: "ViewMessages",
   data() {
     return {
-      topic_options: ['hermes.test', 'gcn.circular'],
+      topic_options: [],
       sortBy: 'created',
       sortDesc: true,
       perPage: 10,
@@ -211,10 +246,25 @@ export default {
           title: '',
           content: ''
       },
+      showCopyAlert: false,
       KVdataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
+      preSetTableOrder: {
+        nle_data: "eventId,discoveryDate,instrument,skymapLink,falseAlarmRate",
+        candidate_data: "candidateId,ra,dec,discoveryDate,telescope,instrument,band,brightness,brightnessError,brightnessUnit",
+        non_detection_data: "ra,dec,obsDate,telescope,instrument,band,depth,depthUnit",
+        pointing_data: "ra,dec,obsStatus,obsDate,telescope,instrument,band,depth,depthUnit",
+        photometry_data: "photometryId,dateObs,telescope,instrument,band,brightness,brightnessError,brightnessUnit",
+        spectroscopy_data: "spectroscopyId,dateObs,telescope,instrument,exptime,classification,spectrumURL",
+        telescope_events: "observatory,telescope,instrument,eventDate,description"
+      }
     };
   },
   mounted() {
+    // Get available topics
+    axios
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
+      .then((response) => (this.topic_options = response.data.read))
+      .catch((error) => console.log(error));
     // Retrieve messages and store data
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
@@ -228,14 +278,25 @@ export default {
     },
     info(item, button) {
       // Get full message info as JSON String
-      this.jsonData.content = JSON.stringify(item, null, 2)
+      this.jsonData.content = JSON.stringify(item, null, 2);
+      this.jsonData.title = "JSON for " + item.topic + " message.";
       // raise modal
-      this.$root.$emit('bv::show::modal', this.jsonData.id, button)
+      this.$root.$emit('bv::show::modal', this.jsonData.id, button);
+    },
+    copy() {
+      // Copy JSON data and trigger alert
+      if (this.jsonData.content){
+        // Copy JSON to Clipboard. Only works with HTTPS or local
+        navigator.clipboard.writeText(this.jsonData.content);
+        // Trigger alert to show sucessful copy
+        this.showCopyAlert = true;
+      }
     },
     resetjsonData() {
-      // clear JSON data when window closed
-      this.jsonData.title = ''
-      this.jsonData.content = ''
+      // clear JSON data and remove copy alert when window closed
+      this.jsonData.title = '';
+      this.jsonData.content = '';
+      this.showCopyAlert=false;
     },
     onFiltered(filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering
@@ -288,10 +349,14 @@ export default {
       // Create the fields for the Main Data Table
       var fieldList = [];
       var column_list = []
-      // Use ordered list if provided, otherwise get list from 1st row
-      if (item.data.mainDataOrder){
+      if (this.getDataTitle(item) in this.preSetTableOrder) {
+        // If Hermes Table, pull Preset Order
+        column_list = this.preSetTableOrder[this.getDataTitle(item)].split(',');
+      } else if (item.data.mainDataOrder){
+        // Otherwise use provided Ordered List
         column_list = item.data.mainDataOrder
       } else {
+        // Otherwise just use first row of Table Data
         column_list = Object.keys(item.data[this.getDataTitle(item)][0])
       }
       for (const data_key of column_list) {

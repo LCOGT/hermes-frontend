@@ -8,7 +8,7 @@
         <!-- Delete Row -->
         <template #cell(delete)="row">
           <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-            &#128465;
+            &#128465; <!-- Little Trashcan Icon -->
           </div>
         </template>
       </b-editable-table>
@@ -40,8 +40,9 @@ export default {
         return this.getMainData
       },
       set(value) {
-        this.$store.commit("SET_MAIN_DATA", value)
-        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry_data")
+        this.$store.commit("SET_MAIN_DATA", value);
+        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry_data");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "photometryId,dateObs,telescope,instrument,band,brightness,brightnessError,brightnessUnit");
       },
     },
   },
@@ -49,7 +50,14 @@ export default {
     return {
 
       fields: [
-        {key: 'photometryId', label: 'ID', type: 'text', editable: true, placeholder: "Target ID", class: "candidate-id-column"},
+        {
+          key: 'photometryId',
+          label: 'ID',
+          type: 'text',
+          editable: true,
+          placeholder: "Target ID",
+          class: "candidate-id-column"
+        },
         {
           key: "dateObs",
           label: "Date-Obs",
@@ -58,10 +66,38 @@ export default {
           placeholder: "Observation Date",
           class: "observation-date-column"
         },
-        {key: 'telescope', label: 'Telescope', type: 'text', editable: true, placeholder: "Telescope", class: "telescope-column"},
-        {key: "instrument", label: "Instrument", type: 'text', editable: true, placeholder: "Instrument", class: "instrument-column"},
-        {key: "band", label: 'Band', type: 'text', editable: true, placeholder: "Band", class: "band-column"},
-        {key: "brightness", label: "Brightness", type: 'text', editable: true, placeholder: "Brightness", class: "brightness-column"},
+        {
+          key: 'telescope',
+          label: 'Telescope',
+          type: 'text',
+          editable: true,
+          placeholder: "Telescope",
+          class: "telescope-column"
+        },
+        {
+          key: "instrument",
+          label: "Instrument",
+          type: 'text',
+          editable: true,
+          placeholder: "Instrument",
+          class: "instrument-column"
+        },
+        {
+          key: "band",
+          label: 'Band',
+          type: 'text',
+          editable: true,
+          placeholder: "Band",
+          class: "band-column"
+        },
+        {
+          key: "brightness",
+          label: "Brightness",
+          type: 'text',
+          editable: true,
+          placeholder: "Brightness",
+          class: "brightness-column"
+        },
         {
           key: "brightnessError",
           label: "Brightness Error",

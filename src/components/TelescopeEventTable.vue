@@ -8,7 +8,7 @@
       <!-- Delete Row -->
       <template #cell(delete)="row">
         <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-          &#128465;
+          &#128465; <!-- Little Trashcan Icon -->
         </div>
       </template>
     </b-editable-table>
@@ -47,16 +47,46 @@ export default {
   data() {
     return {
       fields: [
-        {key: 'observatory', label: 'Observatory', type: 'text', editable: true, placeholder: "Observatory",
-          class: "observatory-column"},
-        {key: "telescope", label: "Telescope", type: 'text', editable: true, placeholder: "Telescope",
-          class: "telescope-column"},
-        {key: "instrument", label: "Instrument", type: 'text', editable: true, placeholder: "Instrument",
-          class: "instrument-column"},
-        {key: 'eventDate', label: 'Date of Event', type: 'text', editable: true, placeholder: "Event Date",
-          class: "event-date-column"},
-        {key: "description", label: "Description of Event", type: 'text', editable: true,
-          placeholder: "Event Description", class: "event-description-column"},
+        {
+          key: 'observatory',
+          label: 'Observatory',
+          type: 'text',
+          editable: true,
+          placeholder: "Observatory",
+          class: "observatory-column"
+        },
+        {
+          key: "telescope",
+          label: "Telescope",
+          type: 'text',
+          editable: true,
+          placeholder: "Telescope",
+          class: "telescope-column"
+        },
+        {
+          key: "instrument",
+          label: "Instrument",
+          type: 'text',
+          editable: true,
+          placeholder: "Instrument",
+          class: "instrument-column"
+        },
+        {
+          key: 'eventDate',
+          label: 'Date of Event',
+          type: 'text',
+          editable: true,
+          placeholder: "Event Date",
+          class: "event-date-column"
+        },
+        {
+          key: "description",
+          label: "Description of Event",
+          type: 'text',
+          editable: true,
+          placeholder: "Event Description",
+          class: "event-description-column"
+        },
         {
           key: "delete",
           label: "",
