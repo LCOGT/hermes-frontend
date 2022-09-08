@@ -43,6 +43,13 @@ export default {
       ...mapGetters(["getUserName"])
   },
   mounted() {
+    // get CSRF token and store it for submission
+    axios
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
+      .then((response) => this.$store.commit('SET_CSRF_TOKEN', response.data['token']))
+      .catch((error) => console.log(error));
+
+    // Get username
     if (this.$route.query.user){
       this.$store.commit('SET_USER_NAME', this.$route.query.user)
       this.$router.replace({'query.user':null})
