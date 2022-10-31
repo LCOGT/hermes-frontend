@@ -26,7 +26,7 @@
           </template>
           <b-dropdown-item v-if="username === 'HERMES Guest'" @click="authenticate">Log In</b-dropdown-item>
           <b-dropdown-item v-else @click="deauthenticate">Log Out</b-dropdown-item>
-          <b-dropdown-item v-if="username === 'HERMES Guest'" href="https://hop.scimma.org/" target="_blank" rel="noopener noreferrer">Register</b-dropdown-item>
+          <b-dropdown-item v-if="username === 'HERMES Guest'" @click="authenticate">Register</b-dropdown-item>
         </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
