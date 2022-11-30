@@ -202,7 +202,7 @@ export default {
       topic_options: [],
       sortBy: 'published',
       sortDesc: true,
-      perPage: 10,
+      perPage: 50,
       currentPage: 1,
       totalRows: 1,
       filter: "",
@@ -268,7 +268,10 @@ export default {
     // Retrieve messages and store data
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json/?page=1")
-      .then((response) => (this.items = response.data, this.totalRows = response.data.length))
+      .then((response) => (
+        this.items = response.data.results,
+        this.totalRows = response.data.count
+        ))
       .catch((error) => console.log(error));
   },
   methods: {
