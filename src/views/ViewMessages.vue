@@ -267,7 +267,7 @@ export default {
       .catch((error) => console.log(error));
     // Retrieve messages and store data
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json")
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json/?page=1")
       .then((response) => (this.items = response.data, this.totalRows = response.data.length))
       .catch((error) => console.log(error));
   },
