@@ -200,9 +200,9 @@ export default {
   data() {
     return {
       topic_options: [],
-      sortBy: 'published',
+      sortBy: 'created',
       sortDesc: true,
-      perPage: 50,
+      perPage: 10,
       currentPage: 1,
       totalRows: 1,
       filter: "",
@@ -270,7 +270,7 @@ export default {
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json/?page=1")
       .then((response) => (
         this.items = response.data.results,
-        this.totalRows = response.data.count
+        this.totalRows = response.data.results.length
         ))
       .catch((error) => console.log(error));
   },
