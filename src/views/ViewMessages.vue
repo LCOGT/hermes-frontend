@@ -200,7 +200,7 @@ export default {
   data() {
     return {
       topic_options: [],
-      sortBy: 'created',
+      sortBy: 'published',
       sortDesc: true,
       perPage: 10,
       currentPage: 1,
