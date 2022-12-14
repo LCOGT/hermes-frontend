@@ -1,5 +1,5 @@
 <template>
-  <message-form page-title="Spectroscopy Reporting Form">
+  <message-form page-title="Spectroscopy Reporting Form" submission-endpoint="submit_message">
     <spectroscopy-input-table></spectroscopy-input-table>
   </message-form>
 </template>

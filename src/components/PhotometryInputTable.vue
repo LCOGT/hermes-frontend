@@ -29,8 +29,8 @@ export default {
   },
   mounted() {
     this.items = [{
-        photometryId: null, dateObs: null, telescope: null, instrument: null,
-        band: null, brightness: null, brightnessError: null, brightnessUnit: "AB mag"
+        target_name: null, ra: null, dec: null, date: null, telescope: null, instrument: null,
+        band: null, brightness: null, brightness_error: null, brightness_unit: "AB mag"
       }];
   },
   computed: {
@@ -41,8 +41,8 @@ export default {
       },
       set(value) {
         this.$store.commit("SET_MAIN_DATA", value);
-        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry_data");
-        this.$store.commit("SET_MAIN_TABLE_HEADER", "photometryId,dateObs,telescope,instrument,band,brightness,brightnessError,brightnessUnit");
+        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "target_name,ra,dec,date,telescope,instrument,band,brightness,brightness_error,brightness_unit");
       },
     },
   },
@@ -51,15 +51,15 @@ export default {
 
       fields: [
         {
-          key: 'photometryId',
-          label: 'ID',
+          key: 'target_name',
+          label: 'Target Name',
           type: 'text',
           editable: true,
-          placeholder: "Target ID",
-          class: "candidate-id-column"
+          placeholder: "Target Name",
+          class: "target-name-column"
         },
         {
-          key: "dateObs",
+          key: "date",
           label: "Date-Obs",
           type: 'text',
           editable: true,
@@ -99,7 +99,7 @@ export default {
           class: "brightness-column"
         },
         {
-          key: "brightnessError",
+          key: "brightness_error",
           label: "Brightness Error",
           type: 'text',
           editable: true,
@@ -107,7 +107,7 @@ export default {
           class: "brightness-error-column"
         },
         {
-          key: "brightnessUnit",
+          key: "brightness_unit",
           label: "Brightness Unit",
           type: "select",
           editable: true,
@@ -138,14 +138,16 @@ export default {
         action: "add",
         data: {
           id: newId,
-          photometryId: null,
-          dateObs: null,
+          target_name: null,
+          ra: null,
+          dec: null,
+          date: null,
           telescope: null,
           instrument: null,
           band: null,
           brightness: null,
-          brightnessError: null,
-          brightnessUnit: "AB mag",
+          brightness_error: null,
+          brightness_unit: "AB mag",
           isActive: false,
         },
       };

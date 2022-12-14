@@ -1,5 +1,5 @@
 <template>
-  <message-form page-title="Candidate Submission Form">
+  <message-form page-title="Candidate Submission Form" submission-endpoint="submit_candidates">
     <candidates-input-table></candidates-input-table>
   </message-form>
 </template>

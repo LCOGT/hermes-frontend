@@ -1,5 +1,5 @@
 <template>
-  <message-form page-title="Search Pointing Submission Form">
+  <message-form page-title="Search Pointing Submission Form" submission-endpoint="submit_message">
     <search-pointing-input-table></search-pointing-input-table>
   </message-form>
 </template>

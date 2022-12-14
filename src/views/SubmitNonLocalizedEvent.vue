@@ -1,5 +1,5 @@
 <template>
-  <message-form :nle-id=false page-title="Submit Non-localized Event">
+  <message-form :nle-id=false page-title="Submit Non-localized Event" submission-endpoint="submit_message">
     <non-localized-event-table></non-localized-event-table>
   </message-form>
 </template>

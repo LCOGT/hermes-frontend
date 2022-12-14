@@ -29,8 +29,8 @@ export default {
   },
   mounted() {
     this.items = [{
-      candidateId: null, ra: null, dec: null, discoveryDate: null, telescope: null, instrument: null,
-      band: null, brightness: null, brightnessError: null, brightnessUnit: "AB mag"
+      target_name: null, ra: null, dec: null, date: null, telescope: null, instrument: null,
+      band: null, brightness: null, brightness_error: null, brightness_unit: "AB mag"
     }];
   },
   computed: {
@@ -41,8 +41,8 @@ export default {
       },
       set(value) {
         this.$store.commit("SET_MAIN_DATA", value);
-        this.$store.commit("SET_MAIN_TABLE_NAME", "candidate_data");
-        this.$store.commit("SET_MAIN_TABLE_HEADER", "candidateId,ra,dec,discoveryDate,telescope,instrument,band,brightness,brightnessError,brightnessUnit");
+        this.$store.commit("SET_MAIN_TABLE_NAME", "candidates");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "target_name,ra,dec,date,telescope,instrument,band,brightness,brightness_error,brightness_unit");
 
       },
     }
@@ -51,12 +51,12 @@ export default {
     return {
       fields: [
         {
-          key: 'candidateId',
-          label: 'ID',
-          type: 'text', 
+          key: 'target_name',
+          label: 'Target Name',
+          type: 'text',
           editable: true, 
-          placeholder: "Candidate ID", 
-          class: "candidate-id-column"
+          placeholder: "Target ID", 
+          class: "target-name-column"
         },
         {
           key: "ra",
@@ -75,7 +75,7 @@ export default {
           class: "dec-column"
         },
         {
-          key: "discoveryDate",
+          key: "date",
           label: "Discovery Date",
           type: 'text',
           editable: true,
@@ -115,7 +115,7 @@ export default {
           class: "brightness-column"
         },
         {
-          key: "brightnessError",
+          key: "brightness_error",
           label: "Brightness Error",
           type: 'text',
           editable: true,
@@ -123,7 +123,7 @@ export default {
           class: "brightness-error-column"
         },
         {
-          key: "brightnessUnit",
+          key: "brightness_unit",
           label: "Brightness Unit",
           type: "select",
           editable: true,
@@ -154,16 +154,16 @@ export default {
         action: "add",
         data: {
           id: newId,
-          candidateId: null,
+          target_name: null,
           ra: null,
           dec: null,
-          discoveryDate: null,
+          date: null,
           telescope: null,
           instrument: null,
           band: null,
           brightness: null,
-          brightnessError: null,
-          brightnessUnit: "AB mag",
+          brightness_error: null,
+          brightness_unit: "AB mag",
           isActive: false,
         },
       };

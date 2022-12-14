@@ -1,5 +1,5 @@
 <template>
-  <message-form page-title="Photometry Reporting Form">
+  <message-form page-title="Photometry Reporting Form" submission-endpoint="submit_photometry">
     <photometry-input-table></photometry-input-table>
   </message-form>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <message-form page-title="Non-Detection Submission Form">
+  <message-form page-title="Non-Detection Submission Form" submission-endpoint="submit_message">
     <non-detection-input-table></non-detection-input-table>
   </message-form>
 </template>

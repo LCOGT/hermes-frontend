@@ -1,5 +1,5 @@
 <template>
-  <message-form :nle-id=false page-title="Observatory Status Events">
+  <message-form :nle-id=false page-title="Observatory Status Events" submission-endpoint="submit_message">
     <telescope-event-table></telescope-event-table>
   </message-form>
 </template>

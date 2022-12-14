@@ -92,7 +92,7 @@
           <div class="submit-container">
             <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
               <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal"
-                title="Submission Error"
+                :title="errorModalTitle"
                 header-bg-variant="danger"
               >
                 <template>
@@ -138,6 +138,7 @@ export default {
       type: Boolean,
       default: true
     },
+    "submissionEndpoint": String,
   },
   data() {
     return {
@@ -150,6 +151,7 @@ export default {
       user: 'Hermes User.guest',
       fileInput: null,
       showErrorModal: false,
+      errorModalTitle: 'Submission Error',
       errorModalText: '',
       csvHeader: {
           id: 'csv-header',
@@ -200,7 +202,7 @@ export default {
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       const mainDataList = this.getMainTableHeader.split(',');
-      const generalDataKeys = ['title', 'authors', 'topic', 'user', 'eventId'];
+      const generalDataKeys = ['title', 'authors', 'topic', 'user', 'event_id'];
       // Loop through potential keys to search for matches
       for (let i in keys_to_format) {
         // Check for row references and convert to Camel Case
@@ -231,6 +233,7 @@ export default {
     closeErrorModal() {
       // Clear error text when closed
       this.errorModalText = '';
+      this.errorModalTitle = 'Submission Error';
       this.showErrorModal = false;
     },
     sexagesimalToDeg(ra) {
@@ -254,16 +257,18 @@ export default {
             try {
               this_ra = parseFloat(row.ra)
               if (isNaN(this_ra)) {
-                throw Error("RA did not parse to a number.")
+                throw Error("RA did not parse to a number.");
               }
             }
             catch {
+              this.errorModalTitle = 'Invalid RA';
               this.errorModalText = row.ra + ' is not a valid RA.';
               this.showErrorModal = true;
               throw Error("Invalid RA")
             }
           }
           if (this_ra < 0.0 || this_ra >= 360.0) {
+            this.errorModalTitle = 'Invalid RA';
             this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
             this.showErrorModal = true;
             throw Error("Invalid RA");
@@ -292,21 +297,24 @@ export default {
       let payload = {
         "topic": this.topic,
         "title": this.title,
-        "author": this.user,
-        "data": additionalDataObj,
+        "submitter": this.user,
+        "data": {},
         "message_text": this.formattedMessage
       };
       // Apply common elements to JSON field "data"
-      if (this.getMainTableName) {
+      if (additionalDataObj) {
+        payload.data['extra_data'] = additionalDataObj;
+      }
+      if (mainData) {
         payload.data[this.getMainTableName] = mainData;
       } else {
         payload.data['main_data'] = mainData;
       }
-      if (this.eventid) {
-        payload.data.eventid = this.eventid;
+      if (this.eventId) {
+        payload.data['event_id'] = this.eventId;
       }
       if (this.authors) {
-        payload.data.authors = this.authors;
+        payload['authors'] = this.authors;
       }
       // Post message via axios
       console.log('submitToHop payload: ' + JSON.stringify(payload));
@@ -316,7 +324,7 @@ export default {
         headers: {'Content-Type': 'application/json',
                   'X-CSRFToken': this.getCsrfToken
                   },
-        url: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "submit/",
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
         data: JSON.stringify(payload)
       })
       .then(function (response) {
@@ -327,8 +335,9 @@ export default {
       .catch(error => {
         // If error, show modal
         console.log(error);
+        this.errorModalTitle = 'Submission Error: ' + error.response.status.toString();
+        this.errorModalText = JSON.stringify(error.response.data);
         this.showErrorModal = true;
-        this.errorModalText = error.message;
       });
     },
     onFileChange(event) {
