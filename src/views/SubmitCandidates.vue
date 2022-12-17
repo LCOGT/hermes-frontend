@@ -1,6 +1,8 @@
 <template>
   <message-form page-title="Candidate Submission Form" submission-endpoint="submit_candidates">
-    <candidates-input-table></candidates-input-table>
+    <template v-slot:dataTable="{ errors, onUpdate }">
+      <candidates-input-table :updateCallback="onUpdate" :fieldErrors="errors"></candidates-input-table>
+    </template>
   </message-form>
 </template>
 

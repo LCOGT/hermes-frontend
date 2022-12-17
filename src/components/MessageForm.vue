@@ -8,23 +8,27 @@
         <b-row class=p-2>
           <b-col>
             <label for="title-input">Title:</label>
-            <b-form-input class="title-input" v-model="title" placeholder="Title"></b-form-input>
+            <b-form-input class="title-input" v-model="title" placeholder="Title" :state="getValidationState('title')" @input="validate"></b-form-input>
+            <b-form-invalid-feedback id="title-input-feedback">{{ getValidationError('title') }}</b-form-invalid-feedback>
           </b-col>
           <b-col>
             <div>
               <label for="topic-input">Topic:</label>
-              <b-form-select class="topic-input" v-model="topic" :options="topicOptions">Topic</b-form-select>
+              <b-form-select class="topic-input" v-model="topic" :options="topicOptions" :state="getValidationState('topic')" @input="validate">Topic</b-form-select>
+              <b-form-invalid-feedback id="topic-input-feedback">{{ getValidationError('topic') }}</b-form-invalid-feedback>
             </div>
           </b-col>
         </b-row>
         <b-row class=p-2>
           <b-col v-if="nleId" class="eventid-col">
             <label for="eventid-input">Event ID:</label>
-            <b-form-input class="eventid-input" v-model="eventId" placeholder="Event ID"></b-form-input>
+            <b-form-input class="eventid-input" v-model="eventId" placeholder="Event ID" :state="getValidationState('data.event_id')" @input="validate"></b-form-input>
+            <b-form-invalid-feedback id="eventid-input-feedback">{{ getValidationError('data.event_id') }}</b-form-invalid-feedback>
           </b-col>
           <b-col class="authors-col">
             <label for="authors-input">Authors:</label>
-            <b-form-input class="authors-input" v-model="authors" placeholder="Authors"></b-form-input>
+            <b-form-input class="authors-input" v-model="authors" placeholder="Authors" :state="getValidationState('authors')" @input="validate"></b-form-input>
+            <b-form-invalid-feedback id="authors-input-feedback">{{ getValidationError('authors') }}</b-form-invalid-feedback>
           </b-col>
         </b-row>
       </b-card>
@@ -32,7 +36,7 @@
       <b-card class="mb-2 shadow" border-variant="primary">
         <b-row>
           <b-col class="input-table-col">
-          <slot></slot>
+          <slot name="dataTable" :errors="childTableValidationErrors" :onUpdate="validate"></slot>
             <!-- Upload Data Card -->
             <b-card title="Upload Row Data to Main Table" class="upload-card my-2" border-variant="light">
               <!-- Get CSV Header -->
@@ -78,7 +82,8 @@
           <label for="message-input">Message:</label>
             <b-tabs class="message-tabs" content-class="mt-2">
               <b-tab title="Edit" active>
-                <b-form-textarea v-model="message" id="message-input" placeholder="Enter Message. Use '{key}' to reference values in Additional Data Table." rows="3" max-rows="6"></b-form-textarea>
+                <b-form-textarea v-model="message" id="message-input" placeholder="Enter Message. Use '{key}' to reference values in Additional Data Table." rows="3" max-rows="6" :state="getValidationState('message_text')" @input="validate"></b-form-textarea>
+                <b-form-invalid-feedback id="message-input-feedback">{{ getValidationError('message_text') }}</b-form-invalid-feedback>
               </b-tab>
               <b-tab title="Preview"><span style="white-space: pre;">
                 {{ formattedMessage }}
@@ -90,15 +95,7 @@
       <b-row>
         <b-col>
           <div class="submit-container">
-            <b-button class="submit-button shadow" variant="success" @click="submitToHop">Submit</b-button>
-              <b-modal ok-only v-model="showErrorModal" @close="closeErrorModal"
-                :title="errorModalTitle"
-                header-bg-variant="danger"
-              >
-                <template>
-                  <div>{{ errorModalText }}</div>
-                </template>
-              </b-modal>
+            <b-button class="submit-button shadow" variant="success" @click="submitToHop" :disabled="!readyToSubmit">Submit</b-button>
           </div>
         </b-col>
         <b-col>
@@ -110,10 +107,13 @@
 </template>
 
 <script>
-import AdditionalDataTable from "@/components/AdditionalDataTable";
 import axios from "axios";
-import getEnv from "@/utils/env.js";
+import _ from 'lodash';
+import $ from 'jquery';
 import { mapGetters } from "vuex";
+import getEnv from "@/utils/env.js";
+import AdditionalDataTable from "@/components/AdditionalDataTable";
+import { mostRecentRequestManager} from '@/utils/utils';
 
 export default {
   name: "MessageForm",
@@ -130,7 +130,6 @@ export default {
       .then((response) => (this.topicOptions = response.data.write, this.topic = response.data.write[0]))
       .catch((error) => console.log(error));
     this.user = this.getUserName;
-    this.showErrorModal = false;
   },
   props: {
     "pageTitle": String,
@@ -150,16 +149,17 @@ export default {
       eventId: '',
       user: 'Hermes User.guest',
       fileInput: null,
-      showErrorModal: false,
-      errorModalTitle: 'Submission Error',
-      errorModalText: '',
       csvHeader: {
           id: 'csv-header',
           title: '',
           content: ''
       },
-       showCopyAlert: false
-      }
+      showCopyAlert: false,
+      validateRequestManager: new mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess),
+      validationErrors: {},
+      childTableValidationErrors: [],
+      readyToSubmit: false
+    }
   },
   components: {
     "additional-data-input-table": AdditionalDataTable,
@@ -229,12 +229,51 @@ export default {
         }
       }
       return formatted_string;
-      },
-    closeErrorModal() {
-      // Clear error text when closed
-      this.errorModalText = '';
-      this.errorModalTitle = 'Submission Error';
-      this.showErrorModal = false;
+    },
+    validate: _.debounce(function() {
+      this.validateRequestManager.send();
+    }, 200),
+    getValidationRequest: function() {
+      return $.ajax({
+        type: 'POST',
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
+        data: JSON.stringify(this.getSubmissionPayload()),
+        contentType: 'application/json'
+      });
+    },
+    onValidationSuccess: function(data) {
+      this.validationErrors = data;
+      if (!_.isEmpty(this.validationErrors)) {
+        this.readyToSubmit = false;
+        if ('data' in this.validationErrors) {
+          this.childTableValidationErrors = this.validationErrors.data[this.getMainTableName] || [];
+        }
+      }
+      else{
+        this.validationErrors = {};
+        this.childTableValidationErrors = [];
+        this.readyToSubmit = true;
+      }
+    },
+    getValidationState: function(key) {
+      let validationError = this.getValidationError(key);
+      if (validationError) {
+        return false;
+      }
+      return null;
+    },
+    getValidationError: function(key) {
+      let splitKey = key.split('.');
+      let errors = this.validationErrors;
+      let pKey = key;
+      if (splitKey.length == 2){
+        errors = errors.data
+        pKey = splitKey[1];
+      }
+      if (errors && pKey in errors) {
+        return errors[pKey].join(', ');
+      }
+      return '';
     },
     sexagesimalToDeg(ra) {
       // Convert ra to degrees if in HH:MM:SS.s
@@ -245,54 +284,15 @@ export default {
       return parseFloat(ra_arr[0]) * 15.0 + parseFloat(ra_arr[1]) * 15.0 / 60.0 +
         parseFloat(ra_arr[2]) * 15.0 / 3600.0;
     },
-    validateRA(table) {
-      // Check if RA makes sense.
-      table.forEach((row) => {
-        if ('ra' in row) {
-          let this_ra;
-          try {
-            this_ra = this.sexagesimalToDeg(row.ra);
-          }
-          catch {
-            try {
-              this_ra = parseFloat(row.ra)
-              if (isNaN(this_ra)) {
-                throw Error("RA did not parse to a number.");
-              }
-            }
-            catch {
-              this.errorModalTitle = 'Invalid RA';
-              this.errorModalText = row.ra + ' is not a valid RA.';
-              this.showErrorModal = true;
-              throw Error("Invalid RA")
-            }
-          }
-          if (this_ra < 0.0 || this_ra >= 360.0) {
-            this.errorModalTitle = 'Invalid RA';
-            this.errorModalText = row.ra + ' is out of the range 0 and 360 degrees.';
-            this.showErrorModal = true;
-            throw Error("Invalid RA");
-          }
-        }
-      });
-    },
-    submitToHop() {
+    getSubmissionPayload() {
       // Compile message and submit to HOPSKOTCH
       const additionalDataObj = this.getExtraData.reduce(
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       const mainData = this.getMainData;
       // Remove elements used for Table maintenance and display
       mainData.forEach(function (item) {
-        delete item.isActive;
         delete item.id;
       });
-      // Run Validation
-      try {
-        this.validateRA(mainData);
-      }
-      catch {
-        return
-      }
       // Build Basic Payload to match backend Model Structure
       let payload = {
         "topic": this.topic,
@@ -316,8 +316,11 @@ export default {
       if (this.authors) {
         payload['authors'] = this.authors;
       }
+      return payload;
+    },
+    submitToHop() {
+      let payload = this.getSubmissionPayload();
       // Post message via axios
-      console.log('submitToHop payload: ' + JSON.stringify(payload));
       axios({
         method: 'post',
         // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
@@ -327,17 +330,12 @@ export default {
         url: new URL('/api/v0/' + this.submissionEndpoint + '/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
         data: JSON.stringify(payload)
       })
-      .then(function (response) {
+      .then(function () {
         // log response, redirect to homepage
-        console.log('submitToHop response.data: ' + JSON.stringify(response.data));
         location.href = '/.html';
       })
       .catch(error => {
-        // If error, show modal
         console.log(error);
-        this.errorModalTitle = 'Submission Error: ' + error.response.status.toString();
-        this.errorModalText = JSON.stringify(error.response.data);
-        this.showErrorModal = true;
       });
     },
     onFileChange(event) {
@@ -391,7 +389,7 @@ export default {
       return outArray;
     },
   },
-}
+};
 </script>
 
 <style scoped>

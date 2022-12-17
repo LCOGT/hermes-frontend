@@ -8,13 +8,13 @@
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
           <b-nav-item to="/">HERMES</b-nav-item>
-          <b-nav-item to="/report-events">Submit New Non-localized Event</b-nav-item>
+          <b-nav-item to="/report-events" disabled>Submit New Non-localized Event</b-nav-item>
           <b-nav-item to="/report-candidates">Submit Candidates</b-nav-item>
-          <b-nav-item to="/report-non-detections">Submit Non-Detections</b-nav-item>
-          <b-nav-item to="/report-search">Submit Search Pointings</b-nav-item>
+          <b-nav-item to="/report-non-detections" disabled>Submit Non-Detections</b-nav-item>
+          <b-nav-item to="/report-search" disabled>Submit Search Pointings</b-nav-item>
           <b-nav-item to="/report-photometry">Report Photometry</b-nav-item>
-          <b-nav-item to="/report-spectroscopy">Report Spectroscopy</b-nav-item>
-          <b-nav-item to="/report-availability">Report Observatory Availability</b-nav-item>
+          <b-nav-item to="/report-spectroscopy" disabled>Report Spectroscopy</b-nav-item>
+          <b-nav-item to="/report-availability" disabled>Report Observatory Availability</b-nav-item>
         </b-navbar-nav>
 
         <!-- Right aligned nav items -->

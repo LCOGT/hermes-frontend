@@ -1,6 +1,8 @@
 <template>
   <message-form page-title="Photometry Reporting Form" submission-endpoint="submit_photometry">
-    <photometry-input-table></photometry-input-table>
+    <template v-slot:dataTable="{ errors, onUpdate }">
+      <photometry-input-table :updateCallback="onUpdate" :fieldErrors="errors"></photometry-input-table>
+    </template>
   </message-form>
 </template>
 
@@ -15,5 +17,5 @@ export default {
     MessageForm,
     "photometry-input-table": PhotometryInputTable,
   },
-}
+};
 </script>

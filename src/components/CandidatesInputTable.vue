@@ -1,15 +1,17 @@
 <template>
     <div>
-      <b-editable-table striped bordered class="candidate-data-table" nle-id v-model="items" :fields="fields" :rowUpdate="rowUpdate">
-        <template #cell(isActive)="data">
-          <span v-if="data.value">Yes</span>
-          <span v-else>No</span>
-        </template>
+      <b-editable-table striped bordered class="candidate-data-table" nle-id v-model="items" :fields="fields" :rowUpdate="rowUpdate" @input="updateCallback">
         <!-- Delete Row -->
         <template #cell(delete)="row">
-          <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
+          <div v-b-tooltip.hover role="button" title="Remove Row" @click="removeRow(row)" v-if="getMainData.length > 1">
             &#128465; <!-- Little Trashcan Icon -->
           </div>
+        </template>
+        <template v-for="field in fields" v-slot:[`cell(${field.key})`]="data">
+          <b-form-group :key="field.key + '-group'" :state="getCellState(data.index, data.field.key)" v-b-tooltip.hover :title="getCellError(data.index, data.field.key)">
+            <b-form-input v-if="field.type == 'text'" v-model="data.value" :state="getCellState(data.index, data.field.key)" :key="field.key + '-input'" :placeholder="field.label"></b-form-input>
+            <b-form-select v-if="field.type == 'select'" v-model="data.value" :options="field.options" :state="getCellState(data.index, data.field.key)" :key="field.key + '-select'"></b-form-select>
+          </b-form-group>
         </template>
       </b-editable-table>
       <div class="add-row-candidate">
@@ -26,6 +28,18 @@ export default {
   name: "CandidatesInputTable",
   components: {
     BEditableTable,
+  },
+  props: {
+    fieldErrors: {
+      type: Array,
+      required: false,
+      default: function() {
+        return [];
+      }
+    },
+    updateCallback: {
+      type: Function
+    }
   },
   mounted() {
     this.items = [{
@@ -146,6 +160,21 @@ export default {
     };
   },
   methods: {
+    getCellState(row, key) {
+      let error = this.getCellError(row, key);
+      if (error) {
+        return false;
+      }
+      return null;
+    },
+    getCellError(row, key) {
+      if (row < this.fieldErrors.length) {
+        if (key in this.fieldErrors[row]){
+          return this.fieldErrors[row][key].join(', ');
+        }
+      }
+      return '';
+    },
     handleAdd() {
       const newId = Date.now();
       this.rowUpdate = {
@@ -164,15 +193,18 @@ export default {
           brightness: null,
           brightness_error: null,
           brightness_unit: "AB mag",
-          isActive: false,
         },
       };
+      this.updateCallback();
     },
     removeRow(row){
-      this.getMainData.splice(row.index, 1)
+      if (this.getMainData.length > 1){
+        this.getMainData.splice(row.index, 1)
+        this.updateCallback();
+      }
     },
   }
-}
+};
 </script>
 
 <style scoped>
@@ -184,7 +216,5 @@ export default {
   height: calc(1.5em + 0.75rem + 2px);
   padding: 0.5rem
 }
-.candidate-data-table /deep/ .data-cell {
-  padding: 0.5rem;
-}
+
 </style>
