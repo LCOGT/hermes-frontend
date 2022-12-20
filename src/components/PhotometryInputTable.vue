@@ -1,17 +1,15 @@
 <template>
     <div>
       <b-editable-table striped bordered class="photometry-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate"  @input="updateCallback">
-        <!-- Delete Row -->
-        <template #cell(delete)="row">
-          <div v-b-tooltip.hover title="Remove Row" @click="removeRow(row)">
-            &#128465; <!-- Little Trashcan Icon -->
-          </div>
-        </template>
         <template v-for="field in fields" v-slot:[`cell(${field.key})`]="data">
-          <b-form-group :key="field.key + '-group'" :state="getCellState(data.index, data.field.key)" v-b-tooltip.hover :title="getCellError(data.index, data.field.key)">
+          <b-form-group :key="field.key + '-group'" :state="getCellState(data.index, data.field.key)" v-b-tooltip.hover :title="getCellError(data.index, data.field.key)" v-if="field.key != 'delete'">
             <b-form-input v-if="field.type == 'text'" v-model="data.value" :state="getCellState(data.index, data.field.key)" :key="field.key + '-input'" :placeholder="field.label"></b-form-input>
             <b-form-select v-if="field.type == 'select'" v-model="data.value" :options="field.options" :state="getCellState(data.index, data.field.key)" :key="field.key + '-select'"></b-form-select>
           </b-form-group>
+          <!-- Delete Row -->
+          <div v-if="field.key == 'delete' && getMainData.length > 1" :key="field.key + '-btn'" v-b-tooltip.hover role="button" title="Remove Row" @click="removeRow(data)">
+            &#128465; <!-- Little Trashcan Icon -->
+          </div>
         </template>
       </b-editable-table>
       <div class="add-row-photometry">
@@ -195,5 +193,11 @@ export default {
 .photometry-data-table /deep/ td {
   height: calc(1.5em + 0.75rem + 2px);
 }
+
+.photometry-data-table /deep/ .delete-column {
+  font-size: 1.25rem;
+  padding: 0.5rem;
+}
+
 
 </style>
