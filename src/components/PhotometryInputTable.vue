@@ -71,6 +71,22 @@ export default {
           class: "target-name-column"
         },
         {
+          key: "ra",
+          label: "RA",
+          type: 'text',
+          editable: true,
+          placeholder: "RA",
+          class: "ra-column"
+        },
+        {
+          key: "dec",
+          label: "Dec",
+          type: 'text',
+          editable: true,
+          placeholder: "Dec",
+          class: "dec-column"
+        },
+        {
           key: "date",
           label: "Date-Obs",
           type: 'text',
