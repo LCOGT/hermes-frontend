@@ -113,7 +113,8 @@ import $ from 'jquery';
 import { mapGetters } from "vuex";
 import getEnv from "@/utils/env.js";
 import AdditionalDataTable from "@/components/AdditionalDataTable";
-import { mostRecentRequestManager} from '@/utils/utils';
+import { OCSUtil } from 'ocs-component-lib';
+import '@/assets/css/submissions.css';
 
 export default {
   name: "MessageForm",
@@ -155,7 +156,7 @@ export default {
           content: ''
       },
       showCopyAlert: false,
-      validateRequestManager: new mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess),
+      validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess),
       validationErrors: {},
       childTableValidationErrors: [],
       readyToSubmit: false
@@ -393,42 +394,5 @@ export default {
 </script>
 
 <style scoped>
-.outside-container {
-  overflow-x: auto;
-  margin: auto;
-}
 
-.inside-container {
-  max-width: 75%;
-  min-width: min-content;
-  margin: auto;
-}
-
-.eventid-col {
-  max-width: 20%;
-  padding: 0;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-.authors-col {
-  max-width: 100%;
-  padding: 0;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-.message-tabs {
-  width: 100%;
-}
-
-.extra-input-col {
-  max-width: 20%;
-}
-.submit-button {
-  color: white;
-}
-.clear-button {
-  float: right;
-}
 </style>

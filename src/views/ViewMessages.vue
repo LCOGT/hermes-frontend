@@ -2,34 +2,34 @@
   <div class="overflow-auto px-4" :style="{width: '100%'}">
   <b-row>
   <b-col>
-   <b-row>
-     <b-col>
-       <!-- Pagination -->
-        <b-pagination
-            v-model="currentPage"
-            :total-rows="totalRows"
-            :per-page="perPage"
-            first-number
-            last-number
-            aria-controls="message-table"
-          ></b-pagination>
-      </b-col>
-      <b-col>
+    <b-row>
+      <b-col class="col-md-4">
         <!-- Topic Filter -->
-        <b-form-group label="Topics" label-for="topic_selector" label-cols-lg="2">
-          <b-form-select
-            id="topic_selector"
-            v-model="filter"
-            :options="topic_options"
-          >
-            <template #first>
-              <b-form-select-option value="">-- All Topics --</b-form-select-option>
-            </template>
-          </b-form-select>
-        </b-form-group>
+        <b-form-select
+          id="topic_selector"
+          v-model.lazy="queryParams.topic_exact"
+          :options="topic_options"
+          @change="submitForm"
+        >
+          <template #first>
+            <b-form-select-option value="">-- All Topics --</b-form-select-option>
+          </template>
+        </b-form-select>
+      </b-col>
+      <b-col class="col-md-8">
+        <!-- Pagination -->
+        <ocs-pagination
+          v-if="!isBusy"
+          table-id="message-table"
+          :per-page="queryParams.limit"
+          :total-rows="data.count"
+          :current-page="currentPage"
+          :display-per-page-dropdown="false"
+          total-rows-class="hermes-total-rows"
+          @pageChange="onPageChange"
+        ></ocs-pagination>
       </b-col>
     </b-row>
-
     <!-- Main Message Table -->
     <b-table
       hover
@@ -44,16 +44,17 @@
       @row-clicked="item=>onRowClicked(item)"
       class="message-b-table"
       id="message-table"
-      :filter="filter"
-      :filter-included-fields="topic"
-      @filtered="onFiltered"
-      :per-page="perPage"
-      :current-page="currentPage"
+      :busy="isBusy"
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
-      :items="items"
+      :items="data.results"
       :fields="fields"
     >
+      <template v-slot:table-busy>
+        <br />
+        <div class="text-center my-2"><i class="fa fa-spin fa-spinner" /> Loading messages...</div>
+        <br />
+      </template>
       <!-- Index Message -->
       <template #cell(index)="data">
         {{ data.index + 1 }}
@@ -192,21 +193,19 @@
 </template>
 
 <script>
+import { OCSMixin } from 'ocs-component-lib';
 import getEnv from "@/utils/env.js";
 import axios from "axios";
+import '@/assets/css/view.css';
 
 export default {
   name: "ViewMessages",
+  mixins: [OCSMixin.paginationAndFilteringMixin],
   data() {
     return {
       topic_options: [],
       sortBy: 'created',
       sortDesc: true,
-      perPage: 10,
-      currentPage: 1,
-      totalRows: 1,
-      filter: "",
-      filterOn: [],
       fields: [
         {
           key: "selected",
@@ -238,7 +237,6 @@ export default {
           label: "Submitter",
         },
       ],
-      items: [],
       selectedItem: null,
       topic: null,
       jsonData: {
@@ -265,16 +263,25 @@ export default {
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
       .then((response) => (this.topic_options = response.data.read))
       .catch((error) => console.log(error));
-    // Retrieve messages and store data
-    axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages.json/?page=1")
-      .then((response) => (
-        this.items = response.data.results,
-        this.totalRows = response.data.results.length
-        ))
-      .catch((error) => console.log(error));
   },
   methods: {
+    // Overrides method in paginationAndFilteringMixin
+    initializeDataEndpoint: function() {
+      return getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + 'api/v0/messages/';
+    },
+    // Overrides method in paginationAndFilteringMixin
+    initializeDefaultQueryParams: function() {
+      const defaultQueryParams = {
+        topic_exact: '',
+        limit: 10,
+        offset: 0
+      };
+      return defaultQueryParams;
+    },
+    submitForm() {
+      let fakeEvent = {'preventDefault': () => true};
+      this.onSubmit(fakeEvent);
+    },
     onRowClicked(item) {
       // Define Behavior when Row Clicked
       this.selectedItem = item
@@ -300,10 +307,6 @@ export default {
       this.jsonData.title = '';
       this.jsonData.content = '';
       this.showCopyAlert=false;
-    },
-    onFiltered(filteredItems) {
-      // Trigger pagination to update the number of buttons/pages due to filtering
-      this.totalRows = filteredItems.length
     },
     getKVDataItems(item){
       // Retrieve Key/Value data from JSON message
@@ -393,31 +396,5 @@ export default {
 </script>
 
 <style scoped>
-.message-b-table {
-  width: 100%;
-}
-
-.message-b-table >>> .data-column{
-  padding : 0.3rem;
-}
-
-.kv-b-table {
-  width: 100%;
-}
-
-.message-block {
-  max-width: 80%;
-}
-.expand-button {
-  max-width: 20%;
-}
-
-/* Show mouseover for Collapsable Data Table */
-.collapse-table-head:hover {
-  opacity: 0.5;
-}
-.collapse-table-head {
-  opacity: 1;
-}
 
 </style>
