@@ -1,38 +1,40 @@
 .outside-container {
     overflow-x: auto;
     margin: auto;
-  }
-  
-  .inside-container {
+}
+
+.inside-container {
     max-width: 75%;
     min-width: min-content;
     margin: auto;
-  }
-  
-  .eventid-col {
+}
+
+.eventid-col {
     max-width: 20%;
     padding: 0;
     padding-left: 15px;
     padding-right: 15px;
-  }
-  
-  .authors-col {
+}
+
+.authors-col {
     max-width: 100%;
     padding: 0;
     padding-left: 15px;
     padding-right: 15px;
-  }
-  
-  .message-tabs {
+}
+
+.message-tabs {
     width: 100%;
-  }
-  
-  .extra-input-col {
+}
+
+.extra-input-col {
     max-width: 20%;
-  }
-  .submit-button {
+}
+
+.submit-button {
     color: white;
-  }
-  .clear-button {
+}
+
+.clear-button {
     float: right;
-  }
+}
