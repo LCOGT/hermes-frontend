@@ -9,7 +9,7 @@
           id="topic_selector"
           v-model.lazy="queryParams.topic_exact"
           :options="topic_options"
-          @change="submitForm"
+          @change="onTopicChange"
         >
           <template #first>
             <b-form-select-option value="">-- All Topics --</b-form-select-option>
@@ -48,7 +48,7 @@
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
       :items="data.results"
-      :fields="fields"
+      :fields="visibleFields"
     >
       <template v-slot:table-busy>
         <br />
@@ -77,8 +77,8 @@
 
       <!-- Format Timestamp -->
       <template #cell(created)="data">
-        <div v-b-tooltip.hover :title="data.item.created|format_time">
-          {{ data.item.created | format_date }}
+        <div v-b-tooltip.hover :title="data.item.created|formatDate">
+          {{ data.item.created | timeFromNow }}
         </div>
       </template>
     </b-table>
@@ -196,6 +196,8 @@
 import { OCSMixin } from 'ocs-component-lib';
 import getEnv from "@/utils/env.js";
 import axios from "axios";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import '@/assets/css/view.css';
 
 export default {
@@ -211,30 +213,41 @@ export default {
           key: "selected",
           label: "",
           headerTitle: "selected",
-          class: "data-column"
+          class: "data-column",
+          visible: true
         },
         {
           key: "index",
           label: "",
-          class: "data-column"
+          class: "data-column",
+          visible: false
         },
         {
           key: "created",
           sortable: true,
           sortDirection: 'desc',
           label: "Timestamp",
-          class: "data-column"
+          class: "data-column",
+          visible: true
+        },
+        {
+          key: "topic",
+          label: "Topic",
+          class: "data-column",
+          visible: true
         },
         {
           key: "title",
           sortable: true,
-          class: "data-column"
+          class: "data-column",
+          visible: true
         },
         {
-          key: "author",
+          key: "submitter",
           sortable: true,
           class: "data-column",
           label: "Submitter",
+          visible: true
         },
       ],
       selectedItem: null,
@@ -251,7 +264,7 @@ export default {
         candidates: "target_name,ra,dec,date,telescope,instrument,band,brightness,brightness_error,brightness_unit",
         non_detection_data: "ra,dec,obsDate,telescope,instrument,band,depth,depthUnit",
         pointing_data: "ra,dec,obsStatus,obsDate,telescope,instrument,band,depth,depthUnit",
-        photometry: "target_name,date,telescope,instrument,band,brightness,brightness_error,brightness_unit",
+        photometry: "target_name,ra,dec,date,telescope,instrument,band,brightness,brightness_error,brightness_unit",
         spectroscopy_data: "spectroscopyId,dateObs,telescope,instrument,exptime,classification,spectrumURL",
         telescope_events: "observatory,telescope,instrument,eventDate,description"
       }
@@ -263,6 +276,14 @@ export default {
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
       .then((response) => (this.topic_options = response.data.read))
       .catch((error) => console.log(error));
+  },
+  created() {
+    dayjs.extend(relativeTime);
+  },
+  computed: {
+    visibleFields() {
+      return this.fields.filter(field => field.visible);
+    }
   },
   methods: {
     // Overrides method in paginationAndFilteringMixin
@@ -278,7 +299,13 @@ export default {
       };
       return defaultQueryParams;
     },
-    submitForm() {
+    onTopicChange(value) {
+      this.fields.forEach(field => {
+        if (field.key == 'topic') {
+          field.visible = (value == '');
+        }
+      });
+      console.log(value);
       let fakeEvent = {'preventDefault': () => true};
       this.onSubmit(fakeEvent);
     },
@@ -375,23 +402,19 @@ export default {
     },
   },
   filters: {
-  format_date: function(datetime) {
-    // Convert the timestamp into a user friendly DATE
-    if (!datetime) { return '(n/a)'; }
-    datetime = new Date(datetime);
-    return datetime.getUTCFullYear() + "/" +
-      ((datetime.getUTCMonth() < 9) ? '0' : '') + (datetime.getUTCMonth() + 1) + '/' +
-      ((datetime.getUTCDate() < 10) ? '0' : '') + datetime.getUTCDate();
-  },
-  format_time:  function(datetime) {
-    // Convert the timestamp into a user friendly TIME
-    if (!datetime) { return '(n/a)'; }
-    datetime = new Date(datetime);
-    return ((datetime.getUTCHours() < 9) ? '0' : '') + datetime.getUTCHours() + ':' +
-      ((datetime.getUTCMinutes() < 9) ? '0' : '') + datetime.getUTCMinutes() + ':' +
-      ((datetime.getUTCSeconds() < 9) ? '0' : '') + datetime.getUTCSeconds();
+    timeFromNow: function(datetime) {
+      if (!datetime) {
+        return null;
+      }
+      return dayjs(datetime).fromNow();
+    },
+    formatDate: function(datetime) {
+      if (!datetime) {
+        return null;
+      }
+      return dayjs(datetime).format('MMM D, YYYY, HH:mm');
+    }
   }
-}
 };
 </script>
 

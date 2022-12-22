@@ -333,7 +333,7 @@ export default {
       })
       .then(function () {
         // log response, redirect to homepage
-        location.href = '/.html';
+        location.href = '/';
       })
       .catch(error => {
         console.log(error);
