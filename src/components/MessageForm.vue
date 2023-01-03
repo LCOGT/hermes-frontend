@@ -239,6 +239,7 @@ export default {
         type: 'POST',
         url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
         data: JSON.stringify(this.getSubmissionPayload()),
+        headers: {'X-CSRFToken': this.getCsrfToken},
         contentType: 'application/json'
       });
     },
