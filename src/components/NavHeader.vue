@@ -42,29 +42,39 @@ import axios from "axios";
 
 export default {
   computed: {
-      ...mapGetters(["getUserName", "getCsrfToken"])
+      ...mapGetters(["getUserName", "getCsrfToken", "getMidLogin"])
   },
   mounted() {
     // get CSRF token and store it for submission
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token")
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token/")
       .then((response) => this.$store.commit('SET_CSRF_TOKEN', response.data['token']))
       .catch((error) => console.log(error));
 
-    // Get username
-    if (this.$route.query.user){
-      this.$store.commit('SET_USER_NAME', this.$route.query.user)
-      this.$router.replace({'query.user':null})
+    // If this is the first refresh after a login workflow, attempt to get the profile data and store it
+    if (this.getMidLogin) {
+      axios
+        .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/profile/", { withCredentials: true })
+        .then((response) => {
+          this.$store.commit('SET_USER_NAME', response.data['email'])
+          this.$store.commit('SET_WRITABLE_TOPICS', response.data['writable_topics'])
+          this.$store.commit('SET_MID_LOGIN', false);
+          this.username = this.getUserName;
+        })
+        .catch((error) => console.log(error));
     }
     this.username = this.getUserName;
   },
   methods: {
     authenticate() {
+      this.$store.commit('SET_MID_LOGIN', true);
       location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/"
     },
 
     deauthenticate() {
       this.$store.commit('SET_USER_NAME', 'HERMES Guest');
+      this.$store.commit('SET_MID_LOGIN', false);
+      this.$store.commit('SET_WRITABLE_TOPICS', ['hermes.test'])
       this.username = 'HERMES Guest';
       location.href = getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/"
     }
