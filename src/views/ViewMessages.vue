@@ -274,7 +274,7 @@ export default {
     // Get available topics
     axios
       .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
-      .then((response) => (this.topic_options = response.data.read))
+      .then((response) => (this.topic_options = response.data.topics))
       .catch((error) => console.log(error));
   },
   created() {
