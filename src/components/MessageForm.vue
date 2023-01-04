@@ -119,17 +119,14 @@ import '@/assets/css/submissions.css';
 export default {
   name: "MessageForm",
   computed: {
-      ...mapGetters(["getUserName", "getMainData", "getExtraData", "getMainTableName", "getMainTableHeader", "getCsrfToken"]),
+      ...mapGetters(["getUserName", "getMainData", "getExtraData", "getMainTableName", "getMainTableHeader", "getCsrfToken", "getWritableTopics"]),
       formattedMessage() {
       return this.formatMessage(this.message);
     }
   },
   mounted() {
-    // Get available topics
-    axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
-      .then((response) => (this.topicOptions = response.data.write, this.topic = response.data.write[0]))
-      .catch((error) => console.log(error));
+    this.topicOptions = this.getWritableTopics;
+    this.topic = this.topicOptions[0];
     this.user = this.getUserName;
   },
   props: {
@@ -148,7 +145,7 @@ export default {
       topicOptions: [],
       message: '',
       eventId: '',
-      user: 'Hermes User.guest',
+      user: 'HERMES Guest',
       fileInput: null,
       csvHeader: {
           id: 'csv-header',
@@ -239,6 +236,7 @@ export default {
         type: 'POST',
         url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
         data: JSON.stringify(this.getSubmissionPayload()),
+        headers: {'X-CSRFToken': this.getCsrfToken},
         contentType: 'application/json'
       });
     },
@@ -333,7 +331,7 @@ export default {
       })
       .then(function () {
         // log response, redirect to homepage
-        location.href = '/.html';
+        location.href = '/';
       })
       .catch(error => {
         console.log(error);

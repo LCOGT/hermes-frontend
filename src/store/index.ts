@@ -11,7 +11,9 @@ export default new Vuex.Store({
     name: '',
     header: '',
     username: 'HERMES Guest',
+    writable_topics: ['hermes.test'],
     csrf_token: '',
+    mid_login: false
   },
   getters: {
     getMainData(state) {
@@ -29,8 +31,14 @@ export default new Vuex.Store({
     getUserName(state) {
       return state.username;
     },
+    getWritableTopics(state) {
+      return state.writable_topics;
+    },
     getCsrfToken(state) {
       return state.csrf_token;
+    },
+    getMidLogin(state) {
+      return state.mid_login;
     }
 
   },
@@ -51,9 +59,15 @@ export default new Vuex.Store({
     SET_USER_NAME(state, username) {
       state.username = username;
     },
+    SET_WRITABLE_TOPICS(state, writable_topics) {
+      state.writable_topics = writable_topics;
+    },
     SET_CSRF_TOKEN(state, csrf_token) {
       state.csrf_token = csrf_token;
     },
+    SET_MID_LOGIN(state, mid_login) {
+      state.mid_login = mid_login;
+    }
   },
   actions: {
   },
