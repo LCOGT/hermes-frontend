@@ -114,18 +114,18 @@ export default {
           class: "band-column"
         },
         {
-          key: "brightness",
-          label: "Brightness",
-          type: 'text',
-          placeholder: "Brightness",
-          class: "brightness-column"
-        },
-        {
           key: "nondetection",
           label: "Non Detect",
           type: 'checkbox',
           default: false,
           class: "nondetection-column"
+        },
+        {
+          key: "brightness",
+          label: "Brightness",
+          type: 'text',
+          placeholder: "Brightness",
+          class: "brightness-column"
         },
         {
           key: "brightness_error",
@@ -192,8 +192,8 @@ export default {
           telescope: null,
           instrument: null,
           band: null,
-          brightness: null,
           nondetection: false,
+          brightness: null,
           brightness_error: null,
           brightness_unit: "AB mag",
         },

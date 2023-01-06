@@ -263,7 +263,7 @@ export default {
         nle_data: "eventId,discoveryDate,instrument,skymapLink,falseAlarmRate",
         non_detection_data: "ra,dec,obsDate,telescope,instrument,band,depth,depthUnit",
         pointing_data: "ra,dec,obsStatus,obsDate,telescope,instrument,band,depth,depthUnit",
-        photometry: "target_name,ra,dec,date,telescope,instrument,band,brightness,nondetection,brightness_error,brightness_unit",
+        photometry: "target_name,ra,dec,date,telescope,instrument,band,nondetection,brightness,brightness_error,brightness_unit",
         spectroscopy_data: "spectroscopyId,dateObs,telescope,instrument,exptime,classification,spectrumURL",
         telescope_events: "observatory,telescope,instrument,eventDate,description"
       }
