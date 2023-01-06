@@ -9,7 +9,7 @@
         <b-navbar-nav>
           <b-nav-item to="/">HERMES</b-nav-item>
           <b-nav-item to="/report-events" disabled>Submit New Non-localized Event</b-nav-item>
-          <b-nav-item to="/report-candidates">Submit Candidates</b-nav-item>
+          <b-nav-item to="/report-discoveries">Submit Discoveries</b-nav-item>
           <b-nav-item to="/report-non-detections" disabled>Submit Non-Detections</b-nav-item>
           <b-nav-item to="/report-search" disabled>Submit Search Pointings</b-nav-item>
           <b-nav-item to="/report-photometry">Report Photometry</b-nav-item>

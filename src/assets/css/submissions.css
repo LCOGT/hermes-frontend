@@ -38,3 +38,43 @@
 .clear-button {
     float: right;
 }
+
+.add-row-photometry .add-row-photometry-button {
+    color: white;
+}
+
+.add-row-discovery .add-row-discovery-button {
+    color: white;
+}
+
+.nondetection-column {
+    vertical-align: middle;
+}
+
+.nondetection-column .form-group {
+    text-align: center;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.delete-column {
+    font-size: 1.25rem;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+}
+
+.ra-column {
+    min-width: 80px;
+}
+
+.dec-column {
+    min-width: 80px;
+}
+
+.target-name-column {
+    min-width: 80px;
+}

@@ -20,12 +20,17 @@
           </b-col>
         </b-row>
         <b-row class=p-2>
-          <b-col v-if="nleId" class="eventid-col">
+          <b-col v-if="topLevelFields.includes('event_id')" class="eventid-col">
             <label for="eventid-input">Event ID:</label>
             <b-form-input class="eventid-input" v-model="eventId" placeholder="Event ID" :state="getValidationState('data.event_id')" @input="validate"></b-form-input>
             <b-form-invalid-feedback id="eventid-input-feedback">{{ getValidationError('data.event_id') }}</b-form-invalid-feedback>
           </b-col>
-          <b-col class="authors-col">
+          <b-col v-if="topLevelFields.includes('type')" class="type-col">
+            <label for="type-input">Type:</label>
+            <b-form-input class="type-input" v-model="type" placeholder="Type" :state="getValidationState('data.type')" @input="validate"></b-form-input>
+            <b-form-invalid-feedback id="type-input-feedback">{{ getValidationError('data.type') }}</b-form-invalid-feedback>
+          </b-col>
+          <b-col v-if="topLevelFields.includes('authors')" class="authors-col">
             <label for="authors-input">Authors:</label>
             <b-form-input class="authors-input" v-model="authors" placeholder="Authors" :state="getValidationState('authors')" @input="validate"></b-form-input>
             <b-form-invalid-feedback id="authors-input-feedback">{{ getValidationError('authors') }}</b-form-invalid-feedback>
@@ -131,11 +136,15 @@ export default {
   },
   props: {
     "pageTitle": String,
-    nleId: {
-      type: Boolean,
-      default: true
+    topLevelFields: {
+      type: Array,
+      required: false,
+      default: function() {
+        return ['title', 'topic', 'authors'];
+      }
     },
     "submissionEndpoint": String,
+
   },
   data() {
     return {
@@ -144,6 +153,7 @@ export default {
       topic: '',
       topicOptions: [],
       message: '',
+      type: '',
       eventId: '',
       user: 'HERMES Guest',
       fileInput: null,
@@ -167,6 +177,7 @@ export default {
       // Build Main Data when new file uploaded
       const loaded_array = this.csvToArray(newTable);
       this.$store.commit("SET_MAIN_DATA", loaded_array);
+      this.validate();
     }
   },
   methods: {
@@ -247,6 +258,9 @@ export default {
         if ('data' in this.validationErrors) {
           this.childTableValidationErrors = this.validationErrors.data[this.getMainTableName] || [];
         }
+        else {
+          this.childTableValidationErrors = [];
+        }
       }
       else{
         this.validationErrors = {};
@@ -289,9 +303,12 @@ export default {
           (obj, element) => ({...obj, [element.key]: element.value}), {});
       const mainData = this.getMainData;
       // Remove elements used for Table maintenance and display
-      mainData.forEach(function (item) {
-        delete item.id;
-      });
+      for (var i = 0; i < mainData.length; i++) {
+        delete mainData[i].id;
+        // Clean out null fields before submission
+        mainData[i] = _.pickBy(mainData[i]);
+      }
+
       // Build Basic Payload to match backend Model Structure
       let payload = {
         "topic": this.topic,
@@ -312,9 +329,13 @@ export default {
       if (this.eventId) {
         payload.data['event_id'] = this.eventId;
       }
+      if (this.type) {
+        payload.data['type'] = this.type;
+      }
       if (this.authors) {
         payload['authors'] = this.authors;
       }
+
       return payload;
     },
     submitToHop() {

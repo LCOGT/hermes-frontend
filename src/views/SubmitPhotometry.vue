@@ -1,5 +1,5 @@
 <template>
-  <message-form page-title="Photometry Reporting Form" submission-endpoint="submit_photometry">
+  <message-form page-title="Photometry Reporting Form" submission-endpoint="submit_photometry" :top-level-fields="topLevelFields">
     <template v-slot:dataTable="{ errors, onUpdate }">
       <photometry-input-table :updateCallback="onUpdate" :fieldErrors="errors"></photometry-input-table>
     </template>
@@ -17,5 +17,15 @@ export default {
     MessageForm,
     "photometry-input-table": PhotometryInputTable,
   },
+  data() {
+    return {
+      topLevelFields: [
+        'title',
+        'topic',
+        'event_id',
+        'authors'
+      ]
+    };
+  }
 };
 </script>
