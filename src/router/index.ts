@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import SubmitCandidates from "@/views/SubmitCandidates.vue"
+import SubmitDiscoveries from "@/views/SubmitDiscoveries.vue"
 import SubmitNonDetections from "@/views/SubmitNonDetection.vue"
 import SubmitSearchPointings from "@/views/SubmitSearchPointing.vue"
 import SubmitPhotometry from "@/views/SubmitPhotometry.vue"
@@ -22,9 +22,9 @@ const routes = [
     name: "report-events",
     component: SubmitNonLocalizedEvent},
   {
-    path: "/report-candidates",
-    name: "report-candidates",
-    component: SubmitCandidates},
+    path: "/report-discoveries",
+    name: "report-discoveries",
+    component: SubmitDiscoveries},
   {
     path: "/report-non-detections",
     name: "report-non-detections",

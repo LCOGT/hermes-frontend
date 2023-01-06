@@ -1,10 +1,11 @@
 <template>
     <div>
-      <b-editable-table striped bordered class="candidate-data-table" nle-id v-model="items" :fields="fields" :rowUpdate="rowUpdate" @input="updateCallback">
+      <b-editable-table striped bordered small class="discovery-data-table" v-model="items" :fields="fields" :rowUpdate="rowUpdate" @input="updateCallback">
         <template v-for="field in fields" v-slot:[`cell(${field.key})`]="data">
           <b-form-group :key="field.key + '-group'" :state="getCellState(data.index, data.field.key)" v-b-tooltip.hover :title="getCellError(data.index, data.field.key)" v-if="field.key != 'delete'">
-            <b-form-input v-if="field.type == 'text'" v-model="data.value" :state="getCellState(data.index, data.field.key)" :key="field.key + '-input'" :placeholder="field.label"></b-form-input>
-            <b-form-select v-if="field.type == 'select'" v-model="data.value" :options="field.options" :state="getCellState(data.index, data.field.key)" :key="field.key + '-select'"></b-form-select>
+            <b-form-input v-if="field.type == 'text'" v-model="data.value" :state="getCellState(data.index, data.field.key)" :key="field.key + '-input'" :placeholder="field.label" @input="handleInput(data)"></b-form-input>
+            <b-form-select v-if="field.type == 'select'" v-model="data.value" :options="field.options" :state="getCellState(data.index, data.field.key)" :key="field.key + '-select'" @input="handleInput(data)"></b-form-select>
+            <b-form-checkbox v-if="field.type == 'checkbox'" v-model="data.value" size="lg" value="true" unchecked-value="false" :state="getCellState(data.index, data.field.key)" :key="field.key + '-checkbox'" @input="handleInput(data)"></b-form-checkbox>
           </b-form-group>
           <!-- Delete Row -->
           <div v-if="field.key == 'delete' && getMainData.length > 1" :key="field.key + '-btn'" v-b-tooltip.hover role="button" title="Remove Row" @click="removeRow(data)">
@@ -12,8 +13,8 @@
           </div>
         </template>
       </b-editable-table>
-      <div class="add-row-candidate">
-        <b-button class="add-row-candidate-button" variant="primary" @click="handleAdd">Add Row</b-button>
+      <div class="add-row-discovery">
+        <b-button class="add-row-discovery-button" variant="primary" @click="handleAdd">Add Row</b-button>
       </div>
     </div>
 </template>
@@ -22,8 +23,10 @@
 
 import BEditableTable from "bootstrap-vue-editable-table";
 import {mapGetters} from "vuex";
+import '@/assets/css/submissions.css';
+
 export default {
-  name: "CandidatesInputTable",
+  name: "DiscoveriesInputTable",
   components: {
     BEditableTable,
   },
@@ -42,7 +45,7 @@ export default {
   mounted() {
     this.items = [{
       target_name: null, ra: null, dec: null, date: null, telescope: null, instrument: null,
-      band: null, brightness: null, brightness_error: null, brightness_unit: "AB mag"
+      band: null, brightness: null, nondetection: false, brightness_error: null, brightness_unit: "AB mag"
     }];
   },
   computed: {
@@ -53,8 +56,8 @@ export default {
       },
       set(value) {
         this.$store.commit("SET_MAIN_DATA", value);
-        this.$store.commit("SET_MAIN_TABLE_NAME", "candidates");
-        this.$store.commit("SET_MAIN_TABLE_HEADER", "target_name,ra,dec,date,telescope,instrument,band,brightness,brightness_error,brightness_unit");
+        this.$store.commit("SET_MAIN_TABLE_NAME", "photometry");
+        this.$store.commit("SET_MAIN_TABLE_HEADER", "target_name,ra,dec,date,telescope,instrument,band,brightness,brightness_error,nondetection, brightness_unit");
 
       },
     }
@@ -66,7 +69,6 @@ export default {
           key: 'target_name',
           label: 'Target Name',
           type: 'text',
-          editable: true, 
           placeholder: "Target ID", 
           class: "target-name-column"
         },
@@ -74,7 +76,6 @@ export default {
           key: "ra",
           label: "RA",
           type: 'text',
-          editable: true,
           placeholder: "RA",
           class: "ra-column"
         },
@@ -82,7 +83,6 @@ export default {
           key: "dec",
           label: "Dec",
           type: 'text',
-          editable: true,
           placeholder: "Dec",
           class: "dec-column"
         },
@@ -90,7 +90,6 @@ export default {
           key: "date",
           label: "Discovery Date",
           type: 'text',
-          editable: true,
           placeholder: "Discovery Date",
           class: "discovery-date-column"
         },
@@ -98,7 +97,6 @@ export default {
           key: 'telescope',
           label: 'Telescope',
           type: 'text',
-          editable: true,
           placeholder: "Telescope",
           class: "telescope-column"
         },
@@ -106,7 +104,6 @@ export default {
           key: "instrument",
           label: "Instrument",
           type: 'text',
-          editable: true,
           placeholder: "Instrument",
           class: "instrument-column"
         },
@@ -114,7 +111,6 @@ export default {
           key: "band",
           label: 'Band',
           type: 'text',
-          editable: true,
           placeholder: "Band",
           class: "band-column"
         },
@@ -122,15 +118,20 @@ export default {
           key: "brightness",
           label: "Brightness",
           type: 'text',
-          editable: true,
           placeholder: "Brightness",
           class: "brightness-column"
+        },
+        {
+          key: "nondetection",
+          label: "Non Detect",
+          type: 'checkbox',
+          default: false,
+          class: "nondetection-column"
         },
         {
           key: "brightness_error",
           label: "Brightness Error",
           type: 'text',
-          editable: true,
           placeholder: "Brightness Error",
           class: "brightness-error-column"
         },
@@ -138,7 +139,6 @@ export default {
           key: "brightness_unit",
           label: "Brightness Unit",
           type: "select",
-          editable: true,
           class: "brightness-unit-col",
           options: [
             { value: "AB mag", text: "AB mag"},
@@ -173,6 +173,11 @@ export default {
       }
       return '';
     },
+    handleInput(data) {
+      const updatedRow = {...this.items[data.index], [data.field.key]: data.value};
+      this.$set(this.items, data.index, updatedRow);
+      this.updateCallback();
+    },
     handleAdd() {
       const newId = Date.now();
       this.rowUpdate = {
@@ -188,6 +193,7 @@ export default {
           telescope: null,
           instrument: null,
           band: null,
+          nondetection: false,
           brightness: null,
           brightness_error: null,
           brightness_unit: "AB mag",
@@ -206,18 +212,6 @@ export default {
 </script>
 
 <style scoped>
-.add-row-candidate-button {
-  color: white;
-}
 
-.candidate-data-table /deep/ td {
-  height: calc(1.5em + 0.75rem + 2px);
-  padding: 0.5rem
-}
-
-.candidate-data-table /deep/ .delete-column {
-  font-size: 1.25rem;
-  padding: 0.5rem;
-}
 
 </style>
