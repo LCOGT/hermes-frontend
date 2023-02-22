@@ -82,6 +82,21 @@
         </div>
       </template>
     </b-table>
+    <b-row>
+      <b-col class="col-md-8 ml-auto">
+        <!-- Pagination -->
+        <ocs-pagination
+          v-if="!isBusy"
+          table-id="message-table"
+          :per-page="queryParams.limit"
+          :total-rows="data.count"
+          :current-page="currentPage"
+          :display-per-page-dropdown="false"
+          total-rows-class="hermes-total-rows"
+          @pageChange="onPageChange"
+        ></ocs-pagination>
+      </b-col>
+    </b-row>
   </b-col>
 
   <!-- Full Message Box -->
@@ -91,6 +106,12 @@
         <!-- Header -->
         <b-card-title> {{selectedItem.title}} </b-card-title>
         <b-card-sub-title> {{selectedItem.author}} </b-card-sub-title>
+        <b-card-sub-title>
+          Message ID:
+          <b-link @click="copy(selectedItem.uuid, 'Message ID')">
+            {{selectedItem.uuid}}
+          </b-link>
+        </b-card-sub-title>
         <hr>
         <!-- Main Message -->
         <b-row>
@@ -155,25 +176,13 @@
       <b-row>
         <pre>{{ jsonData.content }}</pre>
       </b-row>
-      <b-row>
-        <!-- Alert User of Successful Copy -->
-        <b-alert
-          variant="success"
-          dismissible
-          fade
-          :show="showCopyAlert"
-          @dismissed="showCopyAlert=false"
-        >
-          JSON coppied to Clipboard.
-        </b-alert>
-      </b-row>
       <template #modal-footer="{ hide }">
         <div class="w-100">
           <b-button
             variant="outline-primary"
             size="sm"
             class="float-left"
-            @click="copy"
+            @click="copy(jsonData.content, 'JSON Data')"
           >
             Copy
           </b-button>
@@ -257,7 +266,6 @@ export default {
           title: '',
           content: ''
       },
-      showCopyAlert: false,
       KVdataFields: [{key: "key", class: "data-column"}, {key: "value", class: "data-column"}],
       preSetTableOrder: {
         nle_data: "eventId,discoveryDate,instrument,skymapLink,falseAlarmRate",
@@ -285,6 +293,18 @@ export default {
     }
   },
   methods: {
+    copy(value, type) {
+      // Copy text to Clipboard
+      // Only works with HTTPS or local
+      navigator.clipboard.writeText(value);
+      // Trigger alert to show sucessful copy
+      this.$bvToast.toast(type + ' copied to clipboard!', {
+          title: 'Success!',
+          variant: 'success',
+          autoHideDelay: '1000',
+          solid: "true"
+        })
+    },
     // Overrides method in paginationAndFilteringMixin
     initializeDataEndpoint: function() {
       return getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + 'api/v0/messages/';
@@ -318,15 +338,6 @@ export default {
       this.jsonData.title = "JSON for " + item.topic + " message.";
       // raise modal
       this.$root.$emit('bv::show::modal', this.jsonData.id, button);
-    },
-    copy() {
-      // Copy JSON data and trigger alert
-      if (this.jsonData.content){
-        // Copy JSON to Clipboard. Only works with HTTPS or local
-        navigator.clipboard.writeText(this.jsonData.content);
-        // Trigger alert to show sucessful copy
-        this.showCopyAlert = true;
-      }
     },
     resetjsonData() {
       // clear JSON data and remove copy alert when window closed
