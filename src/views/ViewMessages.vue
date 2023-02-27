@@ -16,18 +16,8 @@
           </template>
         </b-form-select>
       </b-col>
-      <b-col class="col-md-8">
-        <!-- Pagination -->
-        <ocs-pagination
-          v-if="!isBusy"
-          table-id="message-table"
-          :per-page="queryParams.limit"
-          :total-rows="data.count"
-          :current-page="currentPage"
-          :display-per-page-dropdown="false"
-          total-rows-class="hermes-total-rows"
-          @pageChange="onPageChange"
-        ></ocs-pagination>
+      <b-col class="col-md-6 ml-auto">
+        <b-form-input placeholder="Search Placeholder"></b-form-input>
       </b-col>
     </b-row>
     <!-- Main Message Table -->
@@ -82,21 +72,18 @@
         </div>
       </template>
     </b-table>
-    <b-row>
-      <b-col class="col-md-8 ml-auto">
-        <!-- Pagination -->
-        <ocs-pagination
-          v-if="!isBusy"
-          table-id="message-table"
-          :per-page="queryParams.limit"
-          :total-rows="data.count"
-          :current-page="currentPage"
-          :display-per-page-dropdown="false"
-          total-rows-class="hermes-total-rows"
-          @pageChange="onPageChange"
-        ></ocs-pagination>
-      </b-col>
-    </b-row>
+    <!-- Pagination -->
+    <ocs-pagination
+      v-if="!isBusy"
+      table-id="message-table"
+      :per-page="queryParams.limit"
+      :total-rows="data.count"
+      :current-page="currentPage"
+      :display-per-page-dropdown="true"
+      total-rows-class="hermes-total-rows"
+      @pageChange="onPageChange"
+      @limitChange="onLimitChange"
+    ></ocs-pagination>
   </b-col>
 
   <!-- Full Message Box -->
