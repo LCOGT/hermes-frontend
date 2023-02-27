@@ -108,8 +108,8 @@
         <b-card-sub-title> {{selectedItem.author}} </b-card-sub-title>
         <b-card-sub-title>
           Message ID:
-          <b-link @click="copy(selectedItem.uuid, 'Message ID')">
-            {{selectedItem.uuid}}
+          <b-link @click="copy(shortUUID(), 'Message ID')" v-b-tooltip.hover :title="selectedItem.uuid">
+            {{shortUUID()}} &boxbox;
           </b-link>
         </b-card-sub-title>
         <hr>
@@ -302,8 +302,12 @@ export default {
           title: 'Success!',
           variant: 'success',
           autoHideDelay: '1000',
-          solid: "true"
+          solid: true
         })
+    },
+    // Return short versio of UUID
+    shortUUID: function() {
+      return this.selectedItem.uuid.split("-")[0];
     },
     // Overrides method in paginationAndFilteringMixin
     initializeDataEndpoint: function() {
@@ -423,7 +427,7 @@ export default {
         return null;
       }
       return dayjs(datetime).format('MMM D, YYYY, HH:mm');
-    }
+    },
   }
 };
 </script>

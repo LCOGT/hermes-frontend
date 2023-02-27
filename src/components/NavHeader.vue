@@ -18,11 +18,11 @@
           <b-nav-item to="/report-discoveries">Report Discoveries</b-nav-item>
           <b-nav-item to="/report-photometry">Report Photometry</b-nav-item>
           <b-nav-item to="/report-spectroscopy" disabled>Report Spectroscopy</b-nav-item>
-          <b-nav-item to="/about-hermes">About</b-nav-item>
         </b-navbar-nav>
 
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
+          <b-nav-item to="/about-hermes">About</b-nav-item>
           <b-nav-item-dropdown right>
             <!-- Using 'button-content' slot -->
             <template #button-content>
@@ -112,7 +112,7 @@ export default {
 
 <style lang="scss" scoped>
 #nav {
-  a.router-link-exact-active {
+  a.router-link-active {
     color: white;
     font-weight: bolder;
   }
