@@ -33,7 +33,7 @@
                                 before you can log into Hermes. We’ve worked hard to make signing up easy and
                                 simple by using single-sign-on (SSO) technology. Hermes uses accounts in the
                                 SCiMMA HopSkotch system. Once you have reached <a href=https://hop.scimma.org/>
-                                hop.scimma.org</a>, click <em>Sign Up</em> (in the middle of the page) and use
+                                <b>hop.scimma.org</b></a>, click <em>Sign Up</em> (in the middle of the page) and use
                                 CILogon to select an Identity Provider of your choice.
                                 </p>
                                 <p>

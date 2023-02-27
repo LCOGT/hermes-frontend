@@ -47,8 +47,8 @@ const routes = [
     name: "report-availability",
     component: SubmitTelescopeEvents},
   {
-    path: "/about-hermes",
-    name: "about-hermes",
+    path: "/about",
+    name: "about",
     component: AboutHermes},
 ]
 
