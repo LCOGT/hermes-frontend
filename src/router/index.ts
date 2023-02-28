@@ -8,6 +8,7 @@ import SubmitSpectroscopy from "@/views/SubmitSpectroscopy.vue"
 import SubmitTelescopeEvents from "@/views/SubmitTelescopeEvents.vue"
 import ViewMessages from "@/views/ViewMessages.vue"
 import SubmitNonLocalizedEvent from "@/views/SubmitNonLocalizedEvent.vue"
+import AboutHermes from "@/views/AboutHermes.vue"
 
 Vue.use(VueRouter)
 
@@ -45,7 +46,10 @@ const routes = [
     path: "/report-availability",
     name: "report-availability",
     component: SubmitTelescopeEvents},
-
+  {
+    path: "/about",
+    name: "about",
+    component: AboutHermes},
 ]
 
 const router = new VueRouter({
