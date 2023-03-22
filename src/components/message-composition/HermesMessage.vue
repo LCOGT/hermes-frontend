@@ -93,7 +93,11 @@
             section="targets"
             datatype="Target"
             :errors="getErrors('data.targets', [])"
-            @toggle-section-show-simple="toggleSectionShowSimple('targets')"
+            :allowLoading=true
+            :forceVisible="forceShow['targets']"
+            @copy-headers="copyHeaders"
+            @parse-csv="parseCsv"
+            @toggle-section-show-simple="toggleSectionShowSimple"
           >
             <data-list
               :data="hermesMessage.data.targets"
@@ -132,7 +136,11 @@
             section="photometry"
             datatype="Photometry"
             :errors="getErrors('data.photometry', [])"
-            @toggle-section-show-simple="toggleSectionShowSimple('photometry')"
+            :allowLoading=true
+            :forceVisible="forceShow['photometry']"
+            @copy-headers="copyHeaders"
+            @parse-csv="parseCsv"
+            @toggle-section-show-simple="toggleSectionShowSimple"
           >
             <data-list
               :data="hermesMessage.data.photometry"
@@ -199,7 +207,11 @@
             section="astrometry"
             datatype="Astrometry"
             :errors="getErrors('data.astrometry', [])"
-            @toggle-section-show-simple="toggleSectionShowSimple('astrometry')"
+            :allowLoading=true
+            :forceVisible="forceShow['astrometry']"
+            @copy-headers="copyHeaders"
+            @parse-csv="parseCsv"
+            @toggle-section-show-simple="toggleSectionShowSimple"
           >
             <data-list
               :data="hermesMessage.data.astrometry"
@@ -239,7 +251,11 @@
             section="references"
             datatype="Reference"
             :errors="getErrors('data.references', [])"
-            @toggle-section-show-simple="toggleSectionShowSimple('references')"
+            :allowLoading=true
+            :forceVisible="forceShow['references']"
+            @copy-headers="copyHeaders"
+            @parse-csv="parseCsv"
+            @toggle-section-show-simple="toggleSectionShowSimple"
           >
             <data-list
               :data="hermesMessage.data.references"
@@ -442,11 +458,23 @@
           'astrometry': true,
           'extra_data': true
         },
+        forceShow: {
+          'references': false,
+          'targets': false,
+          'photometry': false,
+          'astrometry': false,
+          'spectroscopy': false
+        },
         referenceFields: [
           {
             key: 'source',
             label: 'Source',
             type: 'text',
+            list: [
+              { value: "hop_uuid", text: "Hop UUID" },
+              { value: "doi", text: "DOI" },
+              { value: "gracedb_id", text: "GraceDB ID" },
+            ],
             placeholder: "Source",
             class: "source-column"
           },
@@ -874,6 +902,58 @@
       },
       toggleSectionShowSimple: function (section) {
         this.sectionShowSimple[section] = !this.sectionShowSimple[section]
+      },
+      copyHeaders: function (section) {
+        const keys = _.keys(_.omitBy(this.emptySections[section], _.isObject));
+        const deepkeys = _.flatMap(_.pickBy(this.emptySections[section], _.isObject), _.keys);
+
+        navigator.clipboard.writeText(_.concat(keys, deepkeys));
+      },
+      parseCsv: function(section, fileInput) {
+        const lines = fileInput.split("\n");
+        let headers = [];
+        let dataLines = [];
+        _.forEach(lines, function(line){
+          const splitLine = line.split(',');
+          if (_.every(splitLine, v => v === '')){
+            // Saving from excel can yield empty lines at the top, so we skip those lines
+            return;
+          }
+          else if(_.isEmpty(headers)) {
+            // Set the headers array
+            headers = splitLine;
+          }
+          else {
+            // Save the data lines - this will be an array of arrays
+            dataLines.push(splitLine);
+          }
+        });
+        let loadedSection = [];
+        let nestedSections = _.pickBy(this.emptySections[section], _.isObject);
+        for (let i = 0; i < dataLines.length; i += 1) {
+          let newSection = _.cloneDeep(this.emptySections[section]);
+          for (let j = 0; j < headers.length; j+= 1) {
+            if (dataLines[i][j] != '') {
+              if (headers[j] in newSection) {
+                newSection[headers[j]] = dataLines[i][j];
+              }
+              else {
+                // Go through the nested objects and check if those keys are present
+                _.forEach(nestedSections, function(value, key) {
+                  if (headers[j] in value) {
+                    newSection[key][headers[j]] = dataLines[i][j];
+                  }
+                });
+              }
+            }
+          }
+          loadedSection.push(newSection);
+        }
+        if (!_.isEmpty(loadedSection)) {
+          this.hermesMessage.data[section] = loadedSection;
+          this.forceShow[section] = !this.forceShow[section];
+          this.update();
+        }
       }
     }
   };

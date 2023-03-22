@@ -171,3 +171,7 @@
 .delete-column {
     width: 50px;
 }
+
+.br-0 {
+    border-radius: 0;
+}

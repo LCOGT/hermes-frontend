@@ -10,24 +10,35 @@
                   <b-icon v-if="hasErrors" icon="exclamation-circle-fill" variant="danger"
                     :title="getErrorTooltipString()"></b-icon>
                 </b-col>
-                <b-col class="text-center">
+                <b-col class="text-center" :style="textStyle">
                   {{ capitalSection }}
                 </b-col>
               </b-row>
             </b-button>
+            <span v-if="allowLoading" class="text-right">
+              <b-button class="br-0" title="Copy Headers" @click="copyHeaders()">
+                <b-icon icon="clipboard" aria-hidden="true"></b-icon>
+              </b-button>
+            </span>
+            <span v-if="allowLoading" class="text-right">
+              <b-button class="br-0" title="Load CSV File" @click="pickCsv()">
+                <b-icon icon="upload" aria-hidden="true"></b-icon>
+                <input @change="loadCsv" type="file" :ref="section + 'File'" accept=".csv" hidden/>
+              </b-button>
+            </span>
             <span v-if="sectionShowSimple" class="text-right">
-              <b-button title="Advanced UI" :disabled="onlySimple" @click="toggleSectionShowSimple()">
+              <b-button class="br-0" title="Advanced UI" :disabled="onlySimple" @click="toggleSectionShowSimple()">
                 <b-icon icon="diagram3" aria-hidden="true"></b-icon>
               </b-button>
             </span>
             <span v-if="!sectionShowSimple && !onlySimple" class="text-right">
-              <b-button title="Simple UI" @click="toggleSectionShowSimple()">
+              <b-button class="br-0" title="Simple UI" @click="toggleSectionShowSimple()">
                 <b-icon icon="card-list" aria-hidden="true"></b-icon>
               </b-button>
             </span>
           </b-button-group>
         </b-card-header>
-        <b-collapse :id="tabName" :accordion="'accordion-' + tabName" role="tabpanel">
+        <b-collapse :id="tabName" v-model="visible" :accordion="'accordion-' + tabName" role="tabpanel">
           <b-card-body>
               <slot />
           </b-card-body>
@@ -53,6 +64,14 @@ export default {
       type: Boolean,
       default: false
     },
+    allowLoading: {
+      type: Boolean,
+      default: false
+    },
+    forceVisible: {
+      type: Boolean,
+      default: false
+    },
     section: {
       type: String,
       required: true
@@ -61,15 +80,35 @@ export default {
   data: function () {
     return {
       show: true,
+      visible: false,
       id: this.section,
       tabName: this.section.toLowerCase() + '-tab',
       capitalSection: _.capitalize(this.section),
+      fileInput: null,
       sectionShowSimple: true
+    }
+  },
+  watch: {
+    fileInput(newTable) {
+      // emit event to parse csv when file is loaded
+      this.$emit('parse-csv', this.section, newTable);
+    },
+    forceVisible() {
+      // This is just used as a signal to force showing the section
+      this.visible = true;
     }
   },
   computed: {
     hasErrors: function() {
       return !_.isEmpty(this.errors);
+    },
+    textStyle: function() {
+      if (this.allowLoading) {
+        return '';
+      }
+      else {
+        return 'margin-right: 92px !important;';
+      }
     }
   },
   methods: {
@@ -91,6 +130,23 @@ export default {
     },
     toggleSectionShowSimple: function() {
       this.$emit('toggle-section-show-simple', this.section);
+    },
+    copyHeaders: function() {
+      this.$emit('copy-headers', this.section);
+    },
+    pickCsv: function() {
+      _.get(this.$refs, this.section + 'File').click();
+    },
+    loadCsv: function(event) {
+      // Upload CSV from file and return text
+      let files = event.target.files || event.dataTransfer.files;
+      if (!files.length)
+        return;
+      let reader = new FileReader();
+      reader.onload = () => {
+        this.fileInput = reader.result;
+      }
+      reader.readAsText(files[0]);
     }
   }
 };
