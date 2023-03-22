@@ -19,7 +19,7 @@
               />
             </b-col>
             <b-col md="3">
-              <ocs-custom-datetime
+              <ocs-custom-field
                   v-model="astrometry.date_obs"
                   field="date_obs"
                   label="Obs Date:"
@@ -121,7 +121,7 @@
             </b-col>
             <b-col md="3">
               <ocs-custom-field v-model="astrometry.catalog" field="catalog" label="Astrometric Catalog:" :hide=false
-                :errors="errors.catalog" @input="update" />
+                :errors="errors.catalog" @input="update" :list="catalogList"/>
             </b-col>
           </b-form-row>
           <b-form-row>
@@ -187,6 +187,25 @@
       return {
         brightnessUnits: ['AB mag', 'Vega mag', 'mJy', 'erg / s / cm² / Å'],
         errorUnits: ['marcsec', 'arcsec', 'arcmin', 'degrees'],
+        catalogList: [
+          {value: 'Gaia_Int', text: 'Gaia_Int'},
+          {value: 'PS1_DR1', text: 'PanSTARRS-1 DR 1'},
+          {value: 'PS1_DR2', text: 'PanSTARRS-1 DR 2'},
+          {value: 'ATLAS2', text: 'ATLAS-REFCAT 2'},
+          {value: 'Gaia3', text: 'Gaia DR 3'},
+          {value: 'Gaia3E', text: 'Gaia EDR 3'},
+          {value: 'Gaia2', text: 'Gaia DR 2'},
+          {value: 'Gaia1', text: 'Gaia DR 1'},
+          {value: 'Gaia_2016', text: 'Gaia epoch 2016'},
+          {value: 'NOMAD', text: 'NOMAD'},
+          {value: 'PPMXL', text: 'PPM-XL'},
+          {value: 'UBSC', text: 'USNO Bright-star Catalog'},
+          {value: 'UCAC5', text: 'UCAC 5'},
+          {value: 'UCAC4', text: 'UCAC 4'},
+          {value: 'URAT1', text: 'URAT 1'},
+          {value: '2MASS', text: '2MASS'},
+          {value: 'SDSS', text: 'SDSS'}
+        ],
         advancedOptionsCollapsed: true,
         show: true,
         id: 'astrometry-' + this.index

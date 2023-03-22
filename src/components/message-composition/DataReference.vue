@@ -6,7 +6,7 @@
       </b-col>
       <b-col md="3">
         <ocs-custom-field v-model="reference.source" field="source" label="Source:" :hide=false
-          :errors="errors.source" @input="update" />
+          :errors="errors.source" @input="update" :list="sourceList"/>
       </b-col>
       <b-col md="3">
         <ocs-custom-field v-model="reference.citation" field="citation" label="Citation:" :hide=false
@@ -59,6 +59,11 @@ export default {
   },
   data: function() {
     return {
+      sourceList: [
+        { value: "hop_uuid", text: "Hop UUID" },
+        { value: "doi", text: "DOI" },
+        { value: "gracedb_id", text: "GraceDB ID" },
+      ],
       id: 'reference-' + this.index
     }
   }

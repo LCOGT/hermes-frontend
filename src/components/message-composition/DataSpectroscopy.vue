@@ -19,7 +19,7 @@
               />
             </b-col>
             <b-col md="3">
-              <ocs-custom-datetime
+              <ocs-custom-field
                 v-model="spectroscopy.date_obs"
                 field="date_obs"
                 label="Obs Date:"
