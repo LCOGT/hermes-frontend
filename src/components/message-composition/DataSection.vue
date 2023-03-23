@@ -4,13 +4,16 @@
       <b-card no-body class="mb-1">
         <b-card-header header-tag="header" class="p-0" role="tab">
           <b-button-group class="w-100">
-            <b-button block v-b-toggle:[tabName] variant="light">
+            <b-button block v-b-toggle:[tabName] :variant="getVariant" @click="addNewRowIfEmpty">
               <b-row>
                 <b-col class="text-left error-icon">
-                  <b-icon v-if="hasErrors" icon="exclamation-circle-fill" variant="danger"
+                  <b-icon v-if="!isEmpty && hasErrors" icon="exclamation-circle-fill" variant="danger"
                     :title="getErrorTooltipString()"></b-icon>
                 </b-col>
-                <b-col class="text-center" :style="textStyle">
+                <b-col v-if="isEmpty" class="text-center" :style="textStyle">
+                  Add {{ datatype }}
+                </b-col>
+                <b-col v-else class="text-center" :style="textStyle">
                   {{ capitalSection }}
                 </b-col>
               </b-row>
@@ -49,6 +52,7 @@
 </template>
 <script>
 import _ from 'lodash';
+import '@/assets/css/submissions.css';
 
 export default {
   name: 'DataSection',
@@ -60,15 +64,15 @@ export default {
       type: String,
       required: true
     },
+    isEmpty: {
+      type: Boolean,
+      default: false
+    },
     onlySimple: {
       type: Boolean,
       default: false
     },
     allowLoading: {
-      type: Boolean,
-      default: false
-    },
-    forceVisible: {
       type: Boolean,
       default: false
     },
@@ -92,10 +96,6 @@ export default {
     fileInput(newTable) {
       // emit event to parse csv when file is loaded
       this.$emit('parse-csv', this.section, newTable);
-    },
-    forceVisible() {
-      // This is just used as a signal to force showing the section
-      this.visible = true;
     }
   },
   computed: {
@@ -109,9 +109,28 @@ export default {
       else {
         return 'margin-right: 92px !important;';
       }
+    },
+    getVariant: function () {
+      if (this.isEmpty) {
+        return 'empty';
+      }
+      else{
+        if (this.hasErrors) {
+          return 'errors';
+        }
+        return 'valid';
+      }
     }
   },
   methods: {
+    forceVisibility: function(shouldShow) {
+      this.visible = shouldShow;
+    },
+    addNewRowIfEmpty: function() {
+      if (this.isEmpty) {
+        this.$emit('new-row');
+      }
+    },
     getErrorTooltipString: function() {
       if (_.isEmpty(this.errors)){
         return null;
