@@ -40,12 +40,12 @@ export var messageFormatMixin = {
     sanitizeMessageSection: function(message) {
       for(var i = 0; i < message.length; i += 1) {
         if (!_.isEmpty(message[i].discovery_info)){
-          message[i].discovery_info = _.omitBy(message[i].discovery_info, field => field === null || _.isEmpty(field));
+          message[i].discovery_info = _.omitBy(message[i].discovery_info, field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
         }
         if (!_.isEmpty(message[i].orbital_elements)){
-          message[i].orbital_elements = _.omitBy(message[i].orbital_elements, field => field === null || _.isEmpty(field));
+          message[i].orbital_elements = _.omitBy(message[i].orbital_elements, field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
         }
-        message[i] = _.omitBy(message[i], field => field === null || _.isEmpty(field));
+        message[i] = _.omitBy(message[i], field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
         if (!_.isEmpty(message[i].aliases)){
           message[i].aliases = message[i].aliases.split(',');
         }
@@ -55,7 +55,7 @@ export var messageFormatMixin = {
     flattenExtraData: function(extra_data) {
       let flattenedExtraData = {};
       for(var i = 0; i < extra_data.length; i += 1) {
-        if (!_.isEmpty(extra_data[i].key) && !_.isEmpty(extra_data[i].value)) {
+        if (!_.isEmpty(extra_data[i].key) && !(_.isEmpty(extra_data[i].value) || _.isBoolean(extra_data[i].value))) {
           flattenedExtraData[extra_data[i].key] = extra_data[i].value;
         }
       }
