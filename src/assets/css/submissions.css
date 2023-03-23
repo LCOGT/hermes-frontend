@@ -175,3 +175,39 @@
 .br-0 {
     border-radius: 0;
 }
+
+.btn-empty {
+    color: #212529;
+    background-color: #c9e4f2;
+    border-color: #c9e4f2;
+}
+
+.btn-empty:hover {
+    color: #212529;
+    background-color: #aad5eb;
+    border-color: #a0cfe8;
+}
+
+.btn-errors {
+    color: #212529;
+    background-color: #e67676;
+    border-color: #e67676;
+}
+
+.btn-errors:hover {
+    color: #212529;
+    background-color: #dd6d6d;
+    border-color: #dc6e6e;
+}
+
+.btn-valid {
+    color: #212529;
+    background-color: #90e98c;
+    border-color: #90e98c;
+}
+
+.btn-valid:hover {
+    color: #212529;
+    background-color: #71e36c;
+    border-color: #67e161;
+}
