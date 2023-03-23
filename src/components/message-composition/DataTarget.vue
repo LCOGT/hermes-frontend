@@ -17,6 +17,7 @@
                   label="Type:"
                   :hide=false
                   :options="typeOptions"
+                  @change="onTypeChange"
               />
             </b-col>
             <b-col md="2" offset-md="2">
@@ -234,7 +235,18 @@
         id: 'target-' + this.index
       };
     },
+    created() {
+      this.type = this.getDefaultType;
+    },
     computed: {
+      getDefaultType: function() {
+        if (_.isEmpty(_.omitBy(this.target.orbital_elements, field => field === null || (_.isEmpty(field) && !_.isBoolean(field))))) {
+          return 'Sidereal';
+        }
+        else{
+          return 'Non-Sidereal';
+        }
+      },
       getErrorAlignment: function () {
         if (!_.isEmpty(this.target.ra) || !_.isEmpty(this.target.dec)){
           return "center";
@@ -242,6 +254,32 @@
         else{
           return "baseline";
         }
+      }
+    },
+    methods: {
+      onTypeChange: function() {
+        if (this.type === 'Sidereal') {
+          this.target.orbital_elements = {
+            'epoch_of_elements': null,
+            'orbinc': null,
+            'longascnode': null,
+            'argofperih': null,
+            'eccentricity': null,
+            'meandist': null,
+            'meananom': null,
+            'perihdist': null,
+            'epochofperih': null
+          }
+        }
+        else {
+          this.target.ra = null;
+          this.target.ra_error = null;
+          this.target.pm_ra = null;
+          this.target.dec = null;
+          this.target.dec_error = null;
+          this.target.pm_dec = null;
+        }
+        this.update();
       }
     }
   };
