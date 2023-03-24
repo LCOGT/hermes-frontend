@@ -59,54 +59,79 @@
                                         <span v-html="data.value"></span>
                                     </template>
                                 </b-table>
-                                <code>Reference</code>
-                                <b-table striped hover :items="reference_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Target</code>: Note that either RA and Dec or orbital elements are required.
-                                <b-table striped hover :items="target_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Orbital Elements</code>
-                                <b-table striped hover :items="orbital_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Discovery Info</code>
-                                <b-table striped hover :items="discovery_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Photometry</code>
-                                <b-table striped hover :items="photometry_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Astrometry</code>
-                                <b-table striped hover :items="astrometry_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Spectroscopy</code>
-                                <b-table striped hover :items="spectroscopy_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
-                                <code>Spectrum</code>
-                                <b-table striped hover :items="spectrum_items">
-                                    <template #cell(Description)="data">
-                                        <span v-html="data.value"></span>
-                                    </template>
-                                </b-table>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-reference variant="primary">Reference</b-button>
+                                    <b-collapse id="accordion-reference" accordion="accordion-reference" role="tabpanel">
+                                        <b-table striped hover :items="reference_items">
+                                            <template #cell(Description)="data">
+                                                <span v-html="data.value"></span>
+                                            </template>
+                                        </b-table>
+                                    </b-collapse>
+                                </b-card>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-target variant="primary">Target</b-button>
+                                    <b-collapse id="accordion-target" accordion="accordion-target" role="tabpanel">
+                                    <b-card>Note that either RA and Dec or orbital elements are required.</b-card>
+                                    <b-table striped hover :items="target_items">
+                                        <template #cell(Description)="data">
+                                            <span v-html="data.value"></span>
+                                        </template>
+                                    </b-table>
+                                    </b-collapse>  
+                                </b-card>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-orbital-elements variant="primary">Orbital Elements</b-button>
+                                    <b-collapse id="accordion-orbital-elements" accordion="accordion-orbital-elements" role="tabpanel">
+                                        <b-table striped hover :items="orbital_items">
+                                            <template #cell(Description)="data">
+                                                <span v-html="data.value"></span>
+                                            </template>
+                                        </b-table>
+                                    </b-collapse>
+                                </b-card>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-discovery variant="primary">Discovery Info</b-button>
+                                    <b-collapse id="accordion-discovery" accordion="accordion-discovery" role="tabpanel">
+                                        <b-table striped hover :items="discovery_items">
+                                            <template #cell(Description)="data">
+                                                <span v-html="data.value"></span>
+                                            </template>
+                                        </b-table>
+                                    </b-collapse>
+                                </b-card>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-photometry variant="primary">Photometry</b-button>
+                                    <b-collapse id="accordion-photometry" accordion="accordion-photometry" role="tabpanel">
+                                        <b-table striped hover :items="photometry_items">
+                                            <template #cell(Description)="data">
+                                                <span v-html="data.value"></span>
+                                            </template>
+                                        </b-table>
+                                    </b-collapse>
+                                </b-card>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-astrometry variant="primary">Astrometry</b-button>
+                                    <b-collapse id="accordion-astrometry" accordion="accordion-astrometry" role="tabpanel">
+                                        <b-card>
+                                            <b-table striped hover :items="astrometry_items">
+                                                <template #cell(Description)="data">
+                                                    <span v-html="data.value"></span>
+                                                </template>
+                                            </b-table>
+                                        </b-card>
+                                    </b-collapse>
+                                </b-card>
+                                <b-card>
+                                    <b-button block v-b-toggle.accordion-spectroscopy variant="primary">Spectroscopy</b-button>
+                                    <b-collapse id="accordion-spectroscopy" accordion="accordion-spectroscopy" role="tabpanel">
+                                        <b-table striped hover :items="spectroscopy_items">
+                                            <template #cell(Description)="data">
+                                                <span v-html="data.value"></span>
+                                            </template>
+                                        </b-table>
+                                    </b-collapse>
+                                </b-card>
                             </b-card-text>
                         </b-card-body>
                     </b-collapse>
@@ -141,11 +166,11 @@ export default {
                 { Field: 'message', Description: 'String: Message text' },
                 { Field: 'event_id', Description: 'String: Non-localized event ID to associate this message e.g. GW170817' },
                 { Field: 'references', Description: 'List of <code>Reference</code>s' },
-                { Field: 'extra_data', Description: 'JSON dictionary of user-specified key-value pairs' },
                 { Field: 'targets', Description: 'List of <code>Target</code>s to reference in the message' },
                 { Field: 'photometry', Description: 'List of <code>Photometry</code> measurements.' },
                 { Field: 'spectroscopy', Description: 'List of <code>Spectroscopy</code> measurements.' },
                 { Field: 'astrometry', Description: 'List of <code>Astrometry</code> measurements.' },
+                { Field: 'key1, key2,...', Description: 'Users can specify any other key-value pairs that are desired.' },
                 { Field: 'submit_to_tns', Description: 'bool: Submit to the Transient Name Server?' },
                 { Field: 'submit_to_mpc', Description: 'bool: Submit to the Minor Planet Center?' },
             ],
@@ -156,7 +181,7 @@ export default {
             ],
             target_items: [
                 { Field: 'name', Description: 'String, required: Name of target; will be referenced at the key in other sections like photometry.' },
-                { Field: 'discovery', Description: 'bool: Is this target a new discovery?' },
+                { Field: 'new_discovery', Description: 'bool: Is this target a new discovery?' },
                 { Field: 'ra', Description: 'String or Float: RA of the target; Value can be in sexagesimal or decimal degrees; Required for reporting to the TNS' },
                 { Field: 'dec', Description: 'String or Float: Dec of the target; Value can be in sexagesimal or decimal degrees; Required for reporting to the TNS' },
                 { Field: 'ra_error', Description: 'Float: Uncertainty on RA' },
@@ -165,7 +190,7 @@ export default {
                 { Field: 'dec_error_units', Description: 'String: Units for the error on Dec; choices: [degree, arcmin, arcsec]' },
                 { Field: 'pm_ra', Description: 'Float: Proper motion in RA in mas/year' },
                 { Field: 'pm_dec', Description: 'Float: Proper motion in Dec in mas/year' },
-                { Field: 'epoch', Description: 'String or Float: Epoch of the coordinates; Default is j2000. If a float is given, it is assumed to be Julian.' },
+                { Field: 'epoch', Description: 'Float: Julian epoch of the coordinates; Default is 2000.'},
                 { Field: 'orbital_elements', Description: '<code>Orbital Elements</code>' },
                 { Field: 'discovery_info', Description: '<code>Discovery Info</code>' },
                 { Field: 'redshift', Description: 'Float: redshift of the target' },
@@ -232,7 +257,11 @@ export default {
                 { Field: 'instrument', Description: 'String: Instrument used to obtain spectra' },
                 { Field: 'setup', Description: 'String: Setup of the instrument' },
                 { Field: 'exposure_time', Description: 'Float: Exposure time in seconds' },
-                { Field: 'spectrum', Description: '<code>Spectrum</code> dict' },
+                { Field: 'flux', Description: 'Array of floats: the flux values of the spectrum' },
+                { Field: 'error', Description: 'Array of floats: the flux errors of the spectrum' },
+                { Field: 'wavelength', Description: 'Array of floats: the wavelength values of the spectral bins' },
+                { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [A, nm, um, Hz, GHz, THz]' },
+                { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [Flambda, Fnu]' },
                 { Field: 'classification', Description: 'String: Classification of target. If submitting to TNS, classification must be a recognized TNS type.' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time spectrum/classification should remain proprietary on TNS' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years]' },
@@ -242,14 +271,6 @@ export default {
                 { Field: 'comments', Description: 'String: Type of spectrum; Choices: [Object, Host, Synthetic, Sky, Arcs]' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation' },
             ],
-
-            spectrum_items: [
-                { Field: 'flux', Description: 'Array of floats: the flux values of the spectrum' },
-                { Field: 'error', Description: 'Array of floats: the flux errors of the spectrum' },
-                { Field: 'wavelength', Description: 'Array of floats: the wavelength values of the spectral bins' },
-                { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [A, nm, Hz, GHz, THz]' },
-                { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [Flambda, Fnu]' }
-            ]
         }
     }
 }
