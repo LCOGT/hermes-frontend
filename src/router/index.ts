@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import SubmitMessage from "@/views/SubmitMessage.vue"
-import ViewMessages from "@/views/ViewMessages.vue"
+import QueryMessages from "@/views/QueryMessages.vue"
+import ViewMessage from "@/views/ViewMessage.vue"
 import AboutHermes from "@/views/AboutHermes.vue"
 
 Vue.use(VueRouter)
@@ -10,16 +11,26 @@ const routes = [
   {
     path: "/",
     name: "home",
-    component: ViewMessages
+    component: QueryMessages
+  },
+  {
+    path: "/message/:id",
+    name: "message",
+    component: ViewMessage,
+    meta: {
+      title: 'Message Detail'
+    }
   },
   {
     path: "/submit-message",
     name: "submit-message",
-    component: SubmitMessage},
+    component: SubmitMessage
+  },
   {
     path: "/about",
     name: "about",
-    component: AboutHermes},
+    component: AboutHermes
+  },
 ]
 
 const router = new VueRouter({
