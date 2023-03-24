@@ -52,6 +52,7 @@ export default {
           submitter: '',
           submit_to_tns: false,
           submit_to_mpc: false,
+          submit_to_gcn: false,
           data: {
             event_id: null,
             references: [],
@@ -134,6 +135,7 @@ export default {
         submitter: '',
         submit_to_tns: false,
         submit_to_mpc: false,
+        submit_to_gcn: false,
         data: {},
       }
     },

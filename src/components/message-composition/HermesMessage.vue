@@ -76,6 +76,14 @@
                         @input="update"
                     > Submit to MPC
                     </b-form-checkbox>  
+                    <b-form-checkbox
+                        id="submit-to-gcn"
+                        v-model="hermesMessage.submit_to_gcn"
+                        name="submit-to-gcn"
+                        switch
+                        @input="update"
+                    > Submit to GCN
+                    </b-form-checkbox>
                   </b-col>
                 </b-form-row>
               </b-form>
@@ -365,6 +373,22 @@
             </b-form-row>
           </b-container>
         </b-tab>
+        <b-tab>
+          <template slot="title">
+            <span><i class="fas fa-code" /> Text View</span>
+          </template>
+          <b-container class="p-0 mt-2">
+            <b-form-row>
+              <b-col class="bg-light rounded">
+                <text-view
+                  class="p-4"
+                  :request-group="this.sanitizedMessageData()"
+                  :extra-download-button-attrs="{ class: 'float-right', variant: 'primary' }"
+                />
+              </b-col>
+            </b-form-row>
+          </b-container>
+        </b-tab>
       </b-tabs>
     </b-card>
   </template>
@@ -381,6 +405,7 @@
   import DataSpectroscopy from '@/components/message-composition/DataSpectroscopy.vue'
   import DataAstrometry from '@/components/message-composition/DataAstrometry.vue'
   import ShowWrapper from '@/components/message-composition/ShowWrapper.vue'
+  import TextView from '@/components/message-composition/TextView.vue'
   import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
 
   export default {
@@ -394,7 +419,8 @@
       DataTarget,
       DataPhotometry,
       DataSpectroscopy,
-      DataAstrometry
+      DataAstrometry,
+      TextView
     },
     mixins: [messageFormatMixin],
     props: {
