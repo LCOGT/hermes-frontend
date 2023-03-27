@@ -1,7 +1,7 @@
 <template>
   <div :class="containerSize">
     <b-alert :show="failedToLoad" variant="danger">
-      <p>Message with uuid starting with {{ this.id }} not found</p>
+      <p>Message with UUID starting with {{ this.id }} not found, or UUID is not specific enough to specify a single message.</p>
     </b-alert>
     <message-detail v-if="message" :message="message"></message-detail>
   </div>
