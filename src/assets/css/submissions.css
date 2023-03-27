@@ -1,3 +1,7 @@
+.data-label-text {
+    padding-top: 5px !important; 
+}
+
 .outside-container {
     overflow-x: auto;
     margin: auto;
@@ -21,6 +25,11 @@
     padding: 0;
     padding-left: 15px;
     padding-right: 15px;
+}
+
+.error-icon {
+    width: 54px;
+    max-width: 54px;
 }
 
 .message-tabs {
@@ -51,20 +60,33 @@
     vertical-align: middle;
 }
 
-.nondetection-column .form-group {
-    text-align: center;
-    width: 100%;
+.index-column {
+    width: 20px;
+    vertical-align: middle !important;
+}
+
+.index-column span{
+    margin: 0 auto;
+}
+
+#title-fieldgroup-main-fields label{
+    flex: 0 0 10%;
+}
+
+#authors-fieldgroup-main-fields label{
+    flex: 0 0 10%;
+}
+
+#aliases-fieldgroup-advanced-target-collapse-0 label{
+    flex: 0 0 10%;
+}
+
+#url-fieldgroup-reference-0 label{
+    flex: 0 0 10%;
 }
 
 .form-group {
     margin-bottom: 0;
-}
-
-.delete-column {
-    font-size: 1.25rem;
-    text-align: center;
-    vertical-align: middle;
-    width: 100%;
 }
 
 .ra-column {
@@ -75,6 +97,117 @@
     min-width: 80px;
 }
 
+.ra-error-column {
+    min-width: 60px;
+}
+
+.dec-error-column {
+    min-width: 60px;
+}
+
+.ra-error-units-column {
+    min-width: 90px;
+}
+
+.dec-error-units-column {
+    min-width: 90px;
+}
+
 .target-name-column {
     min-width: 80px;
+}
+
+.target-select-column {
+    width: 120px;
+}
+
+.source-column {
+    width: 300px;
+}
+
+.citation-column {
+    width: 200px;
+}
+
+.url-column {
+    width: 440px;
+}
+
+.telescope-column {
+    width: 90px;
+}
+
+.instrument-column {
+    width: 90px;
+}
+
+.bandpass-column {
+    width: 90px;
+}
+
+.brightness-units-column {
+    width: 120px;
+}
+
+.new-discovery-column {
+    width: 40px;
+    vertical-align: middle;
+}
+
+.new-discovery-column .form-group {
+    text-align: center;
+    padding-top: 4px;
+    width: 100%;
+}
+
+.value-column {
+    width: 70%;
+}
+
+.copy-column {
+    width: 50px;
+}
+
+.delete-column {
+    width: 50px;
+}
+
+.br-0 {
+    border-radius: 0;
+}
+
+.btn-empty {
+    color: #212529;
+    background-color: #c9e4f2;
+    border-color: #c9e4f2;
+}
+
+.btn-empty:hover {
+    color: #212529;
+    background-color: #aad5eb;
+    border-color: #a0cfe8;
+}
+
+.btn-errors {
+    color: #212529;
+    background-color: #e67676;
+    border-color: #e67676;
+}
+
+.btn-errors:hover {
+    color: #212529;
+    background-color: #dd6d6d;
+    border-color: #dc6e6e;
+}
+
+.btn-valid {
+    color: #212529;
+    background-color: #90e98c;
+    border-color: #90e98c;
+}
+
+.btn-valid:hover {
+    color: #212529;
+    background-color: #71e36c;
+    border-color: #67e161;
 }

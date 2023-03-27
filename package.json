@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 8001",
+    "dev-build": "vue-cli-service build --mode=development",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -83,6 +84,7 @@
     },
     "rules": {
       "vue/no-unused-vars": "off",
+      "vue/no-mutating-props": "off",
       "@typescript-eslint/no-unused-vars": "off"
     }
   },

@@ -26,3 +26,12 @@
 .collapse-table-head {
     opacity: 1;
 }
+
+.no-padding {
+    padding: 0 0 !important;
+}
+
+.only-right-padding {
+    padding-right: 16px;
+    padding-left: 0px;
+}

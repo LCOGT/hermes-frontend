@@ -13,11 +13,8 @@
 
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item to="/?limit=10">Browse</b-nav-item>
-          <b-nav-item to="/general-message" disabled>Submit Message</b-nav-item>
-          <b-nav-item to="/report-discoveries">Report Discoveries</b-nav-item>
-          <b-nav-item to="/report-photometry">Report Photometry</b-nav-item>
-          <b-nav-item to="/report-spectroscopy" disabled>Report Spectroscopy</b-nav-item>
+          <b-nav-item class="ml-4" to="/?limit=10">Browse</b-nav-item>
+          <b-nav-item class="ml-4" to="/submit-message">Submit Message</b-nav-item>
         </b-navbar-nav>
 
         <!-- Right aligned nav items -->
