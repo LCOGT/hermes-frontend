@@ -187,6 +187,25 @@
                 :errors="errors.group_associations" @input="update" />
             </b-col>
           </b-form-row>
+          <b-form-row class="mb-3">
+            <b-col md="3">
+              <ocs-custom-field v-model="target.distance" field="distance" label="Distance:" :hide=false
+                :errors="errors.distance" @input="update" >
+                <b-input-group-append slot="inline-input">
+                  <b-form-select
+                    :id="'distance-units-select-' + this.index"
+                    v-model="target.distance_units"
+                    :options="distanceUnits"
+                    @input="update"
+                  />
+                </b-input-group-append>
+              </ocs-custom-field>
+            </b-col>
+            <b-col md="3">
+              <ocs-custom-field v-model="target.distance_error" field="distance_error" label="Error:" :hide=false
+                :errors="errors.distance_error" @input="update" />
+            </b-col>
+          </b-form-row>
           <b-form-row>
             <b-col md="12">
               <ocs-custom-field v-model="target.aliases" field="aliases" label="Aliases:" desc="Comma separated list of aliases for this Target" :hide=false
@@ -230,6 +249,7 @@
         type: 'Sidereal',
         typeOptions: ['Sidereal', 'Non-Sidereal'],
         errorUnits: ['marcsec', 'arcsec', 'arcmin', 'degrees'],
+        distanceUnits: ['cm', 'm', 'km', 'pc', 'kpc', 'Mpc', 'Gpc', 'ly', 'au'],
         advancedOptionsCollapsed: true,
         show: true,
         id: 'target-' + this.index
