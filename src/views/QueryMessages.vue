@@ -1,7 +1,7 @@
 <template>
   <div class="overflow-auto px-4" :style="{width: '100%'}">
   <b-row>
-    <b-col>
+    <b-col md="7">
       <b-row>
         <b-col class="col-md-4">
           <!-- Topic Filter -->
@@ -86,7 +86,7 @@
       ></ocs-pagination>
     </b-col>
     <!-- Full Message Box -->
-    <b-col>
+    <b-col md="5" class="only-right-padding">
       <message-detail v-if="selectedItem" :message="selectedItem"></message-detail>
       <!-- Initial Message Box Display -->
       <b-card v-else border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">

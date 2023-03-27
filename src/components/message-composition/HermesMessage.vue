@@ -548,6 +548,9 @@
             'redshift': null,
             'host_name': null,
             'host_redshift': null,
+            'distance': null,
+            'distance_error': null,
+            'distance_units': null,
             'aliases': null,
             'group_associations': null
           },

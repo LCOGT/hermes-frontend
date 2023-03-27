@@ -1,7 +1,7 @@
 <template>
-  <div class="overflow-auto px-4" :style="{ width: '100%' }">
-    <b-container>
-      <b-card border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
+  <div class="overflow-auto px-4 no-padding" :style="{ width: '100%' }">
+    <b-container class="no-padding">
+      <b-card border-variant="primary" class="mb-2" style="overflow: auto;">
         <!-- Header -->
         <b-card-title> {{ message.title }} </b-card-title>
         <b-card-sub-title> {{ message.author }} </b-card-sub-title>
@@ -55,7 +55,7 @@
         </div>
         <div v-if="hasNonObjectDataItems(message)">
           <b-row sm="3" v-b-toggle.collapse-additional-data-kp class="text-sm-right mx-2">
-            <h4 class="collapse-table-head">ADDITIONAL DATA KEYPAIRS &#9776;</h4>
+            <h4 class="collapse-table-head">EXTRA KEYPAIRS &#9776;</h4>
           </b-row>
           <b-collapse id="collapse-additional-data-kp">
             <b-row class="mx-2">

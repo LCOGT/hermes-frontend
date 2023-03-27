@@ -53,9 +53,10 @@ export var messageFormatMixin = {
       return message;
     },
     flattenExtraData: function(extra_data) {
+      const keywordSections = ['targets', 'references', 'event_id', 'astrometry', 'spectroscopy'];
       let flattenedExtraData = {};
       for(var i = 0; i < extra_data.length; i += 1) {
-        if (!_.isEmpty(extra_data[i].key) && !(_.isEmpty(extra_data[i].value) || _.isBoolean(extra_data[i].value))) {
+        if (!_.isEmpty(extra_data[i].key) && !_.isEmpty(extra_data[i].value) && !keywordSections.includes(extra_data[i].key)) {
           flattenedExtraData[extra_data[i].key] = extra_data[i].value;
         }
       }
@@ -71,7 +72,8 @@ export var messageFormatMixin = {
       cleanMessage.data.photometry = this.sanitizeMessageSection(cleanMessage.data.photometry);
       cleanMessage.data.spectroscopy = this.sanitizeMessageSection(cleanMessage.data.spectroscopy);
       cleanMessage.data.astrometry = this.sanitizeMessageSection(cleanMessage.data.astrometry);
-      cleanMessage.data.extra_data = this.flattenExtraData(cleanMessage.data.extra_data);
+      cleanMessage.data = _.assign(cleanMessage.data, this.flattenExtraData(cleanMessage.data.extra_data));
+      delete cleanMessage.data.extra_data;
       if (!_.isEmpty(cleanMessage.message_text)){
         cleanMessage.message_text = this.formattedMessage;
       }
