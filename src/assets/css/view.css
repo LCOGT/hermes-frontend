@@ -1,0 +1,37 @@
+.message-b-table {
+    width: 100%;
+}
+
+.message-b-table>>>.data-column {
+    padding: 0.3rem;
+}
+
+.kv-b-table {
+    width: 100%;
+}
+
+.message-block {
+    max-width: 80%;
+}
+
+.expand-button {
+    max-width: 20%;
+}
+
+/* Show mouseover for Collapsable Data Table */
+.collapse-table-head:hover {
+    opacity: 0.5;
+}
+
+.collapse-table-head {
+    opacity: 1;
+}
+
+.no-padding {
+    padding: 0 0 !important;
+}
+
+.only-right-padding {
+    padding-right: 16px;
+    padding-left: 0px;
+}
