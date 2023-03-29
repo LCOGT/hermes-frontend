@@ -35,6 +35,20 @@
           <b-collapse :id="field">
             <b-row class="mx-2">
               <b-table small reactive class="data-b-table" :items="value" :fields="getDataFields(field, value)">
+                <template #cell(citation)="data">
+                  <b-link v-if="data.item.source == 'hop_uuid'" :to="{ name: 'message', params: { id: data.item.citation } }">
+                    {{ data.item.citation }}
+                  </b-link>
+                  <b-link v-else-if="data.item.source == 'gracedb_id'" :href="getGraceDBLink(data.item.citation)" v-b-tooltip.hover :title="getGraceDBLink(data.item.citation)">
+                    {{ data.item.citation }}
+                  </b-link>
+                  <p v-else>{{ data.item.citation }}</p>
+                </template>
+                <template #cell(url)="data">
+                  <b-link :href="data.item.url">
+                    {{ data.item.url }}
+                  </b-link>
+                </template>
               </b-table>
             </b-row>
           </b-collapse>
