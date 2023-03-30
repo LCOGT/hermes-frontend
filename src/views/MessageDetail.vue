@@ -55,13 +55,19 @@
           <hr>
         </div>
         <!-- Additional Data Table -->
-        <div v-for="(value, field) in getDictionaryDataItems(message)" :key="field + '-dictionary'">
+        <div v-for="(dictvalue, field) in getDictionaryDataItems(message)" :key="field + '-dictionary'">
           <b-row sm="3" v-b-toggle:[field] class="text-sm-right mx-2">
             <h4 class="collapse-table-head">{{ field.toUpperCase().replace("_", " ") }} KEYPAIRS &#9776;</h4>
           </b-row>
           <b-collapse :id="field">
             <b-row class="mx-2">
-              <b-table small reactive class="kv-b-table" :items="getKVItems(value)" :fields="KVdataFields">
+              <b-table small reactive class="kv-b-table" :items="getKVItems(dictvalue)" :fields="KVdataFields">
+                <template #cell(value)="data">
+                  <b-link v-if="isLink(data.item.value)" :href="data.item.value">
+                    {{ data.item.value }}
+                  </b-link>
+                  <p v-else>{{ data.item.value }}</p>
+                </template>
               </b-table>
             </b-row>
           </b-collapse>
@@ -74,6 +80,12 @@
           <b-collapse id="collapse-additional-data-kp">
             <b-row class="mx-2">
               <b-table small reactive class="kv-b-table" :items="getNonObjectDataItems(message)" :fields="KVdataFields">
+                <template #cell(value)="data">
+                  <b-link v-if="isLink(data.item.value)" :href="data.item.value">
+                    {{ data.item.value }}
+                  </b-link>
+                  <p v-else>{{ data.item.value }}</p>
+                </template>
               </b-table>
             </b-row>
           </b-collapse>
@@ -115,12 +127,17 @@ export default {
     message: {
       type: Object,
       required: true
+    },
+    id: {
+      type: String,
+      required: false,
+      default: "1"
     }
   },
   data() {
     return {
       jsonData: {
-        id: 'json-data',
+        id: 'json-data-' + this.id,
         title: '',
         content: ''
       },
@@ -196,6 +213,9 @@ export default {
     },
     hasNonObjectDataItems(message) {
       return !_.isEmpty(this.getNonObjectDataItems(message));
+    },
+    isLink(text) {
+      return _.isString(text) && text.startsWith('http');
     },
     getDataFields(section, values) {
       // Create the fields for the Main Data Table

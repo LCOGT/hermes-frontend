@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import SubmitMessage from "@/views/SubmitMessage.vue"
 import QueryMessages from "@/views/QueryMessages.vue"
 import ViewMessage from "@/views/ViewMessage.vue"
+import ViewNonlocalizedevent from "@/views/ViewNonlocalizedevent.vue"
 import AboutHermes from "@/views/AboutHermes.vue"
 
 Vue.use(VueRouter)
@@ -19,6 +20,14 @@ const routes = [
     component: ViewMessage,
     meta: {
       title: 'Message Detail'
+    }
+  },
+  {
+    path: "/nonlocalizedevent/:id",
+    name: "nonlocalizedevent",
+    component: ViewNonlocalizedevent,
+    meta: {
+      title: 'Nonlocalizedevent Detail'
     }
   },
   {
