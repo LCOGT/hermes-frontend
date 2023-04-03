@@ -10,7 +10,7 @@
           <b-link :to="{ name: 'message', params: { id: message.uuid } }" v-b-tooltip.hover :title="message.uuid">
             {{ shortUUID() }}
           </b-link>
-          <b-link @click="copy(shortUUID(), 'Message ID')" v-b-tooltip.hover title="Copy ID">
+          <b-link @click="copy(message.uuid, 'Message ID')" v-b-tooltip.hover title="Copy ID">
             &boxbox;
           </b-link>
         </b-card-sub-title>
@@ -35,19 +35,39 @@
           <b-collapse :id="field">
             <b-row class="mx-2">
               <b-table small reactive class="data-b-table" :items="value" :fields="getDataFields(field, value)">
+                <template #cell(citation)="data">
+                  <b-link v-if="data.item.source == 'hop_uuid'" :to="{ name: 'message', params: { id: data.item.citation } }">
+                    {{ data.item.citation }}
+                  </b-link>
+                  <b-link v-else-if="data.item.source == 'gracedb_id'" :href="getGraceDBLink(data.item.citation)" v-b-tooltip.hover :title="getGraceDBLink(data.item.citation)">
+                    {{ data.item.citation }}
+                  </b-link>
+                  <p v-else>{{ data.item.citation }}</p>
+                </template>
+                <template #cell(url)="data">
+                  <b-link :href="data.item.url">
+                    {{ data.item.url }}
+                  </b-link>
+                </template>
               </b-table>
             </b-row>
           </b-collapse>
           <hr>
         </div>
         <!-- Additional Data Table -->
-        <div v-for="(value, field) in getDictionaryDataItems(message)" :key="field + '-dictionary'">
+        <div v-for="(dictvalue, field) in getDictionaryDataItems(message)" :key="field + '-dictionary'">
           <b-row sm="3" v-b-toggle:[field] class="text-sm-right mx-2">
             <h4 class="collapse-table-head">{{ field.toUpperCase().replace("_", " ") }} KEYPAIRS &#9776;</h4>
           </b-row>
           <b-collapse :id="field">
             <b-row class="mx-2">
-              <b-table small reactive class="kv-b-table" :items="getKVItems(value)" :fields="KVdataFields">
+              <b-table small reactive class="kv-b-table" :items="getKVItems(dictvalue)" :fields="KVdataFields">
+                <template #cell(value)="data">
+                  <b-link v-if="isLink(data.item.value)" :href="data.item.value">
+                    {{ data.item.value }}
+                  </b-link>
+                  <p v-else>{{ data.item.value }}</p>
+                </template>
               </b-table>
             </b-row>
           </b-collapse>
@@ -60,6 +80,12 @@
           <b-collapse id="collapse-additional-data-kp">
             <b-row class="mx-2">
               <b-table small reactive class="kv-b-table" :items="getNonObjectDataItems(message)" :fields="KVdataFields">
+                <template #cell(value)="data">
+                  <b-link v-if="isLink(data.item.value)" :href="data.item.value">
+                    {{ data.item.value }}
+                  </b-link>
+                  <p v-else>{{ data.item.value }}</p>
+                </template>
               </b-table>
             </b-row>
           </b-collapse>
@@ -101,12 +127,17 @@ export default {
     message: {
       type: Object,
       required: true
+    },
+    id: {
+      type: String,
+      required: false,
+      default: "1"
     }
   },
   data() {
     return {
       jsonData: {
-        id: 'json-data',
+        id: 'json-data-' + this.id,
         title: '',
         content: ''
       },
@@ -182,6 +213,9 @@ export default {
     },
     hasNonObjectDataItems(message) {
       return !_.isEmpty(this.getNonObjectDataItems(message));
+    },
+    isLink(text) {
+      return _.isString(text) && text.startsWith('http');
     },
     getDataFields(section, values) {
       // Create the fields for the Main Data Table
