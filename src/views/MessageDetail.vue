@@ -10,7 +10,7 @@
           <b-link :to="{ name: 'message', params: { id: message.uuid } }" v-b-tooltip.hover :title="message.uuid">
             {{ shortUUID() }}
           </b-link>
-          <b-link @click="copy(shortUUID(), 'Message ID')" v-b-tooltip.hover title="Copy ID">
+          <b-link @click="copy(message.uuid, 'Message ID')" v-b-tooltip.hover title="Copy ID">
             &boxbox;
           </b-link>
         </b-card-sub-title>
