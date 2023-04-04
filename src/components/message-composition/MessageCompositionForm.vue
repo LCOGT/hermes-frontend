@@ -158,7 +158,6 @@ export default {
         this.$refs.hermesMessageChild.$refs[section + 'Section'].forceVisibility(false);
       }
       this.hermesMessage.data['event_id'] = null;
-      this.$refs.hermesMessageChild.update();
     },
     hermesMessageUpdated: function() {
       this.validate();
