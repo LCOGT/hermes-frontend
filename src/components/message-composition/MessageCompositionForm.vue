@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <b-col class="m-0 p-0">
-        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage"
+        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" ref="hermesMessageChild"
           @hermes-message-updated="hermesMessageUpdated">
         </hermes-message>
       </b-col>
@@ -126,16 +126,29 @@ export default {
       });
     },
     clearForm() {
-      this.hermesMessage = {
-        title: '',
-        authors: '',
-        topic: '',
-        message_text: '',
-        submitter: '',
-        submit_to_tns: false,
-        submit_to_mpc: false,
-        data: {},
+      // Reset the page to a clean state
+      let emptyData = '';
+      let dataFieldList = [
+        'references',
+        'extra_data',
+        'targets',
+        'photometry',
+        'spectroscopy',
+        'astrometry']
+      this.hermesMessage.title = emptyData;
+      this.hermesMessage.authors = emptyData;
+      this.hermesMessage.topic = this.topicOptions[0];
+      this.hermesMessage.message_text = emptyData;
+      this.hermesMessage.submitter = emptyData;
+      this.hermesMessage.submit_to_tns = false;
+      this.hermesMessage.submit_to_mpc = false;
+      for (let i = 0; i < dataFieldList.length; i += 1) {
+        let section = dataFieldList[i]
+        this.hermesMessage.data[section] = []
+        this.$refs.hermesMessageChild.$refs[section + 'Section'].forceVisibility(false);
       }
+      this.hermesMessage.data['event_id'] = null;
+      this.$refs.hermesMessageChild.update();
     },
     hermesMessageUpdated: function() {
       this.validate();
