@@ -40,7 +40,7 @@
                                     be registerd with SCiMMA and you will be redirected back to Hermes.
                                 </p>
                                 <p>
-                                    If you wish to update your credentials, or add topics to your account, you will
+                                    If you wish to update your credentials or add topics to your account, you will
                                     need to sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
                                     the same credentials you just used to register.
                                 </p>
