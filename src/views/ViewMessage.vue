@@ -11,12 +11,14 @@ import getEnv from "@/utils/env.js";
 import axios from "axios";
 import '@/assets/css/view.css';
 import MessageDetail from '@/views/MessageDetail.vue';
+import { logoutMixin } from '@/mixins/logoutMixin.js';
 
 export default {
   name: "ViewMessage",
   components: {
     MessageDetail,
   },
+  mixins: [logoutMixin],
   data() {
     return {
       message: null,
@@ -38,9 +40,16 @@ export default {
   },
   created: function() {
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages/" + this.id + '/')
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/messages/" + this.id + '/', {
+          withCredentials: true,
+        })
       .then((response) => (this.message = response.data))
-      .catch(() => this.failedToLoad = true);
+      .catch((error) => {
+        this.failedToLoad = true;
+        if (error.response.status == 401){
+          this.logout();
+        }
+      });
   }
 };
 </script>
