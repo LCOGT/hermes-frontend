@@ -137,11 +137,10 @@ export default {
     },
     clearForm() {
       // Reset the page to a clean state
-      let emptyData = '';
-      this.hermesMessage.title = emptyData;
-      this.hermesMessage.authors = emptyData;
+      this.hermesMessage.title = '';
+      this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];
-      this.hermesMessage.message_text = emptyData;
+      this.hermesMessage.message_text = '';
       this.hermesMessage.submitter = this.getUserName;
       this.hermesMessage.submit_to_tns = false;
       this.hermesMessage.submit_to_mpc = false;
