@@ -31,15 +31,18 @@
                                 <p>
                                     If you are new to SCiMMA HopSkotch, you will need to make an account there
                                     before you can log into Hermes. We’ve worked hard to make signing up easy and
-                                    simple by using single-sign-on (SSO) technology. Hermes uses accounts in the
-                                    SCiMMA HopSkotch system. Once you have reached <a href="https://hop.scimma.org/">
-                                        <b>hop.scimma.org</b></a>, click <em>Sign Up</em> (in the middle of the page) and
-                                    use
-                                    CILogon to select an Identity Provider of your choice.
+                                    simple by using single-sign-on (SSO) technology.
+                                    <br>
+                                    Click on <em>Register</em> under the "HERMES Guest" username above. This will
+                                    redirect you to <b>CILogon</b> where you can choose an identity provider like
+                                    Google or ORCID. Sign into the provider, and you will be redirected to <a href="https://hop.scimma.org/">
+                                    <b>hop.scimma.org</b></a>. Once you have accepted the use policy, you will now
+                                    be registerd with SCiMMA and you will be redirected back to Hermes.
                                 </p>
                                 <p>
-                                    Once this is done, you can return to Hermes and log in using the same Identity
-                                    Provider you chose for accessing SCiMMA.
+                                    If you wish to update your credentials, or add topics to your account, you will
+                                    need to sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
+                                    the same credentials you just used to register.
                                 </p>
                             </b-card-text>
                         </b-card-body>
