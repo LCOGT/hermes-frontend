@@ -30,13 +30,14 @@ import getEnv from "@/utils/env.js";
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
 import { OCSUtil } from 'ocs-component-lib';
 import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
+import { logoutMixin } from '@/mixins/logoutMixin.js';
 
 export default {
   name: 'MessageCompositionForm',
   components: {
     HermesMessage,
   },
-  mixins: [messageFormatMixin],
+  mixins: [messageFormatMixin, logoutMixin],
   props: {
     // The initial hermesMessage data. The basic structure of a hermes message should be included in the
     // object, including the base elements and an empty data element that can be filled in with various
@@ -70,7 +71,7 @@ export default {
   data: function() {
       return {
         topicOptions: [],
-        validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess),
+        validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
         validationErrors: {},
         readyToSubmit: false,
         show: true
@@ -106,11 +107,17 @@ export default {
         this.readyToSubmit = true;
       }
     },
+    onValidationFail: function(jqXHR) {
+      if (jqXHR.status == 401) {
+        this.logout();
+      }
+    },
     submitToHop() {
       let payload = this.sanitizedMessageData();
       // Post message via axios
       axios({
         method: 'post',
+        withCredentials: true,
         // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
         headers: {'Content-Type': 'application/json',
                   'X-CSRFToken': this.getCsrfToken
@@ -124,6 +131,9 @@ export default {
       })
       .catch(error => {
         console.log(error);
+        if (error.response.status == 401){
+          this.logout();
+        }
       });
     },
     clearForm() {

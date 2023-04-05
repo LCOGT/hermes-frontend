@@ -106,10 +106,11 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import '@/assets/css/view.css';
 import MessageDetail from '@/views/MessageDetail.vue';
+import { logoutMixin } from '@/mixins/logoutMixin.js';
 
 export default {
   name: "QueryMessages",
-  mixins: [OCSMixin.paginationAndFilteringMixin],
+  mixins: [OCSMixin.paginationAndFilteringMixin, logoutMixin],
   components: {
     MessageDetail,
   },
@@ -167,9 +168,16 @@ export default {
   mounted() {
     // Get available topics
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/")
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/", {
+          withCredentials: true,
+        })
       .then((response) => (this.topic_options = response.data.topics))
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        if (error.response.status == 401){
+          this.logout();
+        }
+      });
   },
   created() {
     dayjs.extend(relativeTime);
@@ -192,6 +200,12 @@ export default {
         offset: 0
       };
       return defaultQueryParams;
+    },
+    // Overrides methods in paginationAndFilteringMixin
+    onErrorRetrievingData: function(response) {
+      if (response.status == 401) {
+        this.logout();
+      }
     },
     onTopicChange(value) {
       this.fields.forEach(field => {

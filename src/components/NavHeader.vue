@@ -46,23 +46,31 @@
 </template>
 
 <script>
-//import axios from "axios";
 import getEnv from "@/utils/env.js";
 import { mapGetters } from "vuex";
 import axios from "axios";
+import { logoutMixin } from '@/mixins/logoutMixin.js';
 
 export default {
+  mixins: [logoutMixin],
   computed: {
     ...mapGetters(["getUserName", "getCsrfToken", "getMidLogin"]),
   },
   mounted() {
     // get CSRF token and store it for submission
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token/")
+      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token/", {
+          withCredentials: true,
+        })
       .then((response) =>
         this.$store.commit("SET_CSRF_TOKEN", response.data["token"])
       )
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        if (error.response.status == 401){
+          this.deauthenticate();
+        }
+      });
 
     // If this is the first refresh after a login workflow, attempt to get the profile data and store it
     if (this.getMidLogin) {
@@ -77,11 +85,21 @@ export default {
             response.data["writable_topics"]
           );
           this.$store.commit("SET_MID_LOGIN", false);
-          this.username = this.getUserName;
         })
-        .catch((error) => console.log(error));
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status == 401){
+            this.deauthenticate();
+          }
+        });
     }
     this.username = this.getUserName;
+  },
+  watch: {
+    getUserName: function(value) {
+      console.log('username = ' + value);
+      this.username = value;
+    }
   },
   methods: {
     authenticate() {
@@ -89,12 +107,8 @@ export default {
       location.href =
         getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/";
     },
-
     deauthenticate() {
-      this.$store.commit("SET_USER_NAME", "HERMES Guest");
-      this.$store.commit("SET_MID_LOGIN", false);
-      this.$store.commit("SET_WRITABLE_TOPICS", ["hermes.test"]);
-      this.username = "HERMES Guest";
+      this.logout();
       location.href =
         getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/";
     },
