@@ -126,16 +126,24 @@ export default {
       });
     },
     clearForm() {
-      this.hermesMessage = {
-        title: '',
-        authors: '',
-        topic: '',
-        message_text: '',
-        submitter: '',
-        submit_to_tns: false,
-        submit_to_mpc: false,
-        data: {},
-      }
+      // Reset the page to a clean state
+      this.hermesMessage.title = '';
+      this.hermesMessage.authors = '';
+      this.hermesMessage.topic = this.topicOptions[0];
+      this.hermesMessage.message_text = '';
+      this.hermesMessage.submitter = this.getUserName;
+      this.hermesMessage.submit_to_tns = false;
+      this.hermesMessage.submit_to_mpc = false;
+      this.hermesMessage.data = {
+        event_id: null,
+        references: [],
+        extra_data: [],
+        targets: [],
+        photometry: [],
+        spectroscopy: [],
+        astrometry: [],
+      };
+      this.validate();
     },
     hermesMessageUpdated: function() {
       this.validate();

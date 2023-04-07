@@ -278,6 +278,7 @@
           <data-section
             section="message"
             datatype="Message"
+            ref="messageSection"
             :errors="getErrors('message_text', null)"
             :isEmpty="hermesMessage.message_text === ''"
             :onlySimple=true
@@ -394,8 +395,10 @@
           'references': true,
           'targets': true,
           'photometry': true,
+          'spectroscopy': true,
           'astrometry': true,
-          'extra_data': true
+          'extra_data': true,
+          'message': true
         },
         referenceFields: [
           {
@@ -803,6 +806,13 @@
       },
       targetNames: function () {
         return _.map(this.hermesMessage.data.targets, 'name');
+      }
+    },
+    watch: {
+      'hermesMessage.data': function() {
+        for (const section in this.sectionShowSimple){
+          this.$refs[section + 'Section'].forceVisibility(false);
+        }
       }
     },
     methods: {
