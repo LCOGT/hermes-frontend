@@ -332,6 +332,8 @@ export default {
         return {
             items: [
                 { Field: 'title<span class="text-danger">*</span>', Description: 'String: Title of the message.' },
+                { Field: 'topic<span class="text-danger">*</span>', Description: 'String: Kafka topic for the message. (i.e. "hermes.test")' },
+                { Field: 'submitter<span class="text-danger">*</span>', Description: 'String: Person or bot submitting the message.' },
                 { Field: 'authors<sup class="text-info">&dagger;</sup>', Description: 'String: Authors of the message' },
                 { Field: 'message_text', Description: 'String: Message text.' },
                 { Field: 'data', Description: 'Object / Dict: Semi-structured message <code>Data</code>, format shown below.' },
