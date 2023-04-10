@@ -69,7 +69,7 @@
                     </b-collapse>
                 </b-card>
                 <b-card no-body class="mb-2">
-                    <b-button block v-b-toggle.accordion-schema variant="primary">API Schema</b-button>
+                    <b-button block v-b-toggle.accordion-schema variant="primary">API Schema Registry</b-button>
                     <b-collapse id="accordion-schema" accordion="accordion-schema" role="tabpanel">
                         <b-table striped hover :items="items">
                             <template #cell(Field)="fieldData">
@@ -79,7 +79,10 @@
                                 <span v-html="data.value"></span>
                             </template>
                         </b-table>
-                        <b-card text-variant="danger">* Required.</b-card>
+                        <b-card text-variant="danger">
+                            * Required.
+                            <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
+                        </b-card>
                         <b-card no-body class="mb-2">
                             <b-button block v-b-toggle.accordion-data variant="primary">Data</b-button>
                             <b-collapse id="accordion-data" accordion="accordion-data" role="tabpanel">
@@ -94,6 +97,7 @@
                                 <b-card text-variant="danger">
                                     * At least one <code>target</code> is required when including <code>photometry</code>,
                                     <code>spectroscopy</code>, or <code>astrometry</code> data.
+                                    <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
                                 </b-card>
                                 <b-card no-body class="mb-2">
                                     <b-button block v-b-toggle.accordion-reference variant="primary">Reference</b-button>
@@ -127,6 +131,7 @@
                                             * Required. <br>
                                             <sup>1,2</sup> Either both <code>ra</code> and <code>dec</code>, or
                                             <code>orbital_elements</code> is required.
+                                            <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
                                         </b-card>
                                         <b-card no-body class="mb-2 mx-4">
                                             <b-button block v-b-toggle.accordion-orbital-elements variant="primary">Orbital Elements</b-button>
@@ -156,6 +161,9 @@
                                                         <span v-html="data.value"></span>
                                                     </template>
                                                 </b-table>
+                                                <b-card text-variant="danger">
+                                                    <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
+                                                </b-card>
                                             </b-collapse>
                                         </b-card>
                                     </b-collapse>
@@ -175,6 +183,7 @@
                                             * Required. <br>
                                             <sup>1</sup> Either <code>telescope</code> or <code>instrument</code> is required. <br>
                                             <sup>2</sup> Either <code>brightness</code> or <code>limiting_brightness</code> is required.
+                                            <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
                                         </b-card>
                                     </b-collapse>
                                 </b-card>
@@ -211,6 +220,7 @@
                                         <b-card text-variant="danger">
                                             * Required. <br>
                                             <sup>1</sup> Either <code>telescope</code> or <code>instrument</code> is required. <br>
+                                            <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
                                         </b-card>
                                     </b-collapse>
                                 </b-card>
@@ -245,7 +255,7 @@ export default {
         return {
             items: [
                 { Field: 'title<span class="text-danger">*</span>', Description: 'String: Title of the message.' },
-                { Field: 'authors', Description: 'String: Authors of the message, required if message is set or if reporting to TNS.' },
+                { Field: 'authors<sup class="text-info">&dagger;</sup>', Description: 'String: Authors of the message' },
                 { Field: 'message_text', Description: 'String: Message text.' },
                 { Field: 'data', Description: 'Object / Dict: Semi-structured message <code>Data</code>, format shown below.' },
                 { Field: 'submit_to_tns', Description: 'Bool: Submit to the Transient Name Server?' },
@@ -254,9 +264,9 @@ export default {
             data_items: [
                 { Field: 'event_id', Description: 'String: Non-localized event ID to associate this message e.g. S170817.' },
                 { Field: 'references', Description: 'List of <code>Reference</code>s.' },
-                { Field: 'targets<span class="text-danger">*</span>', Description: 'List of <code>Target</code>s to reference in the message.' },
-                { Field: 'photometry', Description: 'List of <code>Photometry</code> measurements.' },
-                { Field: 'spectroscopy', Description: 'List of <code>Spectroscopy</code> measurements.' },
+                { Field: 'targets<span class="text-danger">*</span><sup class="text-info">&dagger;</sup>', Description: 'List of <code>Target</code>s to reference in the message.' },
+                { Field: 'photometry<sup class="text-info">&dagger;</sup>', Description: 'List of <code>Photometry</code> measurements.' },
+                { Field: 'spectroscopy<sup class="text-info">&dagger;</sup>', Description: 'List of <code>Spectroscopy</code> measurements.' },
                 { Field: 'astrometry', Description: 'List of <code>Astrometry</code> measurements.' },
                 { Field: 'key1, key2, ...', Description: 'Users can specify any other key-value pairs that are desired.' },
             ],
@@ -268,8 +278,8 @@ export default {
             target_items: [
                 { Field: 'name<span class="text-danger">*</span>', Description: 'String: Name of target; will be referenced at the key in other sections like photometry.' },
                 { Field: 'new_discovery', Description: 'Bool: Is this target a new discovery?' },
-                { Field: 'ra<sup class="text-danger">1</sup>', Description: 'String or Float: RA of the target; Value can be in sexagesimal or decimal degrees; Required for reporting to the TNS.' },
-                { Field: 'dec<sup class="text-danger">1</sup>', Description: 'String or Float: Dec of the target; Value can be in sexagesimal or decimal degrees; Required for reporting to the TNS.' },
+                { Field: 'ra<sup class="text-danger">1</sup>', Description: 'String or Float: RA of the target; Value can be in sexagesimal or decimal degrees.' },
+                { Field: 'dec<sup class="text-danger">1</sup>', Description: 'String or Float: Dec of the target; Value can be in sexagesimal or decimal degrees.' },
                 { Field: 'ra_error', Description: 'Float: Uncertainty on RA.' },
                 { Field: 'dec_error', Description: 'Float: Uncertainty on Dec.' },
                 { Field: 'ra_error_units', Description: 'String: Units for the error on RA; choices: [degree, arcmin, arcsec, mas].' },
@@ -278,7 +288,7 @@ export default {
                 { Field: 'pm_dec', Description: 'Float: Proper motion in Dec in mas/year.' },
                 { Field: 'epoch', Description: 'Float: Julian epoch of the coordinates; Default is 2000.'},
                 { Field: 'orbital_elements<sup class="text-danger">2</sup>', Description: '<code>Orbital Elements</code>.' },
-                { Field: 'discovery_info', Description: '<code>Discovery Info</code>.' },
+                { Field: 'discovery_info<sup class="text-info">&dagger;</sup>', Description: '<code>Discovery Info</code>.' },
                 { Field: 'redshift', Description: 'Float: Redshift of the target.' },
                 { Field: 'host_name', Description: 'String: Name of the host galaxy.' },
                 { Field: 'host_redshift', Description: 'Float: Redshift of the host galaxy.' },
@@ -299,9 +309,9 @@ export default {
                 { Field: 'epoch_of_perihelion<sup class="text-danger">2</sup>', Description: 'Date/Time: Epoch of the nearest perihelion passage, typically for comets.' }
             ],
             discovery_items: [
-                { Field: 'reporting_group', Description: 'String: Reporting Group required for TNS Submission.' },
-                { Field: 'discovery_source', Description: 'String: Discovery Data Source required for TNS Submission.' },
-                { Field: 'transient_type', Description: 'String: Type of transient; TNS accepts any of [PSN, nuc, PNV, AGN, Other].' },
+                { Field: 'reporting_group<sup class="text-info">&dagger;</sup>', Description: 'String: Reporting Group required for TNS Submission.' },
+                { Field: 'discovery_source<sup class="text-info">&dagger;</sup>', Description: 'String: Discovery Data Source required for TNS Submission.' },
+                { Field: 'transient_type', Description: 'String: Type of transient; Accepted values are [PSN, nuc, PNV, AGN, Other].' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time discovery should remain proprietary on TNS.' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
                 { Field: 'group_associations', Description: 'String: Groups to associate with this discovery on TNS.' },
@@ -310,16 +320,16 @@ export default {
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section.' },
                 { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD/MJD depending on value, or an ISO format.' },
                 { Field: 'telescope<sup class="text-danger">1</sup>', Description: 'String: Telescope used to obtain photometry.' },
-                { Field: 'instrument<sup class="text-danger">1</sup>', Description: 'String: Instrument used to obtain photometry.' },
+                { Field: 'instrument<sup class="text-danger">1</sup><sup class="text-info">&dagger;</sup>', Description: 'String: Instrument used to obtain photometry.' },
                 { Field: 'discovery', Description: 'Bool: Should this point be used as the discovery announcement in TNS?' },
                 { Field: 'brightness<sup class="text-danger">2</sup>', Description: 'Float: Brightness measurement.' },
                 { Field: 'brightness_error', Description: 'Float: Error on the brightness measurement.' },
-                { Field: 'unit', Description: 'Brightness unit; Accepted values are [AB mag, Vega mag, Jsky, erg/s/cm^2/&#8491].' },
+                { Field: 'unit', Description: 'Brightness unit; Accepted values are [AB mag, Vega mag, Jsky, erg / s / cm<sup>2</sup> / &#8491].' },
                 { Field: 'bandpass<span class="text-danger">*</span>', Description: 'String: Wavelength bandpass used for the observation, e.g. filter.' },
                 { Field: 'exposure_time', Description: 'Float: Exposure time in seconds.' },
                 { Field: 'observer', Description: 'String: Observer(s) of the data.' },
                 { Field: 'limiting_brightness<sup class="text-danger">2</sup>', Description: 'Float: 3-sigma limiting brightness of the image.' },
-                { Field: 'limiting_brightness_unit', Description: 'String: Limiting Brightness unit; Accepted values are [AB mag, Vega mag, Jsky, erg/s/cm^2/&#8491].' },
+                { Field: 'limiting_brightness_unit', Description: 'String: Limiting Brightness unit; Accepted values are [AB mag, Vega mag, Jsky, erg / s / cm<sup>2</sup> / &#8491].' },
                 { Field: 'group_associations', Description: 'String: Group associations for TNS.' },
                 { Field: 'catalog', Description: 'String: Reference photometric catalog used, e.g. SDSS.' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation.' },
@@ -343,22 +353,22 @@ export default {
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section.' },
                 { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD/MJD depending on value, or an ISO format.' },
                 { Field: 'telescope<sup class="text-danger">1</sup>', Description: 'String: Telescope used to obtain spectra.' },
-                { Field: 'instrument<sup class="text-danger">1</sup>', Description: 'String: Instrument used to obtain spectra.' },
+                { Field: 'instrument<sup class="text-danger">1</sup><sup class="text-info">&dagger;</sup>', Description: 'String: Instrument used to obtain spectra.' },
                 { Field: 'setup', Description: 'String: Setup of the instrument.' },
                 { Field: 'exposure_time', Description: 'Float: Exposure time in seconds.' },
                 { Field: 'flux<span class="text-danger">*</span>', Description: 'Array of floats: the flux values of the spectrum.' },
-                { Field: 'flux_unit', Description: 'String: Units of the flux values; Choices: [mJy, erg/s/cm<sup>2</sup>/&#8491].' },
+                { Field: 'flux_unit', Description: 'String: Units of the flux values; Choices: [mJy, erg / s / cm<sup>2</sup> / &#8491].' },
                 { Field: 'error', Description: 'Array of floats: the flux errors of the spectrum.' },
                 { Field: 'wavelength<span class="text-danger">*</span>', Description: 'Array of floats: the wavelength values of the spectral bins.' },
-                { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [&#8491, nm, um, Hz, GHz, THz].' },
-                { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [Flambda, Fnu].' },
+                { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [&#8491, nm, &mu;m, Hz, GHz, THz].' },
+                { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [F&lambda;, F&nu;].' },
                 { Field: 'classification', Description: 'String: Classification of target. If submitting to TNS, classification must be a recognized TNS type.' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time spectrum/classification should remain proprietary on TNS.' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
-                { Field: 'observer', Description: 'String: Observer(s) of the data.' },
-                { Field: 'reducer', Description: 'String: Person who reduced the spectrum.' },
+                { Field: 'observer<sup class="text-info">&dagger;</sup>', Description: 'String: Observer(s) of the data.' },
+                { Field: 'reducer<sup class="text-info">&dagger;</sup>', Description: 'String: Person who reduced the spectrum.' },
                 { Field: 'group_associations', Description: 'String: Group associations for TNS.' },
-                { Field: 'spec_type', Description: 'String: Type of spectrum; Choices: [Object, Host, Synthetic, Sky, Arcs].' },
+                { Field: 'spec_type<sup class="text-info">&dagger;</sup>', Description: 'String: Type of spectrum; Choices: [Object, Host, Synthetic, Sky, Arcs].' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation.' },
             ],
             baseUrl: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")
