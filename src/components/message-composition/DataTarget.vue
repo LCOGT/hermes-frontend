@@ -248,7 +248,7 @@
       return {
         type: 'Sidereal',
         typeOptions: ['Sidereal', 'Non-Sidereal'],
-        errorUnits: ['marcsec', 'arcsec', 'arcmin', 'degrees'],
+        errorUnits: ['mas', 'arcsec', 'arcmin', 'degrees'],
         distanceUnits: ['cm', 'm', 'km', 'pc', 'kpc', 'Mpc', 'Gpc', 'ly', 'au'],
         advancedOptionsCollapsed: true,
         show: true,
