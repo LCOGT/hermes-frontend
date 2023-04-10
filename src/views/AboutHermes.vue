@@ -397,7 +397,7 @@ export default {
             ],
             photometry_items: [
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section.' },
-                { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD/MJD depending on value, or an ISO format.' },
+                { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD or an ISO format. (Should be parseable with dateutil.parser.parse.)' },
                 { Field: 'telescope<sup class="text-danger">1</sup>', Description: 'String: Telescope used to obtain photometry.' },
                 { Field: 'instrument<sup class="text-danger">1</sup><sup class="text-info">&dagger;</sup>', Description: 'String: Instrument used to obtain photometry.' },
                 { Field: 'discovery', Description: 'Bool: Should this point be used as the discovery announcement in TNS?' },
@@ -415,7 +415,7 @@ export default {
             ],
             astrometry_items: [
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section' },
-                { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD/MJD depending on value, or an ISO format.' },
+                { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD or an ISO format. (Should be parseable with dateutil.parser.parse.)' },
                 { Field: 'telescope<sup class="text-danger">1</sup>', Description: 'String: Telescope used to obtain astrometry' },
                 { Field: 'instrument<sup class="text-danger">1</sup>', Description: 'String: Instrument used to obtain astrometry' },
                 { Field: 'ra<span class="text-danger">*</span>', Description: 'String or Float: RA of the target; Value can be in sexagesimal or decimal degrees' },
@@ -430,7 +430,7 @@ export default {
             ],
             spectroscopy_items: [
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section.' },
-                { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD/MJD depending on value, or an ISO format.' },
+                { Field: 'date_obs<span class="text-danger">*</span>', Description: 'Date/Time: Date/Time of the observation. Accepts either a float which is assumed JD or an ISO format. (Should be parseable with dateutil.parser.parse.)' },
                 { Field: 'telescope<sup class="text-danger">1</sup>', Description: 'String: Telescope used to obtain spectra.' },
                 { Field: 'instrument<sup class="text-danger">1</sup><sup class="text-info">&dagger;</sup>', Description: 'String: Instrument used to obtain spectra.' },
                 { Field: 'setup', Description: 'String: Setup of the instrument.' },
@@ -440,7 +440,7 @@ export default {
                 { Field: 'error', Description: 'Array of floats: the flux errors of the spectrum.' },
                 { Field: 'wavelength<span class="text-danger">*</span>', Description: 'Array of floats: the wavelength values of the spectral bins.' },
                 { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [&#8491, nm, &mu;m, Hz, GHz, THz].' },
-                { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [F&lambda;, F&nu;].' },
+                { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [F&lambda;, F&nu;, Flambda, Fnu].' },
                 { Field: 'classification', Description: 'String: Classification of target. If submitting to TNS, classification must be a recognized TNS type.' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time spectrum/classification should remain proprietary on TNS.' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
