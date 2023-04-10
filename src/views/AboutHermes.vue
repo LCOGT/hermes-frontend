@@ -54,17 +54,93 @@
                     </b-card-header>
                     <b-collapse id="accordion-3" visible accordion="my-accordion" role="tabpanel">
                         <b-card-body>
-                            <b-card-text>
-                                HERMES message validation and submission can be accessed via API. The available endpoints are as follows:
-                                <b-list-group>
-                                    <b-list-group-item>
-                                        <b>Validation:</b> <code>{{ baseUrl }}api/v0/submit_message/validate/</code>
-                                    </b-list-group-item>
-                                    <b-list-group-item>
-                                        <b>Submission:</b> <code>{{ baseUrl }}api/v0/submit_message/</code>
-                                    </b-list-group-item>
-                                </b-list-group>
-                            </b-card-text>
+                            <b-tabs class="message-tabs" content-class="mt-2">
+                                <b-tab title="Get Your SCiMMA Credentials" active>
+                                    <li>Sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
+                                    the same credentials you used to register with Hermes.</li>
+                                    <li>Click the plus sign next to "Credentials" to add a new credential.</li>
+                                    <li>Add a description so you know not to delete these credentials in the future.</li>
+                                    <li>Recored your <code>SCIMMA_CREDENTIAL_USERNAME</code> and <code>SCIMMA_CREDENTIAL_PASSWORD</code>.</li>
+                                    <li>Find the new credentials in your list and click the blue "Manage" button.</li>
+                                    <li>Add your favorite topic permissions.</li>
+                                </b-tab>
+                                <b-tab title="Build a Basic API Post">
+                                    <b>HERMES message validation and submission can be accessed via API. The available endpoints are as follows:</b>
+                                    <b-list-group>
+                                        <b-list-group-item>
+                                            <b>Validation:</b> <code>{{ baseUrl }}api/v0/submit_message/validate/</code>
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b>Submission:</b> <code>{{ baseUrl }}api/v0/submit_message/</code>
+                                        </b-list-group-item>
+                                    </b-list-group>
+                                    <b-card-group>
+                                        <b-card header="Submitting a message to Hermes API:">
+                                            <b>Using your SCiMMA Credentials and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
+                                            <li>Create a header for your submission including the username/password for the SCiMMA Credentials you set up earlier.</li>
+                                            <li>Build a message dictionary. This can just be as simple as a topic, a title, and a submitter.</li>
+                                            <li>Post your request.</li>
+                                        </b-card>
+                                        <b-card header="Simple Python Code:">
+                                            <pre>
+import requests
+
+hermes_submit_url = 'http://hermes-dev.lco.gtn/api/v0/submit_message/'
+SCIMMA_CREDENTIAL_USERNAME = 'yourusername-12345'
+SCIMMA_CREDENTIAL_PASSWORD = '1234567890'
+
+headers = {'SCIMMA-API-Auth-Username': 'SCIMMA_CREDENTIAL_USERNAME',
+            'SCIMMA-API-Auth-Password': 'SCIMMA_CREDENTIAL_PASSWORD'}
+
+message = {
+    'topic': 'test.topic',
+    'title': 'Test Title',
+    'submitter': 'YourNameHere',
+    'data': {}
+    'message_text': 'Sample Message',
+}
+
+response = requests.post(url=hermes_submit_url, json=message, headers=headers)
+                                            </pre>
+                                        </b-card>
+                                    </b-card-group>
+                                </b-tab>
+                                <b-tab title="Build a Hermes Data Table">
+                                    <b-card-group>
+                                        <b-card header="Construct your Data Dictionary:">
+                                            <b>You can check the specifics of the API schema using the registry below.</b>
+                                            <li>Build a <code>data</code> dictionary containing your desired tables.</li>
+                                            <li><code>targets</code> can include a number of designated targets.</li>
+                                            <li><code>photometry</code> and similar tables require a matching target name from the <code>targets</code> table.</li>
+                                            <li><code>extra_info</code> is a dictionary that can contain any key/value pairs the user wants to include.</li>
+                                            <li>Include the <code>data</code> dictionary in the message info prior to submission.</li>
+                                        </b-card>
+                                        <b-card header="Example Data Dictionary Python Code:">
+                                            <pre>
+'data': {
+    'targets': [{
+        'name': target_name,
+        'ra': target_ra,
+        'dec': target_dec,
+    },],
+    'photometry': [{
+        'target_name': target_name,
+        'date_obs': photometry_date.isoformat(),
+        'telescope': photometry_telescope,
+        'instrument': photometry_instrument,
+        'bandpass': photometry_filter,
+        'brightness_unit': photometry_unit,
+    },],
+    'extra_info': {
+        'key1': 'value1',
+        'key2': 'value2',
+    }
+}
+                                            </pre>
+                                        </b-card>
+                                    </b-card-group>
+                                </b-tab>
+                                </b-tabs>
                         </b-card-body>
                     </b-collapse>
                 </b-card>
