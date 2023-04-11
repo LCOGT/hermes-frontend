@@ -2,6 +2,7 @@ import '@babel/polyfill';
 import 'mutationobserver-shim';
 import Vue, { VNode } from "vue";
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import getEnv from "./utils/env.js";
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
@@ -26,6 +27,8 @@ $(document).ajaxSend(function(event, xhr, settings) {
     withCredentials: true
   };
 });
+
+store.commit('SET_HERMES_URL', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL"));
 
 new Vue({
   router,

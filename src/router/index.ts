@@ -5,6 +5,7 @@ import QueryMessages from "@/views/QueryMessages.vue"
 import ViewMessage from "@/views/ViewMessage.vue"
 import ViewNonlocalizedevent from "@/views/ViewNonlocalizedevent.vue"
 import AboutHermes from "@/views/AboutHermes.vue"
+import ProfileView from "@/views/Profile.vue"
 
 Vue.use(VueRouter)
 
@@ -34,6 +35,11 @@ const routes = [
     path: "/submit-message",
     name: "submit-message",
     component: SubmitMessage
+  },
+  {
+    path: "/profile",
+    name: "profile",
+    component: ProfileView
   },
   {
     path: "/about",

@@ -39,11 +39,11 @@
   </div>
 </template>
 <script>
-import getEnv from "@/utils/env.js";
 import axios from "axios";
 import '@/assets/css/view.css';
 import MessageDetail from '@/views/MessageDetail.vue';
 import { logoutMixin } from '@/mixins/logoutMixin.js';
+import { mapGetters } from "vuex";
 
 export default {
   name: "ViewNonlocalizedevent",
@@ -58,6 +58,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getHermesUrl"]),
     id: function() {
       return this.$route.params.id;
     },
@@ -72,7 +73,7 @@ export default {
   },
   created: function() {
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/nonlocalizedevents/" + this.id + '/', {
+      .get(this.getHermesUrl + "api/v0/nonlocalizedevents/" + this.id + '/', {
         withCredentials: true,
       })
       .then((response) => (this.nlevent = response.data))

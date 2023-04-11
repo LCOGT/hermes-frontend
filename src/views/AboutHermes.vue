@@ -55,10 +55,10 @@
                                 HERMES message validation and submission can be accessed via API. The available endpoints are as follows:
                                 <b-list-group>
                                     <b-list-group-item>
-                                        <b>Validation:</b> <code>{{ baseUrl }}api/v0/submit_message/validate/</code>
+                                        <b>Validation:</b> <code>{{ this.getHermesUrl }}api/v0/submit_message/validate/</code>
                                     </b-list-group-item>
                                     <b-list-group-item>
-                                        <b>Submission:</b> <code>{{ baseUrl }}api/v0/submit_message/</code>
+                                        <b>Submission:</b> <code>{{ this.getHermesUrl }}api/v0/submit_message/</code>
                                     </b-list-group-item>
                                 </b-list-group>
                                 <b-card no-body class="mb-2">
@@ -180,7 +180,8 @@
 </template>
 
 <script>
-import getEnv from "@/utils/env.js";
+import { mapGetters } from "vuex";
+
 export default {
     data() {
         return {
@@ -300,9 +301,11 @@ export default {
                 { Field: 'group_associations', Description: 'String: Group associations for TNS.' },
                 { Field: 'spec_type', Description: 'String: Type of spectrum; Choices: [Object, Host, Synthetic, Sky, Arcs].' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation.' },
-            ],
-            baseUrl: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")
+            ]
         }
+    },
+    computed: {
+        ...mapGetters(["getHermesUrl"])
     }
 }
 </script>

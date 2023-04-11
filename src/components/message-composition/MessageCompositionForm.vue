@@ -25,7 +25,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import axios from "axios";
 import { mapGetters } from "vuex";
-import getEnv from "@/utils/env.js";
 
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
 import { OCSUtil } from 'ocs-component-lib';
@@ -78,12 +77,12 @@ export default {
       };
   },
   mounted() {
-    this.topicOptions = this.getWritableTopics;
+    this.topicOptions = this.getProfile.writable_topics;
     this.hermesMessage.topic = this.topicOptions[0];
-    this.hermesMessage.submitter = this.getUserName;
+    this.hermesMessage.submitter = this.getProfile.email;
   },
   computed: {
-    ...mapGetters(["getUserName", "getCsrfToken", "getWritableTopics"]),
+    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl"]),
   },
   methods: {
     validate: _.debounce(function() {
@@ -92,7 +91,7 @@ export default {
     getValidationRequest: function() {
       return $.ajax({
         type: 'POST',
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', this.getHermesUrl).href,
         data: JSON.stringify(this.sanitizedMessageData()),
         headers: {'X-CSRFToken': this.getCsrfToken},
         contentType: 'application/json'
@@ -122,10 +121,10 @@ export default {
         headers: {'Content-Type': 'application/json',
                   'X-CSRFToken': this.getCsrfToken
                   },
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/', this.getHermesUrl).href,
         data: JSON.stringify(payload)
       })
-      .then(function () {
+      .then(() => {
         // log response, redirect to homepage
         location.href = '/';
       })

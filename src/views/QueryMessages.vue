@@ -100,6 +100,7 @@
 </template>
 <script>
 import { OCSMixin } from 'ocs-component-lib';
+import { mapGetters } from "vuex";
 import getEnv from "@/utils/env.js";
 import axios from "axios";
 import dayjs from 'dayjs';
@@ -168,7 +169,7 @@ export default {
   mounted() {
     // Get available topics
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/topics/", {
+      .get(this.getHermesUrl + "api/v0/topics/", {
           withCredentials: true,
         })
       .then((response) => (this.topic_options = response.data.topics))
@@ -183,6 +184,7 @@ export default {
     dayjs.extend(relativeTime);
   },
   computed: {
+    ...mapGetters(["getHermesUrl"]),
     visibleFields() {
       return this.fields.filter(field => field.visible);
     }

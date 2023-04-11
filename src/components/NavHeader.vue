@@ -25,19 +25,18 @@
             <template #button-content>
               <em>{{ username }}</em>
             </template>
-            <b-dropdown-item
-              v-if="username === 'HERMES Guest'"
-              @click="authenticate"
-              >Log In</b-dropdown-item
-            >
-            <b-dropdown-item v-else @click="deauthenticate"
-              >Log Out</b-dropdown-item
-            >
-            <b-dropdown-item
-              v-if="username === 'HERMES Guest'"
-              @click="authenticate"
-              >Register</b-dropdown-item
-            >
+            <b-dropdown-item v-if="isLoggedIn" to="/profile">
+              Profile
+            </b-dropdown-item>
+            <b-dropdown-item v-if="!isLoggedIn" @click="authenticate">
+              Log In
+            </b-dropdown-item>
+            <b-dropdown-item v-else @click="deauthenticate">
+              Log Out
+            </b-dropdown-item>
+            <b-dropdown-item v-if="!isLoggedIn" @click="authenticate">
+              Register
+            </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -46,7 +45,6 @@
 </template>
 
 <script>
-import getEnv from "@/utils/env.js";
 import { mapGetters } from "vuex";
 import axios from "axios";
 import { logoutMixin } from '@/mixins/logoutMixin.js';
@@ -54,12 +52,12 @@ import { logoutMixin } from '@/mixins/logoutMixin.js';
 export default {
   mixins: [logoutMixin],
   computed: {
-    ...mapGetters(["getUserName", "getCsrfToken", "getMidLogin"]),
+    ...mapGetters(["getProfile", "getCsrfToken", "getMidLogin", "isLoggedIn", "getHermesUrl"]),
   },
   mounted() {
     // get CSRF token and store it for submission
     axios
-      .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "get-csrf-token/", {
+      .get(this.getHermesUrl + "get-csrf-token/", {
           withCredentials: true,
         })
       .then((response) =>
@@ -74,30 +72,12 @@ export default {
 
     // If this is the first refresh after a login workflow, attempt to get the profile data and store it
     if (this.getMidLogin) {
-      axios
-        .get(getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "api/v0/profile/", {
-          withCredentials: true,
-        })
-        .then((response) => {
-          this.$store.commit("SET_USER_NAME", response.data["email"]);
-          this.$store.commit(
-            "SET_WRITABLE_TOPICS",
-            response.data["writable_topics"]
-          );
-          this.$store.commit("SET_MID_LOGIN", false);
-        })
-        .catch((error) => {
-          console.log(error);
-          if (error.response.status == 401){
-            this.deauthenticate();
-          }
-        });
+      this.$store.dispatch('getProfileData');
     }
-    this.username = this.getUserName;
+    this.username = this.getProfile.email;
   },
   watch: {
-    getUserName: function(value) {
-      console.log('username = ' + value);
+    "getProfile.email": function(value) {
       this.username = value;
     }
   },
@@ -105,12 +85,12 @@ export default {
     authenticate() {
       this.$store.commit("SET_MID_LOGIN", true);
       location.href =
-        getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/authenticate/";
+        this.getHermesUrl + "auth/authenticate/";
     },
     deauthenticate() {
       this.logout();
       location.href =
-        getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + "auth/logout/";
+        this.getHermesUrl + "auth/logout/";
     },
   },
   data() {

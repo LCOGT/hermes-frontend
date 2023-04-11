@@ -31,7 +31,7 @@
                       :desc="''"
                       :hide="false"
                       :errors="errors.topic"
-                      :options="getWritableTopics"
+                      :options="getProfile.writable_topics"
                       @input="update"
                     />
                   </b-col>
@@ -288,6 +288,7 @@
             datatype="Message"
             :errors="getErrors('message_text', null)"
             :isEmpty="hermesMessage.message_text === ''"
+            ref="messageSection"
             :onlySimple=true
           >
             <b-tabs class="message-tabs" content-class="mt-2">
@@ -421,7 +422,8 @@
           'targets': true,
           'photometry': true,
           'astrometry': true,
-          'extra_data': true
+          'extra_data': true,
+          'message': true
         },
         referenceFields: [
           {
@@ -644,8 +646,15 @@
         id: 'hermes-message'
       };
     },
+    watch: {
+      'hermesMessage.data': function() {
+        for (const section in this.sectionShowSimple){
+          this.$refs[section + 'Section'].forceVisibility(false);
+        }
+      }
+    },
     computed: {
-      ...mapGetters(["getWritableTopics"]),
+      ...mapGetters(["getProfile"]),
       photometryFields: function () {
         return [
           {
