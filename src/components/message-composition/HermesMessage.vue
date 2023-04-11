@@ -281,7 +281,6 @@
             ref="messageSection"
             :errors="getErrors('message_text', null)"
             :isEmpty="hermesMessage.message_text === ''"
-            ref="messageSection"
             :onlySimple=true
           >
             <b-tabs class="message-tabs" content-class="mt-2">
@@ -621,13 +620,6 @@
         show: true,
         id: 'hermes-message'
       };
-    },
-    watch: {
-      'hermesMessage.data': function() {
-        for (const section in this.sectionShowSimple){
-          this.$refs[section + 'Section'].forceVisibility(false);
-        }
-      }
     },
     computed: {
       ...mapGetters(["getProfile"]),
