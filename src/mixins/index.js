@@ -1,4 +1,5 @@
 import { schemaDataMixin } from "./schemaDataMixin";
 import { messageFormatMixin } from "./messageFormatMixin";
+import { logoutMixin } from "./logoutMixin";
 
-export { schemaDataMixin, messageFormatMixin };
+export { logoutMixin, schemaDataMixin, messageFormatMixin };
