@@ -11,7 +11,7 @@
         </b-form-textarea>
         <p class="pt-3">To add more writable topics, attach your
           <a class="text-secondary" href="https://my.hop.scimma.org/hopauth/">Scimma Auth</a> user account
-          to more groups with the topic permissions you want, or manually add write permissions to your existing Hermes hop credential.
+          to more groups with the topic permissions you want, or manually add write permissions to your existing Hermes SCiMMA Auth credential.
         </p>
       </b-col>
       <b-col md="4" class="border-right">
@@ -35,15 +35,15 @@
         </div>
       </b-col>
       <b-col md="4">
-        <h3 class="text-center">Hop Credential</h3>
+        <h3 class="text-center">SCiMMA Auth Credential</h3>
         <p>
-          The following Hop credential name was created and is used by Hermes for all authenication with Scimma Auth.
+          The following credential name was created and is used by Hermes for all authenication with SCiMMA Auth.
         </p>
         <input class="form-control" :value="getProfile.credential_name" onclick="this.select()" readonly />
         <p class="pt-3">
           If you believe this credential has been compromised, or is not working properly, you may destroy the credential
-          by clicking below. This will cause Hermes to regenerate a new Hop credential for your account. The initial permissions
-          on the credential are set using your Scimma Auth user accounts various group permissions.
+          by clicking below. This will cause Hermes to regenerate a new SCiMMA Auth credential for your account. The initial permissions
+          on the credential are set using your SCiMMA Auth user accounts various group permissions.
         </p>
         <div class="text-center">
           <b-button variant="danger" @click="performRevokeCredential">
