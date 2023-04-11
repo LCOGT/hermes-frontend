@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate';
+import axios from "axios";
 
 Vue.use(Vuex)
 
@@ -10,8 +11,11 @@ export default new Vuex.Store({
     extra_data: [],
     name: '',
     header: '',
-    username: 'HERMES Guest',
-    writable_topics: ['hermes.test'],
+    profile: {
+      'email': 'HERMES Guest',
+      'writable_topics': ['hermes.test']
+    },
+    hermesUrl: '',
     csrf_token: '',
     mid_login: false
   },
@@ -28,19 +32,21 @@ export default new Vuex.Store({
     getMainTableHeader(state) {
       return state.header;
     },
-    getUserName(state) {
-      return state.username;
+    getProfile(state) {
+      return state.profile;
     },
-    getWritableTopics(state) {
-      return state.writable_topics;
+    getHermesUrl(state) {
+      return state.hermesUrl;
     },
     getCsrfToken(state) {
       return state.csrf_token;
     },
     getMidLogin(state) {
       return state.mid_login;
+    },
+    isLoggedIn(state) {
+      return state.profile.email != 'HERMES Guest';
     }
-
   },
   plugins: [createPersistedState()],
   mutations: {
@@ -56,11 +62,11 @@ export default new Vuex.Store({
     SET_MAIN_TABLE_HEADER(state, header) {
       state.header = header;
     },
-    SET_USER_NAME(state, username) {
-      state.username = username;
+    SET_PROFILE(state, profile) {
+      state.profile = profile;
     },
-    SET_WRITABLE_TOPICS(state, writable_topics) {
-      state.writable_topics = writable_topics;
+    SET_HERMES_URL(state, url) {
+      state.hermesUrl = url;
     },
     SET_CSRF_TOKEN(state, csrf_token) {
       state.csrf_token = csrf_token;
@@ -70,6 +76,25 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    getProfileData(context) {
+      return axios.get(context.state.hermesUrl + "api/v0/profile/", {
+          withCredentials: true,
+        })
+        .then((response) => {
+          context.commit("SET_PROFILE", response.data);
+          context.commit("SET_MID_LOGIN", false);
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status == 401){
+            context.commit("SET_MID_LOGIN", false);
+            context.commit("SET_PROFILE", {
+              "email": "HERMES Guest",
+              "writable_topics": ["hermes.test"]
+            });
+          }
+        });
+    }
   },
   modules: {
   }

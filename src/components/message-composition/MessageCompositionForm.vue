@@ -25,18 +25,18 @@ import _ from 'lodash';
 import $ from 'jquery';
 import axios from "axios";
 import { mapGetters } from "vuex";
-import getEnv from "@/utils/env.js";
 
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
 import { OCSUtil } from 'ocs-component-lib';
 import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
+import { logoutMixin } from '@/mixins/logoutMixin.js';
 
 export default {
   name: 'MessageCompositionForm',
   components: {
     HermesMessage,
   },
-  mixins: [messageFormatMixin],
+  mixins: [messageFormatMixin, logoutMixin],
   props: {
     // The initial hermesMessage data. The basic structure of a hermes message should be included in the
     // object, including the base elements and an empty data element that can be filled in with various
@@ -69,19 +69,19 @@ export default {
   data: function() {
       return {
         topicOptions: [],
-        validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess),
+        validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
         validationErrors: {},
         readyToSubmit: false,
         show: true
       };
   },
   mounted() {
-    this.topicOptions = this.getWritableTopics;
+    this.topicOptions = this.getProfile.writable_topics;
     this.hermesMessage.topic = this.topicOptions[0];
-    this.hermesMessage.submitter = this.getUserName;
+    this.hermesMessage.submitter = this.getProfile.email;
   },
   computed: {
-    ...mapGetters(["getUserName", "getCsrfToken", "getWritableTopics"]),
+    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl"]),
   },
   methods: {
     validate: _.debounce(function() {
@@ -90,7 +90,7 @@ export default {
     getValidationRequest: function() {
       return $.ajax({
         type: 'POST',
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', this.getHermesUrl).href,
         data: JSON.stringify(this.sanitizedMessageData()),
         headers: {'X-CSRFToken': this.getCsrfToken},
         contentType: 'application/json'
@@ -105,24 +105,33 @@ export default {
         this.readyToSubmit = true;
       }
     },
+    onValidationFail: function(jqXHR) {
+      if (jqXHR.status == 401) {
+        this.logout();
+      }
+    },
     submitToHop() {
       let payload = this.sanitizedMessageData();
       // Post message via axios
       axios({
         method: 'post',
+        withCredentials: true,
         // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
         headers: {'Content-Type': 'application/json',
                   'X-CSRFToken': this.getCsrfToken
                   },
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/', getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")).href,
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/', this.getHermesUrl).href,
         data: JSON.stringify(payload)
       })
-      .then(function () {
+      .then(() => {
         // log response, redirect to homepage
         location.href = '/';
       })
       .catch(error => {
         console.log(error);
+        if (error.response.status == 401){
+          this.logout();
+        }
       });
     },
     clearForm() {
