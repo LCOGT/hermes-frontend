@@ -2,7 +2,7 @@
   <div class="overflow-auto px-4" :style="{width: '100%'}">
   <b-row>
     <b-col md="7">
-      <b-row>
+      <b-row class="pb-2">
         <b-col class="col-md-4">
           <!-- Topic Filter -->
           <b-form-select
@@ -17,7 +17,7 @@
           </b-form-select>
         </b-col>
         <b-col class="col-md-6 ml-auto">
-          <b-form-input placeholder="Search Placeholder"></b-form-input>
+          <b-form-input type="search" placeholder="Search Placeholder" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
         </b-col>
       </b-row>
       <!-- Main Message Table -->
@@ -99,6 +99,7 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
 import { OCSMixin } from 'ocs-component-lib';
 import { mapGetters } from "vuex";
 import getEnv from "@/utils/env.js";
@@ -198,6 +199,7 @@ export default {
     initializeDefaultQueryParams: function() {
       const defaultQueryParams = {
         topic_exact: '',
+        search: '',
         limit: 10,
         offset: 0
       };
@@ -218,6 +220,10 @@ export default {
       let fakeEvent = {'preventDefault': () => true};
       this.onSubmit(fakeEvent);
     },
+    searchTerms: _.debounce(function() {
+      let fakeEvent = {'preventDefault': () => true};
+      this.onSubmit(fakeEvent);
+    }, 300),
     onRowSelected(items) {
       // Define Behavior when Row Selected
       this.selectedItem = items[0];
