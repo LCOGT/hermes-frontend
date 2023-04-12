@@ -20,70 +20,63 @@
           <b-form-input type="search" placeholder="Search Placeholder" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
         </b-col>
       </b-row>
-      <!-- Main Message Table -->
-      <b-table
-        hover
-        small
-        noCollapse
-        outlined
-        select-mode="single"
-        selectable
-        striped
-        sort-icon-left
-        head-variant="light"
-        @row-selected="items=>onRowSelected(items)"
-        class="message-b-table"
-        id="message-table"
-        :busy="isBusy"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
-        :items="data.results"
-        :fields="visibleFields"
-      >
-        <template v-slot:table-busy>
-          <br />
-          <div class="text-center my-2"><i class="fa fa-spin fa-spinner" /> Loading messages...</div>
-          <br />
-        </template>
-        <!-- Index Message -->
-        <template #cell(index)="data">
-          {{ data.index + 1 }}
-        </template>
-
-        <!-- Style Header -->
-        <template #head()="data">
-          <span variant="secondary" class="data-column">{{ data.label.toUpperCase() }}</span>
-        </template>
-
-        <!-- Selection Behavior -->
-        <template #cell(selected)="row">
-          <template v-if="row.rowSelected">
-            <span aria-hidden="true">&#8667;<!-- Tripple rightarrow --></span>
+      <div class="table-container">
+        <!-- Main Message Table -->
+        <b-table
+          hover
+          small
+          noCollapse
+          outlined
+          select-mode="single"
+          selected-variant="secondary"
+          selectable
+          striped
+          sort-icon-left
+          head-variant="light"
+          @row-selected="items=>onRowSelected(items)"
+          class="message-b-table"
+          id="message-table"
+          :busy="isBusy"
+          :sort-by.sync="sortBy"
+          :sort-desc.sync="sortDesc"
+          :items="data.results"
+          :fields="visibleFields"
+        >
+          <template v-slot:table-busy>
+            <br />
+            <div class="text-center my-2"><i class="fa fa-spin fa-spinner" /> Loading messages...</div>
+            <br />
           </template>
-          <template v-else>
-            <span aria-hidden="true">&#10624;<!-- Three Bars --></span>
+          <!-- Index Message -->
+          <template #cell(index)="data">
+            {{ data.index + 1 }}
           </template>
-        </template>
 
-        <!-- Format Timestamp -->
-        <template #cell(created)="data">
-          <div v-b-tooltip.hover :title="data.item.created|formatDate">
-            {{ data.item.created | timeFromNow }}
-          </div>
-        </template>
-      </b-table>
-      <!-- Pagination -->
-      <ocs-pagination
-        v-if="!isBusy"
-        table-id="message-table"
-        :per-page="queryParams.limit"
-        :total-rows="data.count"
-        :current-page="currentPage"
-        :display-per-page-dropdown="true"
-        total-rows-class="hermes-total-rows"
-        @pageChange="onPageChange"
-        @limitChange="onLimitChange"
-      ></ocs-pagination>
+          <!-- Style Header -->
+          <template #head()="data">
+            <span variant="secondary" class="data-column">{{ data.label.toUpperCase() }}</span>
+          </template>
+
+          <!-- Format Timestamp -->
+          <template #cell(created)="data">
+            <div v-b-tooltip.hover :title="data.item.created|formatDate">
+              {{ data.item.created | timeFromNow }}
+            </div>
+          </template>
+        </b-table>
+        <!-- Pagination -->
+        <ocs-pagination
+          v-if="!isBusy"
+          table-id="message-table"
+          :per-page="queryParams.limit"
+          :total-rows="data.count"
+          :current-page="currentPage"
+          :display-per-page-dropdown="true"
+          total-rows-class="hermes-total-rows"
+          @pageChange="onPageChange"
+          @limitChange="onLimitChange"
+        ></ocs-pagination>
+      </div>
     </b-col>
     <!-- Full Message Box -->
     <b-col md="5" class="only-right-padding">
