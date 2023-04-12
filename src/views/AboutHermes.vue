@@ -46,9 +46,9 @@
                                 </p>
                                 <p><b>How do I log out of Hermes?</b><br>
                                 Under your profile name you will see an option to log out. This will log you out of Hermes and you will become a guest user.
-                                However, your computer will store the cookies from CILogon, and when you log back in to Hermes, you will be automatically logged on
+                                However, your computer will store the cookies from CILogon, and when you log back into Hermes, you will be automatically logged on
                                 using the same profile as before. If you wish to log into Hermes using a different profile you will need to either close your browser
-                                between sessions, clear your cookies, or <a href="https://cilogon.org/logout/"><b>logout from CIlogon manually</b></a> before returning to Hermes.
+                                between sessions, clear your cookies, or <a href="https://cilogon.org/logout/"><b>logout from CILogon manually</b></a> before returning to Hermes.
                                 </p>
                             </b-card-text>
                         </b-card-body>
