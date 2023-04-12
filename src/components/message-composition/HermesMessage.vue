@@ -66,16 +66,16 @@
                         name="submit-to-tns"
                         switch
                         @input="update"
-                    > Submit to TNS
+                    > Validate for TNS
                     </b-form-checkbox>
-                    <b-form-checkbox
+                    <!-- <b-form-checkbox
                         id="submit-to-mpc"
                         v-model="hermesMessage.submit_to_mpc"
                         name="submit-to-mpc"
                         switch
                         @input="update"
                     > Submit to MPC
-                    </b-form-checkbox>  
+                    </b-form-checkbox> -->
                   </b-col>
                 </b-form-row>
               </b-form>
