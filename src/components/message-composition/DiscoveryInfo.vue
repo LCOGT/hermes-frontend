@@ -64,7 +64,7 @@
     data: function() {
       return {
         transientTypes: ['PSN', 'nuc', 'PNV', 'AGN', 'Other'],
-        proprietaryPeriodUnits: ['Days', 'Seconds', 'Years'],
+        proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
         show: true,
         id: 'discovery-info-' + this.index
       };

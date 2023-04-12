@@ -65,10 +65,10 @@
                                     <b>HERMES message validation and submission can be accessed via API. The available endpoints are as follows:</b>
                                     <b-list-group>
                                         <b-list-group-item>
-                                            <b>Validation:</b> <code><a :href="baseUrl + 'api/v0/submit_message/validate/'">{{ baseUrl }}api/v0/submit_message/validate/</a></code>
+                                            <b>Validation:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/validate/'">{{ this.getHermesUrl}}api/v0/submit_message/validate/</a></code>
                                         </b-list-group-item>
                                         <b-list-group-item>
-                                            <b>Submission:</b> <code><a :href="baseUrl + 'api/v0/submit_message/'">{{ baseUrl }}api/v0/submit_message/</a></code>
+                                            <b>Submission:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/'">{{ this.getHermesUrl }}api/v0/submit_message/</a></code>
                                         </b-list-group-item>
                                     </b-list-group>
                                     <b-card-group>
@@ -82,7 +82,7 @@
                                             <pre>
 import requests
 
-hermes_submit_url = '{{ baseUrl }}api/v0/submit_message/'
+hermes_submit_url = '{{ this.getHermesUrl }}api/v0/submit_message/'
 HERMES_API_KEY = '1234567890'  # Copied from your profile page
 
 headers = {'Authorization': f'Token {HERMES_API_KEY}'}
@@ -334,7 +334,8 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
 </template>
 
 <script>
-import getEnv from "@/utils/env.js";
+import { mapGetters } from "vuex";
+
 export default {
     data() {
         return {
@@ -457,9 +458,11 @@ export default {
                 { Field: 'group_associations', Description: 'String: Group associations for TNS.' },
                 { Field: 'spec_type<sup class="text-info">&dagger;</sup>', Description: 'String: Type of spectrum; Choices: [Object, Host, Synthetic, Sky, Arcs].' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation.' },
-            ],
-            baseUrl: getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL")
+            ]
         }
+    },
+    computed: {
+        ...mapGetters(["getHermesUrl"])
     }
 }
 </script>

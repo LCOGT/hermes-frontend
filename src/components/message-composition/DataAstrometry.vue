@@ -186,7 +186,7 @@
     data: function() {
       return {
         brightnessUnits: ['AB mag', 'Vega mag', 'mJy', 'erg / s / cm² / Å'],
-        errorUnits: ['marcsec', 'arcsec', 'arcmin', 'degrees'],
+        errorUnits: ['mas', 'arcsec', 'arcmin', 'degrees'],
         catalogList: [
           {value: 'Gaia_Int', text: 'Gaia_Int'},
           {value: 'PS1_DR1', text: 'PanSTARRS-1 DR 1'},

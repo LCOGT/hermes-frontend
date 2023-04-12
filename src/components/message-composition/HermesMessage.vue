@@ -31,7 +31,7 @@
                       :desc="''"
                       :hide="false"
                       :errors="errors.topic"
-                      :options="getWritableTopics"
+                      :options="getProfile.writable_topics"
                       @input="update"
                     />
                   </b-col>
@@ -622,7 +622,7 @@
       };
     },
     computed: {
-      ...mapGetters(["getWritableTopics"]),
+      ...mapGetters(["getProfile"]),
       photometryFields: function () {
         return [
           {
