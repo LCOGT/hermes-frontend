@@ -55,29 +55,20 @@
                     <b-collapse id="accordion-3" visible accordion="my-accordion" role="tabpanel">
                         <b-card-body>
                             <b-tabs class="message-tabs" content-class="mt-2">
-                                <b-tab title="Get Your SCiMMA Credentials" active>
-                                    <li>Sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
-                                    the same credentials you used to register with Hermes.</li>
-                                    <li>Click the plus sign next to "Credentials" to add a new credential.</li>
-                                    <li>Add a description so you know not to delete these credentials in the future.</li>
-                                    <li>Recored your <code>SCIMMA_CREDENTIAL_USERNAME</code> and <code>SCIMMA_CREDENTIAL_PASSWORD</code>.</li>
-                                    <li>Find the new credentials in your list and click the blue "Manage" button.</li>
-                                    <li>Add your favorite topic permissions.</li>
-                                </b-tab>
-                                <b-tab title="Build a Basic API Post">
+                                <b-tab title="Build a Basic API Post" active>
                                     <b>HERMES message validation and submission can be accessed via API. The available endpoints are as follows:</b>
                                     <b-list-group>
                                         <b-list-group-item>
-                                            <b>Validation:</b> <code>{{ baseUrl }}api/v0/submit_message/validate/</code>
+                                            <b>Validation:</b> <code><a :href="baseUrl + 'api/v0/submit_message/validate/'">{{ baseUrl }}api/v0/submit_message/validate/</a></code>
                                         </b-list-group-item>
                                         <b-list-group-item>
-                                            <b>Submission:</b> <code>{{ baseUrl }}api/v0/submit_message/</code>
+                                            <b>Submission:</b> <code><a :href="baseUrl + 'api/v0/submit_message/'">{{ baseUrl }}api/v0/submit_message/</a></code>
                                         </b-list-group-item>
                                     </b-list-group>
                                     <b-card-group>
                                         <b-card header="Submitting a message to Hermes API:">
-                                            <b>Using your SCiMMA Credentials and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
-                                            <li>Create a header for your submission including the username/password for the SCiMMA Credentials you set up earlier.</li>
+                                            <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
+                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. This can just be as simple as a topic, a title, and a submitter.</li>
                                             <li>Post your request.</li>
                                         </b-card>
@@ -85,12 +76,10 @@
                                             <pre>
 import requests
 
-hermes_submit_url = 'http://hermes-dev.lco.gtn/api/v0/submit_message/'
-SCIMMA_CREDENTIAL_USERNAME = 'yourusername-12345'
-SCIMMA_CREDENTIAL_PASSWORD = '1234567890'
+hermes_submit_url = '{{ baseUrl }}api/v0/submit_message/'
+HERMES_API_KEY = '1234567890'  # Copied from your profile page
 
-headers = {'SCIMMA-API-Auth-Username': 'SCIMMA_CREDENTIAL_USERNAME',
-            'SCIMMA-API-Auth-Password': 'SCIMMA_CREDENTIAL_PASSWORD'}
+headers = {'Authorization': f'Token {HERMES_API_KEY}'}
 
 message = {
     'topic': 'test.topic',
@@ -139,6 +128,20 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                             </pre>
                                         </b-card>
                                     </b-card-group>
+                                </b-tab>
+                                <b-tab title="Working with SCiMMA Credentials">
+                                    <p>Hermes will create and store SCiMMA Credentials the first time you log in. These "SCiMMA credentials" are what Hermes will use to send messages
+                                    through HopSkotch on your behalf. They include a username that you can get from your <a :href="baseUrl + 'profile'">Hermes profile</a>. In general
+                                    you shouldn't need to alter these credentials unless they somehow get in a bad state or you wish to add or remove topic permissions. If you want
+                                    to reset your credentials, simply use the button on the profile page. If you wish to change your topic permissions, use the following steps:
+                                    </p>
+                                    <li>Sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
+                                    the same credentials you used to register with Hermes.</li>
+                                    <li>Find your Hermes credentials in your list. It should say "Created by HERMES" in the description, but if you have more than one, the username will
+                                        match what's in your Hermes profile.</li>
+                                    <li>Click the blue "Manage" button next to your credential username.</li>
+                                    <li>Add, remove, or change your favorite topic permissions.</li>
+                                    <li>Log out and return to Hermes.</li>
                                 </b-tab>
                                 </b-tabs>
                         </b-card-body>
