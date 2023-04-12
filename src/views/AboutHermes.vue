@@ -142,12 +142,13 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                     to reset your credentials, simply use the button on the profile page. If you wish to change your topic permissions, use the following steps:
                                     </p>
                                     <li>Sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
-                                    the same credentials you used to register with Hermes.</li>
-                                    <li>Find your Hermes credentials in your list. It should say "Created by HERMES" in the description, but if you have more than one, the username will
-                                        match what's in your Hermes profile.</li>
+                                    the same login details you used to register with Hermes.</li>
+                                    <li>Find your Hermes credentials in your list. It should say "Created by HERMES" in the description, but if you have more than one, the credential
+                                        username will match what's in your Hermes profile.</li>
                                     <li>Click the blue "Manage" button next to your credential username.</li>
                                     <li>Add, remove, or change your favorite topic permissions.</li>
                                     <li>Log out and return to Hermes.</li>
+                                    <li>Log out and log back into Hermes to clear cache and update accesible topics.</li>
                                 </b-tab>
                                 </b-tabs>
                         </b-card-body>
