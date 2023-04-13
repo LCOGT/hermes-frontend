@@ -19,7 +19,7 @@
                 </b-card>
                 <b-card no-body border-variant="primary">
                     <b-card-header header-tag="header" class="p-1" role="tab">
-                        <b-button block v-b-toggle.accordion-2 variant="primary">How do I log in?</b-button>
+                        <b-button block v-b-toggle.accordion-2 variant="primary">Logging In / Logging Out</b-button>
                     </b-card-header>
                     <b-collapse id="accordion-2" visible accordion="my-accordion" role="tabpanel">
                         <b-card-body>
@@ -56,7 +56,7 @@
                 </b-card>
                 <b-card no-body border-variant="primary">
                     <b-card-header header-tag="header" class="p-1" role="tab">
-                        <b-button block v-b-toggle.accordion-3 variant="primary">How to access Hermes via an API</b-button>
+                        <b-button block v-b-toggle.accordion-3 variant="primary">Access Hermes via an API</b-button>
                     </b-card-header>
                     <b-collapse id="accordion-3" visible accordion="my-accordion" role="tabpanel">
                         <b-card-body>
@@ -77,16 +77,20 @@
                                             <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. This can just be as simple as a topic, a title, and a submitter.</li>
                                             <li>Post your request.</li>
+                                            <br>
+                                            <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream.</P>
                                         </b-card>
-                                        <b-card header="Simple Python Code:">
+                                        <b-card header="Example Message (Python Code):">
                                             <pre>
 import requests
 
 hermes_submit_url = '{{ baseUrl }}api/v0/submit_message/'
 HERMES_API_KEY = '1234567890'  # Copied from your profile page
 
+# Authenticate User in Request Headers
 headers = {'Authorization': f'Token {HERMES_API_KEY}'}
 
+# Define Your Message Dictionary
 message = {
     'topic': 'test.topic',
     'title': 'Test Title',
@@ -95,6 +99,7 @@ message = {
     'message_text': 'Sample Message',
 }
 
+# Submit to Hermes
 response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                             </pre>
                                         </b-card>
@@ -110,7 +115,7 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                             <li><code>extra_info</code> is a dictionary that can contain any key/value pairs the user wants to include.</li>
                                             <li>Include the <code>data</code> dictionary in the message info prior to submission.</li>
                                         </b-card>
-                                        <b-card header="Example Data Dictionary Python Code:">
+                                        <b-card header="Example Data Dictionary (Python Code):">
                                             <pre>
 'data': {
     'targets': [{
@@ -136,14 +141,14 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                     </b-card-group>
                                 </b-tab>
                                 <b-tab title="Working with SCiMMA Credentials">
-                                    <p>Hermes will create and store SCiMMA Credentials the first time you log in. These "SCiMMA credentials" are what Hermes will use to send messages
+                                    <p>Hermes will create and store <b>SCiMMA Credentials</b> the first time you log in. These <b>SCiMMA Credentials</b> are what Hermes will use to send messages
                                     through HopSkotch on your behalf. They include a username that you can get from your <a :href="baseUrl + 'profile'">Hermes profile</a>. In general
                                     you shouldn't need to alter these credentials unless they somehow get in a bad state or you wish to add or remove topic permissions. If you want
                                     to reset your credentials, simply use the button on the profile page. If you wish to change your topic permissions, use the following steps:
                                     </p>
                                     <li>Sign into <a href="https://hop.scimma.org/"><b>SCiMMA Auth</b></a> using
                                     the same login details you used to register with Hermes.</li>
-                                    <li>Find your Hermes credentials in your list. It should say "Created by HERMES" in the description, but if you have more than one, the credential
+                                    <li>Find your Hermes credentials in your list. It will say "Created by HERMES" in the description, but if you have more than one, the credential
                                         username will match what's in your Hermes profile.</li>
                                     <li>Click the blue "Manage" button next to your credential username.</li>
                                     <li>Add, remove, or change your favorite topic permissions.</li>
