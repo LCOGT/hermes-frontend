@@ -2,6 +2,10 @@
     width: 100%;
 }
 
+.table-container {
+    overflow-x: auto;
+}
+
 .message-b-table>>>.data-column {
     padding: 0.3rem;
 }
