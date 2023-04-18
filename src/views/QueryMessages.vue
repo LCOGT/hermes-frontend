@@ -17,7 +17,7 @@
           </b-form-select>
         </b-col>
         <b-col class="col-md-6 ml-auto">
-          <b-form-input type="search" placeholder="Search Placeholder" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
+          <b-form-input type="search" placeholder="Search Terms" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
         </b-col>
       </b-row>
       <div class="table-container">
