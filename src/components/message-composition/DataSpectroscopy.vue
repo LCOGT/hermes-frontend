@@ -245,10 +245,10 @@
     },
     data: function() {
       return {
-        wavelengthUnits: ['µm', 'nm', 'Å'],
+        wavelengthUnits: ['µm', 'nm', 'Å', 'Hz', 'GHz', 'THz'],
         fluxUnits: ['mJy', 'erg / s / cm² / Å'],
         fluxTypes: ['Fλ', 'Fν'],
-        proprietaryPeriodUnits: ['Seconds', 'Days', 'Years'],
+        proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
         specTypes: ['Object', 'Host', 'Synthetic', 'Sky', 'Arcs'],
         classificationTypes: [
           'Afterglow',
