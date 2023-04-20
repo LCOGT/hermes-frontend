@@ -1,34 +1,38 @@
 <template>
     <div>
-        <b-button :href="dataAsEncodedStr" :download="downloadFilename" v-bind="extraDownloadButtonAttrs">
-            <slot name="download-button-content"> <i class="fa fa-download" /> Download as JSON </slot>
-        </b-button>
-        <pre>{{ JSON.stringify(requestGroup, null, 4) }}</pre>
+        <pre>
+{{ message.title }}
+
+{{ message.authors }}
+
+{{  message.message_text }}
+        </pre>
     </div>
 </template>
 <script>
 export default {
-    name: 'RequestGroupApiDisplay',
+    name: 'TextView',
     props: {
-        requestGroup: {
+        message: {
             type: Object,
             required: true
-        },
-        extraDownloadButtonAttrs: {
-            type: Object,
-            default: () => {
-                return {};
-            }
-        },
-        downloadFilename: {
-            type: String,
-            default: 'apiview.json'
         }
     },
     computed: {
         dataAsEncodedStr: function () {
-            return 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.requestGroup));
+            return 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.message));
         }
     }
 };
 </script>
+
+<style scoped>
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+</style>

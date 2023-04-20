@@ -31,7 +31,7 @@
                       :desc="''"
                       :hide="false"
                       :errors="errors.topic"
-                      :options="getProfile.writable_topics"
+                      :options="getWritableTopics"
                       @input="update"
                     />
                   </b-col>
@@ -94,202 +94,218 @@
             section="targets"
             datatype="Target"
             :errors="getErrors('data.targets', [])"
-            :isEmpty="isSectionEmpty('targets')"
-            :allowLoading=true
-            ref="targetsSection"
-            @new-row="addSection('targets')"
-            @copy-headers="copyHeaders"
-            @parse-csv="parseCsv"
-            @toggle-section-show-simple="toggleSectionShowSimple"
+            @toggle-section-show-simple="toggleSectionShowSimple('targets')"
           >
-            <data-table
-              v-if="sectionShowSimple.targets && hermesMessage.data.targets.length > 0"
-              id="target"
-              :tableData="hermesMessage.data.targets"
-              :fields="targetFields"
-              :errors="getErrors('data.targets', [])"
-              @remove="removeSection('targets', $event)"
-              @copy="copySection('targets', $event)"
-              @message-updated="messageUpdated"
+            <data-list
+              :data="hermesMessage.data.targets"
+              id="targets"
+              datatype="Target"
+              :errors="getErrors('data.targets.non_field_errors', {})"
+              @new-row="addSection('targets')"
             >
-            </data-table>
-            <span v-if="!sectionShowSimple.targets">
-              <div v-for="(target, idx) in hermesMessage.data.targets" :key="'target' + idx">
-                <data-target
-                  :index="idx"
-                  :target="target"
-                  :errors="getDataErrorsArray('targets', idx)"
-                  @remove="removeSection('targets', idx)"
-                  @copy="copySection('targets', idx)"
-                  @message-updated="messageUpdated"
-                >
-                </data-target>
-              </div>
-            </span>
+              <data-table
+                v-if="sectionShowSimple.targets && hermesMessage.data.targets.length > 0"
+                id="target"
+                :tableData="hermesMessage.data.targets"
+                :fields="targetFields"
+                :errors="getErrors('data.targets', [])"
+                @remove="removeSection('targets', $event)"
+                @copy="copySection('targets', $event)"
+                @message-updated="messageUpdated"
+              >
+              </data-table>
+              <span v-if="!sectionShowSimple.targets">
+                <div v-for="(target, idx) in hermesMessage.data.targets" :key="'target' + idx">
+                  <data-target
+                    :index="idx"
+                    :target="target"
+                    :errors="getDataErrorsArray('targets', idx)"
+                    @remove="removeSection('targets', idx)"
+                    @copy="copySection('targets', idx)"
+                    @message-updated="messageUpdated"
+                  >
+                  </data-target>
+                </div>
+              </span>
+            </data-list>
           </data-section>
           <data-section
             section="photometry"
             datatype="Photometry"
             :errors="getErrors('data.photometry', [])"
-            :isEmpty="isSectionEmpty('photometry')"
-            :allowLoading=true
-            ref="photometrySection"
-            @new-row="addSection('photometry')"
-            @copy-headers="copyHeaders"
-            @parse-csv="parseCsv"
-            @toggle-section-show-simple="toggleSectionShowSimple"
+            @toggle-section-show-simple="toggleSectionShowSimple('photometry')"
           >
-            <data-table
-                v-if="sectionShowSimple.photometry && hermesMessage.data.photometry.length > 0"
-                id="photometry"
-                :tableData="hermesMessage.data.photometry"
-                :fields="photometryFields"
-                :errors="getErrors('data.photometry', [])"
-                @remove="removeSection('photometry', $event)"
-                @copy="copySection('photometry', $event)"
-                @message-updated="messageUpdated"
-              >
-            </data-table>
-            <span v-if="!sectionShowSimple.photometry">
-              <div v-for="(photometry, idx) in hermesMessage.data.photometry" :key="'photometry' + idx">
-                <data-photometry
-                  :index="idx"
-                  :photometry="photometry"
-                  :targets="hermesMessage.data.targets"
-                  :errors="getDataErrorsArray('photometry', idx)"
-                  @remove="removeSection('photometry', idx)"
-                  @copy="copySection('photometry', idx)"
+            <data-list
+              :data="hermesMessage.data.photometry"
+              id="photometry"
+              datatype="Photometry"
+              :errors="getErrors('data.photometry.non_field_errors', {})"
+              @new-row="addSection('photometry')"
+            >
+              <data-table
+                  v-if="sectionShowSimple.photometry && hermesMessage.data.photometry.length > 0"
+                  id="photometry"
+                  :tableData="hermesMessage.data.photometry"
+                  :fields="photometryFields"
+                  :errors="getErrors('data.photometry', [])"
+                  @remove="removeSection('photometry', $event)"
+                  @copy="copySection('photometry', $event)"
                   @message-updated="messageUpdated"
                 >
-                </data-photometry>
-              </div>
-            </span>
+              </data-table>
+              <span v-if="!sectionShowSimple.photometry">
+                <div v-for="(photometry, idx) in hermesMessage.data.photometry" :key="'photometry' + idx">
+                  <data-photometry
+                    :index="idx"
+                    :photometry="photometry"
+                    :targets="hermesMessage.data.targets"
+                    :errors="getDataErrorsArray('photometry', idx)"
+                    @remove="removeSection('photometry', idx)"
+                    @copy="copySection('photometry', idx)"
+                    @message-updated="messageUpdated"
+                  >
+                  </data-photometry>
+                </div>
+              </span>
+            </data-list>
           </data-section>
           <data-section
             section="spectroscopy"
             datatype="Spectroscopy"
             :errors="getErrors('data.spectroscopy', [])"
-            :isEmpty="isSectionEmpty('spectroscopy')"
             :onlySimple=true
-            ref="spectroscopySection"
-            @new-row="addSection('spectroscopy')"
           >
-            <div v-for="(spectroscopy, idx) in hermesMessage.data.spectroscopy" :key="'spectroscopy' + idx">
-              <data-spectroscopy
-                :index="idx"
-                :spectroscopy="spectroscopy"
-                :targets="hermesMessage.data.targets"
-                :errors="getDataErrorsArray('spectroscopy', idx)"
-                @remove="removeSection('spectroscopy', idx)"
-                @copy="copySection('spectroscopy', idx)"
-                @message-updated="messageUpdated"
-              >
-              </data-spectroscopy>
-            </div>
+            <data-list
+              :data="hermesMessage.data.spectroscopy"
+              id="spectroscopy"
+              datatype="Spectroscopy"
+              :errors="getErrors('data.spectroscopy.non_field_errors', {})"
+              @new-row="addSection('spectroscopy')"
+            >
+              <div v-for="(spectroscopy, idx) in hermesMessage.data.spectroscopy" :key="'spectroscopy' + idx">
+                <data-spectroscopy
+                  :index="idx"
+                  :spectroscopy="spectroscopy"
+                  :targets="hermesMessage.data.targets"
+                  :errors="getDataErrorsArray('spectroscopy', idx)"
+                  @remove="removeSection('spectroscopy', idx)"
+                  @copy="copySection('spectroscopy', idx)"
+                  @message-updated="messageUpdated"
+                >
+                </data-spectroscopy>
+              </div>
+            </data-list>
           </data-section>
           <data-section
             section="astrometry"
             datatype="Astrometry"
             :errors="getErrors('data.astrometry', [])"
-            :isEmpty="isSectionEmpty('astrometry')"
-            :allowLoading=true
-            ref="astrometrySection"
-            @new-row="addSection('astrometry')"
-            @copy-headers="copyHeaders"
-            @parse-csv="parseCsv"
-            @toggle-section-show-simple="toggleSectionShowSimple"
+            @toggle-section-show-simple="toggleSectionShowSimple('astrometry')"
           >
-            <data-table
-                v-if="sectionShowSimple.astrometry && hermesMessage.data.astrometry.length > 0"
-                id="astrometry"
-                :tableData="hermesMessage.data.astrometry"
-                :fields="astrometryFields"
-                :errors="getErrors('data.astrometry', [])"
-                @remove="removeSection('astrometry', $event)"
-                @copy="copySection('astrometry', $event)"
-                @message-updated="messageUpdated"
-              >
-            </data-table>
-            <span v-if="!sectionShowSimple.astrometry">
-              <div v-for="(astrometry, idx) in hermesMessage.data.astrometry" :key="'astrometry' + idx">
-                <data-astrometry
-                  :index="idx"
-                  :astrometry="astrometry"
-                  :targets="hermesMessage.data.targets"
-                  :errors="getDataErrorsArray('astrometry', idx)"
-                  @remove="removeSection('astrometry', idx)"
-                  @copy="copySection('astrometry', idx)"
+            <data-list
+              :data="hermesMessage.data.astrometry"
+              id="astrometry"
+              datatype="Astrometry"
+              :errors="getErrors('data.astrometry.non_field_errors', {})"
+              @new-row="addSection('astrometry')"
+            >
+              <data-table
+                  v-if="sectionShowSimple.astrometry && hermesMessage.data.astrometry.length > 0"
+                  id="astrometry"
+                  :tableData="hermesMessage.data.astrometry"
+                  :fields="astrometryFields"
+                  :errors="getErrors('data.astrometry', [])"
+                  @remove="removeSection('astrometry', $event)"
+                  @copy="copySection('astrometry', $event)"
                   @message-updated="messageUpdated"
                 >
-                </data-astrometry>
-              </div>
-            </span>
+              </data-table>
+              <span v-if="!sectionShowSimple.astrometry">
+                <div v-for="(astrometry, idx) in hermesMessage.data.astrometry" :key="'astrometry' + idx">
+                  <data-astrometry
+                    :index="idx"
+                    :astrometry="astrometry"
+                    :targets="hermesMessage.data.targets"
+                    :errors="getDataErrorsArray('astrometry', idx)"
+                    @remove="removeSection('astrometry', idx)"
+                    @copy="copySection('astrometry', idx)"
+                    @message-updated="messageUpdated"
+                  >
+                  </data-astrometry>
+                </div>
+              </span>
+            </data-list>
           </data-section>
           <data-section
             section="references"
             datatype="Reference"
             :errors="getErrors('data.references', [])"
-            :isEmpty="isSectionEmpty('references')"
-            :allowLoading=true
-            ref="referencesSection"
-            @new-row="addSection('references')"
-            @copy-headers="copyHeaders"
-            @parse-csv="parseCsv"
-            @toggle-section-show-simple="toggleSectionShowSimple"
+            @toggle-section-show-simple="toggleSectionShowSimple('references')"
           >
-            <data-table
-              v-if="sectionShowSimple.references && hermesMessage.data.references.length > 0"
-              id="reference"
-              :tableData="hermesMessage.data.references"
-              :fields="referenceFields"
-              :errors="getErrors('data.references', [])"
-              @remove="removeSection('references', $event)"
-              @copy="copySection('references', $event)"
-              @message-updated="messageUpdated"
+            <data-list
+              :data="hermesMessage.data.references"
+              id="references"
+              datatype="Reference"
+              :errors="getErrors('data.references.non_field_errors', {})"
+              @new-row="addSection('references')"
             >
-            </data-table>
-            <span v-if="!sectionShowSimple.references" >
-              <div v-for="(reference, idx) in hermesMessage.data.references" :key="'reference' + idx">
-                <data-reference
-                  :index="idx"
-                  :reference="reference"
-                  :errors="getDataErrorsArray('references', idx)"
-                  @remove="removeSection('references', idx)"
-                  @copy="copySection('references', idx)"
-                  @message-updated="messageUpdated"
-                >
-                </data-reference>
-                <hr v-if="(idx + 1) < hermesMessage.data.references.length"/>
-              </div>
-            </span>
+              <data-table
+                v-if="sectionShowSimple.references && hermesMessage.data.references.length > 0"
+                id="reference"
+                :tableData="hermesMessage.data.references"
+                :fields="referenceFields"
+                :errors="getErrors('data.references', [])"
+                @remove="removeSection('references', $event)"
+                @copy="copySection('references', $event)"
+                @message-updated="messageUpdated"
+              >
+              </data-table>
+              <span v-if="!sectionShowSimple.references" >
+                <div v-for="(reference, idx) in hermesMessage.data.references" :key="'reference' + idx">
+                  <data-reference
+                    :index="idx"
+                    :reference="reference"
+                    :errors="getDataErrorsArray('references', idx)"
+                    @remove="removeSection('references', idx)"
+                    @copy="copySection('references', idx)"
+                    @message-updated="messageUpdated"
+                  >
+                  </data-reference>
+                  <hr v-if="(idx + 1) < hermesMessage.data.references.length"/>
+                </div>
+              </span>
+            </data-list>
           </data-section>
           <data-section
             section="extra_data"
             datatype="Extra Data"
             :errors="getErrors('data.extra_data', [])"
             :onlySimple=true
-            :isEmpty="isSectionEmpty('extra_data')"
-            ref="extra_dataSection"
-            @new-row="addSection('extra_data')"
           >
-            <data-table
-              v-if="sectionShowSimple.extra_data && hermesMessage.data.extra_data.length > 0"
+            <data-list
+              :data="hermesMessage.data.extra_data"
               id="extra_data"
-              :tableData="hermesMessage.data.extra_data"
-              :fields="extraDataFields"
-              :errors="getErrors('data.extra_data', [])"
-              @remove="removeSection('extra_data', $event)"
-              @copy="copySection('extra_data', $event)"
-              @message-updated="messageUpdated"
+              datatype="Extra Data"
+              :errors="getErrors('data.extra_data.non_field_errors', {})"
+              @new-row="addSection('extra_data')"
             >
-            </data-table>
+              <data-table
+                v-if="sectionShowSimple.extra_data && hermesMessage.data.extra_data.length > 0"
+                id="extra_data"
+                :tableData="hermesMessage.data.extra_data"
+                :fields="extraDataFields"
+                :errors="getErrors('data.extra_data', [])"
+                @remove="removeSection('extra_data', $event)"
+                @copy="copySection('extra_data', $event)"
+                @message-updated="messageUpdated"
+              >
+              </data-table>
+            </data-list>
           </data-section>
           <data-section
             section="message"
             datatype="Message"
-            ref="messageSection"
             :errors="getErrors('message_text', null)"
-            :isEmpty="hermesMessage.message_text === ''"
             :onlySimple=true
           >
             <b-tabs class="message-tabs" content-class="mt-2">
@@ -422,21 +438,14 @@
           'references': true,
           'targets': true,
           'photometry': true,
-          'spectroscopy': true,
           'astrometry': true,
-          'extra_data': true,
-          'message': true
+          'extra_data': true
         },
         referenceFields: [
           {
             key: 'source',
             label: 'Source',
             type: 'text',
-            list: [
-              { value: "hop_uuid", text: "Hop UUID" },
-              { value: "doi", text: "DOI" },
-              { value: "gracedb_id", text: "GraceDB ID" },
-            ],
             placeholder: "Source",
             class: "source-column"
           },
@@ -578,9 +587,6 @@
             'redshift': null,
             'host_name': null,
             'host_redshift': null,
-            'distance': null,
-            'distance_error': null,
-            'distance_units': null,
             'aliases': null,
             'group_associations': null
           },
@@ -649,7 +655,7 @@
       };
     },
     computed: {
-      ...mapGetters(["getProfile"]),
+      ...mapGetters(["getWritableTopics"]),
       photometryFields: function () {
         return [
           {
@@ -835,22 +841,12 @@
         return _.map(this.hermesMessage.data.targets, 'name');
       }
     },
-    watch: {
-      'hermesMessage.data': function() {
-        for (const section in this.sectionShowSimple){
-          this.$refs[section + 'Section'].forceVisibility(false);
-        }
-      }
-    },
     methods: {
       update: function (data) {
         this.$emit('hermes-message-updated', data);
       },
       messageUpdated: function (data) {
         this.update(data);
-      },
-      isSectionEmpty: function (section) {
-        return _.isEmpty(this.hermesMessage.data[section]);
       },
       addSection: function (section) {
         let emptySection = _.cloneDeep(this.emptySections[section]);
@@ -867,9 +863,6 @@
       },
       removeSection: function (section, idx) {
         this.hermesMessage.data[section].splice(idx, 1);
-        if (_.isEmpty(this.hermesMessage.data[section])) {
-          this.$refs[section + 'Section'].forceVisibility(false);
-        }
         this.update();
       },
       getDataErrorsArray: function (section, idx) {

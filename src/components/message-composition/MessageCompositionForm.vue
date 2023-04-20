@@ -68,7 +68,7 @@ export default {
     "submissionEndpoint": String,
   },
   data: function() {
-      return {
+    return {
         topicOptions: [],
         validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
         validationErrors: {},
@@ -144,6 +144,7 @@ export default {
       this.hermesMessage.submitter = this.getUserName;
       this.hermesMessage.submit_to_tns = false;
       this.hermesMessage.submit_to_mpc = false;
+      this.hermesMessage.submit_to_gcn = false;
       this.hermesMessage.data = {
         event_id: null,
         references: [],
