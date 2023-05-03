@@ -3,18 +3,16 @@
   <b-row>
     <b-col md="7">
       <b-row class="pb-2">
-        <b-col class="col-md-4">
-          <!-- Topic Filter -->
-          <b-form-select
-            id="topic_selector"
-            v-model.lazy="queryParams.topic_exact"
+        <b-col class="col-md-6">
+          <multiselect
+            v-model.lazy="queryParams.topic"
+            placeholder="Filter by Topic"
+            :optionHeight=38
             :options="topic_options"
-            @change="onTopicChange"
+            :multiple="true"
+            @input="onTopicChange"
           >
-            <template #first>
-              <b-form-select-option value="">-- All Topics --</b-form-select-option>
-            </template>
-          </b-form-select>
+          </multiselect>
         </b-col>
         <b-col class="col-md-6 ml-auto">
           <b-form-input type="search" placeholder="Search Terms" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
@@ -93,6 +91,9 @@
 </template>
 <script>
 import _ from 'lodash';
+import Multiselect from 'vue-multiselect';
+import "vue-multiselect/dist/vue-multiselect.min.css";
+import "vue-multiselect-bootstrap-theme/dist/vue-multiselect-bootstrap4.scss";
 import { OCSMixin } from 'ocs-component-lib';
 import { mapGetters } from "vuex";
 import getEnv from "@/utils/env.js";
@@ -108,6 +109,7 @@ export default {
   mixins: [OCSMixin.paginationAndFilteringMixin, logoutMixin],
   components: {
     MessageDetail,
+    Multiselect
   },
   data() {
     return {
@@ -191,7 +193,7 @@ export default {
     // Overrides method in paginationAndFilteringMixin
     initializeDefaultQueryParams: function() {
       const defaultQueryParams = {
-        topic_exact: '',
+        topic: [],
         search: '',
         limit: 10,
         offset: 0
@@ -207,7 +209,7 @@ export default {
     onTopicChange(value) {
       this.fields.forEach(field => {
         if (field.key == 'topic') {
-          field.visible = (value == '');
+          field.visible = (value == []);
         }
       });
       let fakeEvent = {'preventDefault': () => true};
