@@ -2,8 +2,8 @@
   <b-container>
     <b-row>
       <b-col class="m-0 p-0">
-        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage"
-          @hermes-message-updated="hermesMessageUpdated">
+        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText"
+          @hermes-message-updated="hermesMessageUpdated" @generate-plain-text="generatePlainText">
         </hermes-message>
       </b-col>
     </b-row>
@@ -69,6 +69,7 @@ export default {
   },
   data: function() {
     return {
+        plainText: '',
         topicOptions: [],
         validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
         validationErrors: {},
@@ -110,6 +111,29 @@ export default {
       if (jqXHR.status == 401) {
         this.logout();
       }
+    },
+    generatePlainText: function() {
+      let payload = this.sanitizedMessageData();
+      // Post message via axios
+      axios({
+        method: 'post',
+        withCredentials: true,
+        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
+        headers: {'Content-Type': 'application/json',
+                  'X-CSRFToken': this.getCsrfToken
+                  },
+        url: new URL('/api/v0/' + this.submissionEndpoint + '/plaintext/', this.getHermesUrl).href,
+        data: JSON.stringify(payload)
+      })
+      .then((response) => {
+        this.plainText = response.data;
+      })
+      .catch(error => {
+        console.log(error);
+        if (error.response.status == 401){
+          this.logout();
+        }
+      });
     },
     submitToHop() {
       let payload = this.sanitizedMessageData();

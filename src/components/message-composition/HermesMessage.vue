@@ -348,25 +348,27 @@
           <b-container class="p-0 mt-2">
             <b-form-row>
               <b-col class="bg-light rounded">
-                <ocs-request-group-api-display
+                <data-view
                   class="p-4"
-                  :request-group="this.sanitizedMessageData()"
+                  :data="this.sanitizedMessageData()"
                   :extra-download-button-attrs="{ class: 'float-right', variant: 'primary' }"
                 />
               </b-col>
             </b-form-row>
           </b-container>
         </b-tab>
-        <b-tab>
+        <b-tab @click="generatePlainText">
           <template slot="title">
             <span><i class="fas fa-code" /> Text View</span>
           </template>
           <b-container class="p-0 mt-2">
             <b-form-row>
               <b-col class="bg-light rounded">
-                <text-view
+                <data-view
                   class="p-4"
-                  :request-group="this.sanitizedMessageData()"
+                  :data="plainText"
+                  downloadText="Download Plaintext"
+                  downloadFilename="textview.txt"
                   :extra-download-button-attrs="{ class: 'float-right', variant: 'primary' }"
                 />
               </b-col>
@@ -384,11 +386,11 @@
   import DataReference from '@/components/message-composition/DataReference.vue'
   import DataTable from '@/components/message-composition/DataTable.vue'
   import DataTarget from '@/components/message-composition/DataTarget.vue'
+  import DataView from '@/components/message-composition/DataView.vue'
   import DataPhotometry from '@/components/message-composition/DataPhotometry.vue'
   import DataSpectroscopy from '@/components/message-composition/DataSpectroscopy.vue'
   import DataAstrometry from '@/components/message-composition/DataAstrometry.vue'
   import ShowWrapper from '@/components/message-composition/ShowWrapper.vue'
-  import TextView from '@/components/message-composition/TextView.vue'
   import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
 
   export default {
@@ -402,7 +404,7 @@
       DataPhotometry,
       DataSpectroscopy,
       DataAstrometry,
-      TextView
+      DataView
     },
     mixins: [messageFormatMixin],
     props: {
@@ -412,6 +414,10 @@
       },
       hermesMessage: {
         type: Object,
+        required: true
+      },
+      plainText: {
+        type: String,
         required: true
       }
     },
@@ -870,6 +876,9 @@
           this.$refs[section + 'Section'].forceVisibility(false);
         }
         this.update();
+      },
+      generatePlainText: function() {
+        this.$emit('generate-plain-text');
       },
       getDataErrorsArray: function (section, idx) {
         return _.get(this.getErrors('data', {}), [section, idx], {});
