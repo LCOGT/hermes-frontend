@@ -7,7 +7,7 @@
           <multiselect
             v-model.lazy="queryParams.topic"
             placeholder="Filter by Topic"
-            maxHeight="500"
+            :maxHeight=500
             :optionHeight=38
             :options="topic_options"
             :multiple="true"
@@ -198,14 +198,18 @@ export default {
   },
   methods: {
     selectAllTopics: function() {
-      this.queryParams.topic = this.topic_options;
-      let fakeEvent = {'preventDefault': () => true};
-      this.onSubmit(fakeEvent);
+      if (this.queryParams.topic != this.topic_options){
+        this.queryParams.topic = this.topic_options;
+        let fakeEvent = {'preventDefault': () => true};
+        this.onSubmit(fakeEvent);
+      }
     },
     deselectAllTopics: function() {
-      this.queryParams.topic = [];
-      let fakeEvent = {'preventDefault': () => true};
-      this.onSubmit(fakeEvent);
+      if (this.queryParams.topic.length > 0){
+        this.queryParams.topic = [];
+        let fakeEvent = {'preventDefault': () => true};
+        this.onSubmit(fakeEvent);
+      }
     },
     // Overrides method in paginationAndFilteringMixin
     initializeDataEndpoint: function() {
