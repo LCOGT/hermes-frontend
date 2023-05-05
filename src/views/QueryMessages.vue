@@ -231,12 +231,7 @@ export default {
         this.logout();
       }
     },
-    onTopicChange(value) {
-      this.fields.forEach(field => {
-        if (field.key == 'topic') {
-          field.visible = (value == []);
-        }
-      });
+    onTopicChange() {
       let fakeEvent = {'preventDefault': () => true};
       this.onSubmit(fakeEvent);
     },
