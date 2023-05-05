@@ -15,9 +15,14 @@
           </b-link>
         </b-card-sub-title>
         <b-card-sub-title class="mt-1" v-if="itemHasEventId(message)">
-          Related Superevent ID:
-          <b-link :href="getGraceDBLink(message.data.event_id)" v-b-tooltip.hover
-            :title="getGraceDBLink(message.data.event_id)">{{ message.data.event_id }}</b-link>
+          Related Superevent Messages:
+          <b-link :to="{ name: 'nonlocalizedevent', params: { id: message.data.event_id } }" v-b-tooltip.hover
+            :title="message.data.event_id">{{ message.data.event_id }}</b-link>
+        </b-card-sub-title>
+        <b-card-sub-title class="mt-1" v-if="itemIsNLE(message)">
+          Superevent Messages:
+          <b-link :to="{ name: 'nonlocalizedevent', params: { id: message.data.superevent_id } }" v-b-tooltip.hover
+            :title="message.data.superevent_id">{{ message.data.superevent_id }}</b-link>
         </b-card-sub-title>
         <hr>
         <!-- Main Message -->
@@ -186,6 +191,9 @@ export default {
     },
     itemHasEventId(item) {
       return _.has(item, 'data.event_id');
+    },
+    itemIsNLE(item) {
+      return _.has(item, 'data.superevent_id');
     },
     getKVItems(item) {
       var kvList = [];
