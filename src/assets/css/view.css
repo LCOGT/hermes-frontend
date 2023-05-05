@@ -47,3 +47,27 @@
 a {
     color: #1c7aa3;
 }
+
+.w-5 {
+    width: 5%;
+}
+
+.ms-icon {
+    height: 18px;
+    width: 18px;
+}
+
+.ms-button {
+    height: 19px;
+    width: 12px;
+}
+
+.smooth-top-border {
+    border-top-right-radius: 0.25em;
+    border-top-left-radius: 0.25em;
+}
+
+.smooth-bottom-border {
+    border-bottom-right-radius: 0.25em;
+    border-bottom-left-radius: 0.25em;
+}
