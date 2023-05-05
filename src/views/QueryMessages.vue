@@ -3,16 +3,27 @@
   <b-row>
     <b-col md="7">
       <b-row class="pb-2">
-        <b-col class="col-md-6">
+        <b-col class="col-md-5 pr-0">
           <multiselect
             v-model.lazy="queryParams.topic"
             placeholder="Filter by Topic"
+            :maxHeight=500
             :optionHeight=38
             :options="topic_options"
             :multiple="true"
             @input="onTopicChange"
           >
           </multiselect>
+        </b-col>
+        <b-col class="col-md-1 text-left pl-0">
+          <b-button-group vertical class="w-5">
+            <b-button class="br-0 ms-button smooth-top-border" variant="outline-secondary" @click="selectAllTopics" title="Select All Topics">
+              <b-icon icon="check-all" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
+            </b-button>
+            <b-button class="br-0 ms-button smooth-bottom-border" variant="outline-secondary" @click="deselectAllTopics" title="Deselect All Topics">
+              <b-icon stacked icon="stop" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
+            </b-button>
+          </b-button-group>
         </b-col>
         <b-col class="col-md-6 ml-auto">
           <b-form-input type="search" placeholder="Search Terms" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
@@ -186,6 +197,20 @@ export default {
     }
   },
   methods: {
+    selectAllTopics: function() {
+      if (this.queryParams.topic != this.topic_options){
+        this.queryParams.topic = this.topic_options;
+        let fakeEvent = {'preventDefault': () => true};
+        this.onSubmit(fakeEvent);
+      }
+    },
+    deselectAllTopics: function() {
+      if (this.queryParams.topic.length > 0){
+        this.queryParams.topic = [];
+        let fakeEvent = {'preventDefault': () => true};
+        this.onSubmit(fakeEvent);
+      }
+    },
     // Overrides method in paginationAndFilteringMixin
     initializeDataEndpoint: function() {
       return getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + 'api/v0/messages/';
