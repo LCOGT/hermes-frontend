@@ -3,18 +3,27 @@
   <b-row>
     <b-col md="7">
       <b-row class="pb-2">
-        <b-col class="col-md-4">
-          <!-- Topic Filter -->
-          <b-form-select
-            id="topic_selector"
-            v-model.lazy="queryParams.topic_exact"
+        <b-col class="col-md-5 pr-0">
+          <multiselect
+            v-model.lazy="queryParams.topic"
+            placeholder="Filter by Topic"
+            :maxHeight=500
+            :optionHeight=38
             :options="topic_options"
-            @change="onTopicChange"
+            :multiple="true"
+            @input="onTopicChange"
           >
-            <template #first>
-              <b-form-select-option value="">-- All Topics --</b-form-select-option>
-            </template>
-          </b-form-select>
+          </multiselect>
+        </b-col>
+        <b-col class="col-md-1 text-left pl-0">
+          <b-button-group vertical class="w-5">
+            <b-button class="br-0 ms-button smooth-top-border" variant="outline-secondary" @click="selectAllTopics" title="Select All Topics">
+              <b-icon icon="check-all" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
+            </b-button>
+            <b-button class="br-0 ms-button smooth-bottom-border" variant="outline-secondary" @click="deselectAllTopics" title="Deselect All Topics">
+              <b-icon stacked icon="stop" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
+            </b-button>
+          </b-button-group>
         </b-col>
         <b-col class="col-md-6 ml-auto">
           <b-form-input type="search" placeholder="Search Terms" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
@@ -93,6 +102,9 @@
 </template>
 <script>
 import _ from 'lodash';
+import Multiselect from 'vue-multiselect';
+import "vue-multiselect/dist/vue-multiselect.min.css";
+import "vue-multiselect-bootstrap-theme/dist/vue-multiselect-bootstrap4.scss";
 import { OCSMixin } from 'ocs-component-lib';
 import { mapGetters } from "vuex";
 import getEnv from "@/utils/env.js";
@@ -108,6 +120,7 @@ export default {
   mixins: [OCSMixin.paginationAndFilteringMixin, logoutMixin],
   components: {
     MessageDetail,
+    Multiselect
   },
   data() {
     return {
@@ -184,6 +197,20 @@ export default {
     }
   },
   methods: {
+    selectAllTopics: function() {
+      if (this.queryParams.topic != this.topic_options){
+        this.queryParams.topic = this.topic_options;
+        let fakeEvent = {'preventDefault': () => true};
+        this.onSubmit(fakeEvent);
+      }
+    },
+    deselectAllTopics: function() {
+      if (this.queryParams.topic.length > 0){
+        this.queryParams.topic = [];
+        let fakeEvent = {'preventDefault': () => true};
+        this.onSubmit(fakeEvent);
+      }
+    },
     // Overrides method in paginationAndFilteringMixin
     initializeDataEndpoint: function() {
       return getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + 'api/v0/messages/';
@@ -191,7 +218,7 @@ export default {
     // Overrides method in paginationAndFilteringMixin
     initializeDefaultQueryParams: function() {
       const defaultQueryParams = {
-        topic_exact: '',
+        topic: [],
         search: '',
         limit: 10,
         offset: 0
@@ -204,12 +231,7 @@ export default {
         this.logout();
       }
     },
-    onTopicChange(value) {
-      this.fields.forEach(field => {
-        if (field.key == 'topic') {
-          field.visible = (value == '');
-        }
-      });
+    onTopicChange() {
       let fakeEvent = {'preventDefault': () => true};
       this.onSubmit(fakeEvent);
     },
