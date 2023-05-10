@@ -21,7 +21,10 @@
         <b-navbar-nav class="ml-auto">
           <b-nav-item disabled v-b-tooltip.hover.html="streamStateText">
             Stream Status:
-            <b-icon icon="circle-fill" :variant="streamState"></b-icon>
+            <b-iconstack font-scale="1">
+              <b-icon stacked icon="circle-fill" :variant="streamState"></b-icon>
+              <b-icon stacked icon="circle" scale="1.1"></b-icon>
+            </b-iconstack>
           </b-nav-item>
           <b-nav-item to="/about">About</b-nav-item>
           <b-nav-item-dropdown right>
