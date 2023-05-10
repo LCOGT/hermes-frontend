@@ -158,7 +158,7 @@
           </data-section>
           <data-section
             section="spectroscopy"
-            datatype="Spectroscopy"
+            datatype="Spectroscopy (beta)"
             :errors="getErrors('data.spectroscopy', [])"
             :isEmpty="isSectionEmpty('spectroscopy')"
             :onlySimple=true
