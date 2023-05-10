@@ -11,7 +11,7 @@
       <b-col>
         <div class="submit-container">
           <b-button class="submit-button shadow" variant="success" @click="submitToHop"
-            :disabled="!readyToSubmit">Submit</b-button>
+            :disabled="!readyToSubmit">Submit</b-button> to {{this.hermesMessage.topic}}
         </div>
       </b-col>
       <b-col>
