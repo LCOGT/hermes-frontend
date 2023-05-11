@@ -76,6 +76,14 @@
                         @input="update"
                     > Submit to MPC
                     </b-form-checkbox> -->
+                    <b-form-checkbox
+                        id="submit-to-gcn"
+                        v-model="hermesMessage.submit_to_gcn"
+                        name="submit-to-gcn"
+                        switch
+                        @input="update"
+                    > Submit to GCN
+                    </b-form-checkbox>
                   </b-col>
                 </b-form-row>
               </b-form>
@@ -340,9 +348,27 @@
           <b-container class="p-0 mt-2">
             <b-form-row>
               <b-col class="bg-light rounded">
-                <ocs-request-group-api-display
+                <data-view
                   class="p-4"
-                  :request-group="this.sanitizedMessageData()"
+                  :data="this.sanitizedMessageData()"
+                  :extra-download-button-attrs="{ class: 'float-right', variant: 'primary' }"
+                />
+              </b-col>
+            </b-form-row>
+          </b-container>
+        </b-tab>
+        <b-tab @click="generatePlainText">
+          <template slot="title">
+            <span><i class="fas fa-code" /> Text View</span>
+          </template>
+          <b-container class="p-0 mt-2">
+            <b-form-row>
+              <b-col class="bg-light rounded">
+                <data-view
+                  class="p-4"
+                  :data="plainText"
+                  downloadText="Download Plaintext"
+                  downloadFilename="textview.txt"
                   :extra-download-button-attrs="{ class: 'float-right', variant: 'primary' }"
                 />
               </b-col>
@@ -360,6 +386,7 @@
   import DataReference from '@/components/message-composition/DataReference.vue'
   import DataTable from '@/components/message-composition/DataTable.vue'
   import DataTarget from '@/components/message-composition/DataTarget.vue'
+  import DataView from '@/components/message-composition/DataView.vue'
   import DataPhotometry from '@/components/message-composition/DataPhotometry.vue'
   import DataSpectroscopy from '@/components/message-composition/DataSpectroscopy.vue'
   import DataAstrometry from '@/components/message-composition/DataAstrometry.vue'
@@ -376,7 +403,8 @@
       DataTarget,
       DataPhotometry,
       DataSpectroscopy,
-      DataAstrometry
+      DataAstrometry,
+      DataView
     },
     mixins: [messageFormatMixin],
     props: {
@@ -386,6 +414,10 @@
       },
       hermesMessage: {
         type: Object,
+        required: true
+      },
+      plainText: {
+        type: String,
         required: true
       }
     },
@@ -844,6 +876,9 @@
           this.$refs[section + 'Section'].forceVisibility(false);
         }
         this.update();
+      },
+      generatePlainText: function() {
+        this.$emit('generate-plain-text');
       },
       getDataErrorsArray: function (section, idx) {
         return _.get(this.getErrors('data', {}), [section, idx], {});
