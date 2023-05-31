@@ -45,12 +45,14 @@ export var messageFormatMixin = {
         if (!_.isEmpty(message[i].orbital_elements)){
           message[i].orbital_elements = _.omitBy(message[i].orbital_elements, field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
         }
+        message[i] = _.omitBy(message[i], (value, key) => key.includes('unit') && key.replace('_unit', '')  in message[i] && message[i][key.replace('_unit', '')] === null);
         message[i] = _.omitBy(message[i], field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
         if (!_.isEmpty(message[i].aliases)){
           message[i].aliases = message[i].aliases.split(',');
         }
       }
-      return message;
+      // Remove empty objects
+      return message.filter(obj => Object.keys(obj).length !== 0);
     },
     flattenExtraData: function(extra_data) {
       const keywordSections = ['targets', 'references', 'event_id', 'astrometry', 'spectroscopy'];
