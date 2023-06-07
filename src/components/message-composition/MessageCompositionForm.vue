@@ -8,13 +8,16 @@
       </b-col>
     </b-row>
     <b-row class="mt-2">
-      <b-col>
-        <div class="submit-container">
-          <b-button class="submit-button shadow" variant="success" @click="submitToHop"
-            :disabled="!readyToSubmit">Submit</b-button> to {{this.hermesMessage.topic}}
+      <b-col sm="1" class="submit-container">
+        <b-button class="submit-button shadow" variant="success" @click="submitToHop"
+          :disabled="!readyToSubmit">Submit</b-button>
+      </b-col>
+      <b-col sm="2"> to {{this.hermesMessage.topic}}
+        <div v-if="this.hermesMessage.submit_to_gcn">
+          and GCN
         </div>
       </b-col>
-      <b-col>
+      <b-col sm="9">
         <b-button class="clear-button shadow mb-2" variant="outline-primary" @click="clearForm">Clear Form</b-button>
       </b-col>
     </b-row>
