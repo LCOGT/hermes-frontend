@@ -14,7 +14,7 @@
       </b-col>
       <b-col sm="2"> to {{this.hermesMessage.topic}}
         <div v-if="this.hermesMessage.submit_to_gcn">
-          and GCN
+          and GCN Circulars
         </div>
       </b-col>
       <b-col sm="9">
