@@ -12,12 +12,12 @@
         <b-button class="submit-button shadow" variant="success" @click="submitToHop"
           :disabled="!readyToSubmit">Submit</b-button>
       </b-col>
-      <b-col sm="2"> to {{this.hermesMessage.topic}}
+      <b-col sm="5"> to {{this.hermesMessage.topic}}
         <div v-if="this.hermesMessage.submit_to_gcn">
-          and GCN Circulars
+          and {{getGCNDestination()}}
         </div>
       </b-col>
-      <b-col sm="9">
+      <b-col sm="6">
         <b-button class="clear-button shadow mb-2" variant="outline-primary" @click="clearForm">Clear Form</b-button>
       </b-col>
     </b-row>
@@ -114,6 +114,13 @@ export default {
       if (jqXHR.status == 401) {
         this.logout();
       }
+    },
+    getGCNDestination: function() {
+      // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
+      if (this.getHermesUrl == "http://hermes.lco.global/") {
+        return "circulars@gcn.nasa.gov"
+      }
+      return "circulars@dev.gcn.nasa.gov"
     },
     generatePlainText: function() {
       let payload = this.sanitizedMessageData();
