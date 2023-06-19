@@ -7,7 +7,7 @@
           </template>
           <show-wrapper id="main-fields">
             <ocs-custom-alert v-for="error in errors.non_field_errors" :key="error" alert-class="danger" :dismissible="false">
-              {{ error }}
+              <span v-html="error"></span>
             </ocs-custom-alert>
             <b-container class="p-0">
               <b-form>
