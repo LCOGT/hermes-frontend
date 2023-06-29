@@ -117,7 +117,7 @@ export default {
     },
     getGCNDestination: function() {
       // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
-      if (this.getHermesUrl == "http://hermes.lco.global/") {
+      if (this.getHermesUrl == "https://hermes.lco.global/") {
         return "circulars@gcn.nasa.gov"
       }
       return "circulars@dev.gcn.nasa.gov"
