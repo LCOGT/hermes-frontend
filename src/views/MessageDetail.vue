@@ -64,7 +64,7 @@
           <b-row sm="3" v-b-toggle:[field] class="text-sm-right mx-2">
             <h4 class="collapse-table-head">{{ field.toUpperCase().replace("_", " ") }} KEYPAIRS &#9776;</h4>
           </b-row>
-          <b-collapse :id="field">
+          <b-collapse visible :id="field" >
             <b-row class="mx-2">
               <b-table small reactive class="kv-b-table" :items="getKVItems(dictvalue)" :fields="KVdataFields">
                 <template #cell(value)="data">
