@@ -332,6 +332,8 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                     </b-col>
                     <b-col class="text-primary text-right">
                         <a href="mailto:hermes@lco.global">Contact <b>HERMES</b></a>
+                        <br />
+                        <a href="https://github.com/LCOGT/hermes-frontend/issues"><em>Report Issues</em></a>
                     </b-col>
                 </b-row>
             </div>
