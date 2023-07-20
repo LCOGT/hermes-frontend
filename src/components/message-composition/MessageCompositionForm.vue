@@ -81,12 +81,15 @@ export default {
       };
   },
   mounted() {
+    if (_.isEmpty(this.getTnsOptions)) {
+      this.$store.dispatch('getTnsOptionsData');
+    }
     this.topicOptions = this.getProfile.writable_topics;
     this.hermesMessage.topic = this.topicOptions[0];
     this.hermesMessage.submitter = this.getProfile.email;
   },
   computed: {
-    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl"]),
+    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions"]),
   },
   methods: {
     validate: _.debounce(function() {

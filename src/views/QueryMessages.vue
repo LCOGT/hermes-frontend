@@ -15,7 +15,7 @@
           >
           </multiselect>
         </b-col>
-        <b-col class="col-md-1 text-left pl-0">
+        <b-col class="col-md-1 text-left pl-0 pr-0">
           <b-button-group vertical class="w-5">
             <b-button class="br-0 ms-button smooth-top-border" variant="outline-secondary" @click="selectAllTopics" title="Select All Topics">
               <b-icon icon="check-all" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
@@ -25,7 +25,7 @@
             </b-button>
           </b-button-group>
         </b-col>
-        <b-col class="col-md-6 ml-auto">
+        <b-col class="col-md-6 ml-auto pl-0">
           <b-form-input type="search" placeholder="Search Terms" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
         </b-col>
       </b-row>

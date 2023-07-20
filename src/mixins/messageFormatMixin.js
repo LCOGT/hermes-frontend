@@ -47,7 +47,10 @@ export var messageFormatMixin = {
         }
         message[i] = _.omitBy(message[i], (value, key) => key.includes('unit') && key.replace('_unit', '')  in message[i] && message[i][key.replace('_unit', '')] === null);
         message[i] = _.omitBy(message[i], field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
-        if (!_.isEmpty(message[i].aliases)){
+        if (!_.isEmpty(message[i].group_associations) && _.isString(message[i].group_associations)){
+          message[i].group_associations = message[i].group_associations.split(',');
+        }
+        if (!_.isEmpty(message[i].aliases)  && _.isString(message[i].aliases)){
           message[i].aliases = message[i].aliases.split(',');
         }
       }

@@ -95,6 +95,8 @@
             :errors="getErrors('data.targets', [])"
             :isEmpty="isSectionEmpty('targets')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['targets']"
+            :disabled="hermesMessage.submit_to_tns"
             ref="targetsSection"
             @new-row="addSection('targets')"
             @copy-headers="copyHeaders"
@@ -118,6 +120,7 @@
                   :index="idx"
                   :target="target"
                   :errors="getDataErrorsArray('targets', idx)"
+                  :is-tns="hermesMessage.submit_to_tns"
                   @remove="removeSection('targets', idx)"
                   @copy="copySection('targets', idx)"
                   @message-updated="messageUpdated"
@@ -132,6 +135,8 @@
             :errors="getErrors('data.photometry', [])"
             :isEmpty="isSectionEmpty('photometry')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['photometry']"
+            :disabled="hermesMessage.submit_to_tns"
             ref="photometrySection"
             @new-row="addSection('photometry')"
             @copy-headers="copyHeaders"
@@ -156,6 +161,7 @@
                   :photometry="photometry"
                   :targets="hermesMessage.data.targets"
                   :errors="getDataErrorsArray('photometry', idx)"
+                  :is-tns="hermesMessage.submit_to_tns"
                   @remove="removeSection('photometry', idx)"
                   @copy="copySection('photometry', idx)"
                   @message-updated="messageUpdated"
@@ -169,7 +175,9 @@
             datatype="Spectroscopy (beta)"
             :errors="getErrors('data.spectroscopy', [])"
             :isEmpty="isSectionEmpty('spectroscopy')"
+            :sectionShowSimple="this.sectionShowSimple['spectroscopy']"
             :onlySimple=true
+            :disabled=true
             ref="spectroscopySection"
             @new-row="addSection('spectroscopy')"
           >
@@ -179,6 +187,7 @@
                 :spectroscopy="spectroscopy"
                 :targets="hermesMessage.data.targets"
                 :errors="getDataErrorsArray('spectroscopy', idx)"
+                :is-tns="hermesMessage.submit_to_tns"
                 @remove="removeSection('spectroscopy', idx)"
                 @copy="copySection('spectroscopy', idx)"
                 @message-updated="messageUpdated"
@@ -192,6 +201,7 @@
             :errors="getErrors('data.astrometry', [])"
             :isEmpty="isSectionEmpty('astrometry')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['astrometry']"
             ref="astrometrySection"
             @new-row="addSection('astrometry')"
             @copy-headers="copyHeaders"
@@ -229,6 +239,7 @@
             datatype="Reference"
             :errors="getErrors('data.references', [])"
             :isEmpty="isSectionEmpty('references')"
+            :sectionShowSimple="this.sectionShowSimple['references']"
             :allowLoading=true
             ref="referencesSection"
             @new-row="addSection('references')"
@@ -266,7 +277,9 @@
             section="extra_data"
             datatype="Extra Data"
             :errors="getErrors('data.extra_data', [])"
+            :sectionShowSimple="this.sectionShowSimple['extra_data']"
             :onlySimple=true
+            :disabled=true
             :isEmpty="isSectionEmpty('extra_data')"
             ref="extra_dataSection"
             @new-row="addSection('extra_data')"
@@ -289,7 +302,9 @@
             ref="messageSection"
             :errors="getErrors('message_text', null)"
             :isEmpty="hermesMessage.message_text === ''"
+            :sectionShowSimple="this.sectionShowSimple['message']"
             :onlySimple=true
+            :disabled=true
           >
             <b-tabs class="message-tabs" content-class="mt-2">
               <b-tab title="Edit" active>
@@ -605,7 +620,6 @@
             'limiting_brightness': null,
             'limiting_brightness_error': null,
             'limiting_brightness_unit': 'AB mag',
-            'group_associations': null
           },
           'spectroscopy': {
             'target_name': null,
@@ -627,7 +641,6 @@
             'comments': null,
             'reducer': null,
             'spec_type': null,
-            'group_associations': null
           },
           'astrometry': {
             'target_name': null,
@@ -844,6 +857,12 @@
       'hermesMessage.data': function() {
         for (const section in this.sectionShowSimple){
           this.$refs[section + 'Section'].forceVisibility(false);
+        }
+      },
+      'hermesMessage.submit_to_tns': function(value) {
+        if (value) {
+          this.sectionShowSimple['targets'] = false;
+          this.sectionShowSimple['photometry'] = false;
         }
       }
     },

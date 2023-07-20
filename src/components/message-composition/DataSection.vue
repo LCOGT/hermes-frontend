@@ -29,13 +29,13 @@
                 <input @change="loadCsv" type="file" :ref="section + 'File'" accept=".csv" hidden/>
               </b-button>
             </span>
-            <span v-if="sectionShowSimple" class="text-right">
-              <b-button class="br-0" title="Advanced UI" :disabled="onlySimple" @click="toggleSectionShowSimple()">
+            <span v-if="sectionShowSimple && !onlySimple" class="text-right">
+              <b-button class="br-0" title="Advanced UI" :disabled="disabled" @click="toggleSectionShowSimple()">
                 <b-icon icon="diagram3" aria-hidden="true"></b-icon>
               </b-button>
             </span>
-            <span v-if="!sectionShowSimple && !onlySimple" class="text-right">
-              <b-button class="br-0" title="Simple UI" @click="toggleSectionShowSimple()">
+            <span v-if="!sectionShowSimple || onlySimple" class="text-right">
+              <b-button class="br-0" title="Simple UI" :disabled="disabled" @click="toggleSectionShowSimple()">
                 <b-icon icon="card-list" aria-hidden="true"></b-icon>
               </b-button>
             </span>
@@ -68,7 +68,15 @@ export default {
       type: Boolean,
       default: false
     },
+    sectionShowSimple: {
+      type: Boolean,
+      default: true
+    },
     onlySimple: {
+      type: Boolean,
+      default: false
+    },
+    disabled: {
       type: Boolean,
       default: false
     },
@@ -89,7 +97,6 @@ export default {
       tabName: this.section.toLowerCase() + '-tab',
       capitalSection: _.capitalize(this.section),
       fileInput: null,
-      sectionShowSimple: true
     }
   },
   watch: {
