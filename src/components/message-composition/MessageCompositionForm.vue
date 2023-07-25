@@ -14,12 +14,20 @@
       </b-col>
       <b-col sm="5"> to {{this.hermesMessage.topic}}
         <div v-if="this.hermesMessage.submit_to_gcn">
-          and {{getGCNDestination()}}
+          and {{getGcnDestination()}}
+        </div>
+        <div v-if="this.hermesMessage.submit_to_tns">
+          and {{getTnsDestination()}}
         </div>
       </b-col>
       <b-col sm="6">
         <b-button class="clear-button shadow mb-2" variant="outline-primary" @click="clearForm">Clear Form</b-button>
       </b-col>
+    </b-row>
+    <b-row v-if="submissionError">
+      <b-alert show dismissible variant="danger" @dismissed="clearError()">
+        {{this.submissionError}}
+      </b-alert>
     </b-row>
   </b-container>
 </template>
@@ -77,7 +85,8 @@ export default {
         validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
         validationErrors: {},
         readyToSubmit: false,
-        show: true
+        show: true,
+        submissionError: '',
       };
   },
   mounted() {
@@ -118,12 +127,19 @@ export default {
         this.logout();
       }
     },
-    getGCNDestination: function() {
+    getGcnDestination: function() {
       // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
       if (this.getHermesUrl == "https://hermes.lco.global/") {
-        return "circulars@gcn.nasa.gov"
+        return "circulars@gcn.nasa.gov";
       }
-      return "circulars@dev.gcn.nasa.gov"
+      return "circulars@dev.gcn.nasa.gov";
+    },
+    getTnsDestination: function() {
+      // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
+      if (this.getHermesUrl == "https://hermes.lco.global/") {
+        return "TNS";
+      }
+      return "TNS (sandbox)";
     },
     generatePlainText: function() {
       let payload = this.sanitizedMessageData();
@@ -170,6 +186,9 @@ export default {
         if (error.response.status == 401){
           this.logout();
         }
+        else if (error.response.status == 400) {
+          this.submissionError = error.response.data.error;
+        }
       });
     },
     clearForm() {
@@ -192,6 +211,9 @@ export default {
         astrometry: [],
       };
       this.validate();
+    },
+    clearSubmissionError() {
+      this.submissionError = '';
     },
     hermesMessageUpdated: function() {
       this.validate();

@@ -53,7 +53,7 @@
                       v-model="hermesMessage.authors"
                       field="authors"
                       label="Authors:"
-                      :desc="''"
+                      :desc="'Authors list in format: FirstName1 LastName1 (Affil1), FirstName2 LastName2 (Affil2), ...'"
                       :hide="false"
                       :errors="errors.authors"
                       @input="update"
@@ -66,7 +66,7 @@
                         name="submit-to-tns"
                         switch
                         @input="update"
-                    > Validate for TNS
+                    > Submit to TNS
                     </b-form-checkbox>
                     <!-- <b-form-checkbox
                         id="submit-to-mpc"
@@ -878,6 +878,9 @@
       },
       addSection: function (section) {
         let emptySection = _.cloneDeep(this.emptySections[section]);
+        if (section == 'targets' && this.hermesMessage.submit_to_tns) {
+          emptySection['new_discovery'] = true;
+        }
         if (!(section in this.hermesMessage.data)) {
           this.hermesMessage.data[section] = [];
         }

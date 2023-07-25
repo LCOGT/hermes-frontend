@@ -111,6 +111,7 @@
             <b-col md="2" offset-md="1" align-self="center">
               <b-form-checkbox
                 :id="'target-new-discovery-' + index"
+                :disabled="isTns"
                 v-model="target.new_discovery"
                 name="new_discovery"
                 switch
@@ -286,6 +287,7 @@
           this.advancedOptionsCollapsed = false;
           this.typeOptions = ['Sidereal'];
           this.type = 'Sidereal';
+          this.target.new_discovery = true;
           this.groupsArray = [];
         }
         else {
