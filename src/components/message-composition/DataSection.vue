@@ -7,7 +7,7 @@
             <b-button block v-b-toggle:[tabName] :variant="getVariant" @click="addNewRowIfEmpty">
               <b-row>
                 <b-col class="text-left error-icon">
-                  <b-icon v-if="!isEmpty && hasErrors" icon="exclamation-circle-fill" variant="danger"
+                  <b-icon v-if="hasErrors" icon="exclamation-circle-fill" variant="danger"
                     :title="getErrorTooltipString()"></b-icon>
                 </b-col>
                 <b-col v-if="isEmpty" class="text-center" :style="textStyle">
@@ -118,13 +118,13 @@ export default {
       }
     },
     getVariant: function () {
-      if (this.isEmpty) {
+      if (this.hasErrors){
+        return 'errors';
+      }
+      else if (this.isEmpty) {
         return 'empty';
       }
       else{
-        if (this.hasErrors) {
-          return 'errors';
-        }
         return 'valid';
       }
     }
@@ -145,7 +145,10 @@ export default {
       let errorStr = 'Field Errors:\n';
       if (_.isArray(this.errors)){
         for (var i = 0; i < this.errors.length; i += 1) {
-          if (!_.isEmpty(this.errors[i])) {
+          if (_.isString(this.errors[i])) {
+            errorStr += this.errors[i] + '\n';
+          }
+          else if (_.isObject(this.errors[i]) && !_.isEmpty(this.errors[i])) {
             _.forEach(this.errors[i], function(value, key) {
               errorStr += i + ': ' + key + '\n';
             });

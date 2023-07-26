@@ -906,7 +906,18 @@
         return _.get(this.getErrors('data', {}), [section, idx], {});
       },
       getErrors: function (key, default_value) {
-        return _.get(this.errors, key, default_value);
+        let errors = _.get(this.errors, key, default_value);
+        let non_field_key = '';
+        if (key.includes('target')){
+          non_field_key = 'target_non_field_errors';
+        }
+        else if (key.includes('photometry')) {
+          non_field_key = 'photometry_non_field_errors';
+        }
+        if (non_field_key){
+          errors = _.concat(errors, _.get(this.errors, non_field_key, default_value));
+        }
+        return errors;
       },
       toggleSectionShowSimple: function (section) {
         this.sectionShowSimple[section] = !this.sectionShowSimple[section]
