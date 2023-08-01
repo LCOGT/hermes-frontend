@@ -23,7 +23,7 @@
             <b-col md="2" offset-md="2">
               <b-button-toolbar>
                 <b-button-group class="mr-1">
-                  <b-button title="Advanced Target Fields" v-b-toggle="'advanced-target-collapse-' + index" @click="toggleCollapse">
+                  <b-button title="Advanced Target Fields" :class="advancedOptionsCollapsed ? 'collapsed': null" :aria-expanded="advancedOptionsCollapsed ? 'false': 'true'" aria-controls="'advanced-target-collapse-' + index" @click="toggleCollapse" :disabled="isTns">
                     <span v-if="advancedOptionsCollapsed">
                       <b-icon icon="arrows-expand" aria-hidden="true"></b-icon>
                     </span>
@@ -111,6 +111,7 @@
             <b-col md="2" offset-md="1" align-self="center">
               <b-form-checkbox
                 :id="'target-new-discovery-' + index"
+                :disabled="isTns"
                 v-model="target.new_discovery"
                 name="new_discovery"
                 switch
@@ -168,7 +169,7 @@
             </b-col>
           </b-form-row>
         </span>
-        <b-collapse :id="'advanced-target-collapse-' + index">
+        <b-collapse :id="'advanced-target-collapse-' + index" v-model="collapseVisible" >
           <b-form-row>
             <b-col md="3">
               <ocs-custom-field v-model="target.redshift" field="redshift" label="Redshift:" :hide=false
@@ -181,10 +182,6 @@
             <b-col md="3">
               <ocs-custom-field v-model="target.host_redshift" field="host_redshift" label="Host Redshift:" :hide=false
                 :errors="errors.host_redshift" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.group_associations" field="group_associations" label="Group Association:" :hide=false
-                :errors="errors.group_associations" @input="update" />
             </b-col>
           </b-form-row>
           <b-form-row class="mb-3">
@@ -207,12 +204,27 @@
             </b-col>
           </b-form-row>
           <b-form-row>
-            <b-col md="12">
+            <b-col md="6">
+              <ocs-custom-field v-if="!isTns" v-model="target.group_associations" field="group_associations" label="Groups:" desc="Comma separated list of TNS group associations for this Target" :hide=false
+                :errors="errors.group_associations" @input="update" />
+              <multiselect
+                v-else
+                v-model.lazy="groupsArray"
+                placeholder="Associate TNS Groups:"
+                :maxHeight=500
+                :optionHeight=38
+                :options="getTnsGroups()"
+                :multiple="true"
+                @input="update"
+              >
+              </multiselect>
+            </b-col>
+            <b-col md="6">
               <ocs-custom-field v-model="target.aliases" field="aliases" label="Aliases:" desc="Comma separated list of aliases for this Target" :hide=false
                 :errors="errors.aliases" @input="update" />
             </b-col>
           </b-form-row>
-          <discovery-info :data="target.discovery_info" :errors="getErrors('discovery_info', {})" :index="index" @message-updated="update">
+          <discovery-info :data="target.discovery_info" :errors="getErrors('discovery_info', {})" :index="index" :is-tns="isTns" @message-updated="update">
           </discovery-info>
         </b-collapse>
       </b-card>
@@ -220,6 +232,11 @@
   </template>
   <script>
   import _ from 'lodash';
+  import { mapGetters } from "vuex";
+  import '@/assets/css/submissions.css';
+  import Multiselect from 'vue-multiselect';
+  import "vue-multiselect/dist/vue-multiselect.min.css";
+  import "vue-multiselect-bootstrap-theme/dist/vue-multiselect-bootstrap4.scss";
   import { OCSMixin } from 'ocs-component-lib';
   import DiscoveryInfo from '@/components/message-composition/DiscoveryInfo.vue'
   import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
@@ -227,7 +244,8 @@
   export default {
     name: 'DataTarget',
     components: {
-      DiscoveryInfo
+      DiscoveryInfo,
+      Multiselect
     },
     mixins: [OCSMixin.confirmMixin, schemaDataMixin],
     props: {
@@ -242,6 +260,10 @@
       target: {
         type: Object,
         required: true
+      },
+      isTns: {
+        type: Boolean,
+        default: false
       }
     },
     data: function() {
@@ -250,15 +272,44 @@
         typeOptions: ['Sidereal', 'Non-Sidereal'],
         errorUnits: ['mas', 'arcsec', 'arcmin', 'degrees'],
         distanceUnits: ['cm', 'm', 'km', 'pc', 'kpc', 'Mpc', 'Gpc', 'ly', 'au'],
-        advancedOptionsCollapsed: true,
+        advancedOptionsCollapsed: !this.isTns,
         show: true,
+        groupsArray: [],
         id: 'target-' + this.index
       };
     },
     created() {
       this.type = this.getDefaultType;
     },
+    watch: {
+      isTns: function(value) {
+        if (value){
+          this.advancedOptionsCollapsed = false;
+          this.typeOptions = ['Sidereal'];
+          this.type = 'Sidereal';
+          this.target.new_discovery = true;
+          this.groupsArray = [];
+        }
+        else {
+          this.typeOptions = ['Sidereal', 'Non-Sidereal'];
+        }
+      },
+      groupsArray: function(value) {
+        if (!_.isEmpty(value)) {
+          this.target.group_associations = value.join(',');
+        }
+      }
+    },
     computed: {
+      ...mapGetters(["getTnsOptions"]),
+      collapseVisible: {
+        get: function() {
+          return !this.advancedOptionsCollapsed;
+        },
+        set: function(_val) {
+
+        }
+      },
       getDefaultType: function() {
         if (_.isEmpty(_.omitBy(this.target.orbital_elements, field => field === null || (_.isEmpty(field) && !_.isBoolean(field))))) {
           return 'Sidereal';
@@ -300,6 +351,10 @@
           this.target.pm_dec = null;
         }
         this.update();
+      },
+      getTnsGroups: function() {
+        let tnsOptions = this.getTnsOptions;
+        return _.values(tnsOptions['groups']).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
       }
     }
   };

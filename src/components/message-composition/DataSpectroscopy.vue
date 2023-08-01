@@ -179,10 +179,6 @@
                   @input="update"
               />
             </b-col>
-            <b-col md="6">
-              <ocs-custom-field v-model="spectroscopy.group_associations" field="group_associations" label="Group Associations:" :hide=false
-                :errors="errors.group_associations" @input="update" />
-            </b-col>
           </b-form-row>
           <b-form-row>
             <b-col md="12">
@@ -241,6 +237,10 @@
         default: () => {
           return [];
         }
+      },
+      isTns: {
+        type: Boolean,
+        default: false
       }
     },
     data: function() {

@@ -53,7 +53,7 @@
                       v-model="hermesMessage.authors"
                       field="authors"
                       label="Authors:"
-                      :desc="''"
+                      :desc="'Authors list in format: FirstName1 LastName1 (Affil1), FirstName2 LastName2 (Affil2), ...'"
                       :hide="false"
                       :errors="errors.authors"
                       @input="update"
@@ -66,7 +66,7 @@
                         name="submit-to-tns"
                         switch
                         @input="update"
-                    > Validate for TNS
+                    > Submit to TNS
                     </b-form-checkbox>
                     <!-- <b-form-checkbox
                         id="submit-to-mpc"
@@ -95,6 +95,8 @@
             :errors="getErrors('data.targets', [])"
             :isEmpty="isSectionEmpty('targets')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['targets']"
+            :disabled="hermesMessage.submit_to_tns"
             ref="targetsSection"
             @new-row="addSection('targets')"
             @copy-headers="copyHeaders"
@@ -118,6 +120,7 @@
                   :index="idx"
                   :target="target"
                   :errors="getDataErrorsArray('targets', idx)"
+                  :is-tns="hermesMessage.submit_to_tns"
                   @remove="removeSection('targets', idx)"
                   @copy="copySection('targets', idx)"
                   @message-updated="messageUpdated"
@@ -132,6 +135,8 @@
             :errors="getErrors('data.photometry', [])"
             :isEmpty="isSectionEmpty('photometry')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['photometry']"
+            :disabled="hermesMessage.submit_to_tns"
             ref="photometrySection"
             @new-row="addSection('photometry')"
             @copy-headers="copyHeaders"
@@ -156,6 +161,7 @@
                   :photometry="photometry"
                   :targets="hermesMessage.data.targets"
                   :errors="getDataErrorsArray('photometry', idx)"
+                  :is-tns="hermesMessage.submit_to_tns"
                   @remove="removeSection('photometry', idx)"
                   @copy="copySection('photometry', idx)"
                   @message-updated="messageUpdated"
@@ -169,7 +175,9 @@
             datatype="Spectroscopy (beta)"
             :errors="getErrors('data.spectroscopy', [])"
             :isEmpty="isSectionEmpty('spectroscopy')"
+            :sectionShowSimple="this.sectionShowSimple['spectroscopy']"
             :onlySimple=true
+            :disabled=true
             ref="spectroscopySection"
             @new-row="addSection('spectroscopy')"
           >
@@ -179,6 +187,7 @@
                 :spectroscopy="spectroscopy"
                 :targets="hermesMessage.data.targets"
                 :errors="getDataErrorsArray('spectroscopy', idx)"
+                :is-tns="hermesMessage.submit_to_tns"
                 @remove="removeSection('spectroscopy', idx)"
                 @copy="copySection('spectroscopy', idx)"
                 @message-updated="messageUpdated"
@@ -192,6 +201,7 @@
             :errors="getErrors('data.astrometry', [])"
             :isEmpty="isSectionEmpty('astrometry')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['astrometry']"
             ref="astrometrySection"
             @new-row="addSection('astrometry')"
             @copy-headers="copyHeaders"
@@ -229,6 +239,7 @@
             datatype="Reference"
             :errors="getErrors('data.references', [])"
             :isEmpty="isSectionEmpty('references')"
+            :sectionShowSimple="this.sectionShowSimple['references']"
             :allowLoading=true
             ref="referencesSection"
             @new-row="addSection('references')"
@@ -266,7 +277,9 @@
             section="extra_data"
             datatype="Extra Data"
             :errors="getErrors('data.extra_data', [])"
+            :sectionShowSimple="this.sectionShowSimple['extra_data']"
             :onlySimple=true
+            :disabled=true
             :isEmpty="isSectionEmpty('extra_data')"
             ref="extra_dataSection"
             @new-row="addSection('extra_data')"
@@ -289,7 +302,9 @@
             ref="messageSection"
             :errors="getErrors('message_text', null)"
             :isEmpty="hermesMessage.message_text === ''"
+            :sectionShowSimple="this.sectionShowSimple['message']"
             :onlySimple=true
+            :disabled=true
           >
             <b-tabs class="message-tabs" content-class="mt-2">
               <b-tab title="Edit" active>
@@ -605,7 +620,6 @@
             'limiting_brightness': null,
             'limiting_brightness_error': null,
             'limiting_brightness_unit': 'AB mag',
-            'group_associations': null
           },
           'spectroscopy': {
             'target_name': null,
@@ -627,7 +641,6 @@
             'comments': null,
             'reducer': null,
             'spec_type': null,
-            'group_associations': null
           },
           'astrometry': {
             'target_name': null,
@@ -845,6 +858,12 @@
         for (const section in this.sectionShowSimple){
           this.$refs[section + 'Section'].forceVisibility(false);
         }
+      },
+      'hermesMessage.submit_to_tns': function(value) {
+        if (value) {
+          this.sectionShowSimple['targets'] = false;
+          this.sectionShowSimple['photometry'] = false;
+        }
       }
     },
     methods: {
@@ -859,6 +878,9 @@
       },
       addSection: function (section) {
         let emptySection = _.cloneDeep(this.emptySections[section]);
+        if (section == 'targets' && this.hermesMessage.submit_to_tns) {
+          emptySection['new_discovery'] = true;
+        }
         if (!(section in this.hermesMessage.data)) {
           this.hermesMessage.data[section] = [];
         }
@@ -884,7 +906,18 @@
         return _.get(this.getErrors('data', {}), [section, idx], {});
       },
       getErrors: function (key, default_value) {
-        return _.get(this.errors, key, default_value);
+        let errors = _.get(this.errors, key, default_value);
+        let non_field_key = '';
+        if (key.includes('target')){
+          non_field_key = 'target_non_field_errors';
+        }
+        else if (key.includes('photometry')) {
+          non_field_key = 'photometry_non_field_errors';
+        }
+        if (non_field_key){
+          errors = _.concat(errors, _.get(this.errors, non_field_key, default_value));
+        }
+        return errors;
       },
       toggleSectionShowSimple: function (section) {
         this.sectionShowSimple[section] = !this.sectionShowSimple[section]

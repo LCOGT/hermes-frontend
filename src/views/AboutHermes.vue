@@ -392,6 +392,7 @@ export default {
                 { Field: 'distance_error', Description: 'Float: Uncertainty in distance to the target.' },
                 { Field: 'distance_units', Description: 'String: Units of distance to the target; choices: [cm, m, km, au, ly, pc, kpc, Mpc, Gpc].' },
                 { Field: 'aliases', Description: 'List of Strings: List of alternate names, e.g. internal names for the target.' },
+                { Field: 'group_associations', Description: 'List of Strings: Groups to associate with this discovery on TNS.' },
             ],
             orbital_items: [
                 { Field: 'epoch_of_elements<span class="text-danger">*</span>', Description: 'Date/Time: Epoch of the elements.' },
@@ -410,7 +411,6 @@ export default {
                 { Field: 'transient_type', Description: 'String: Type of transient; Accepted values are [PSN, nuc, PNV, AGN, Other].' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time discovery should remain proprietary on TNS.' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
-                { Field: 'group_associations', Description: 'String: Groups to associate with this discovery on TNS.' },
             ],
             photometry_items: [
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section.' },
@@ -426,7 +426,6 @@ export default {
                 { Field: 'observer', Description: 'String: Observer(s) of the data.' },
                 { Field: 'limiting_brightness<sup class="text-danger">2</sup>', Description: 'Float: 3-sigma limiting brightness of the image.' },
                 { Field: 'limiting_brightness_unit', Description: 'String: Limiting Brightness unit; Accepted values are [AB mag, Vega mag, Jsky, erg / s / cm<sup>2</sup> / &#8491].' },
-                { Field: 'group_associations', Description: 'String: Group associations for TNS.' },
                 { Field: 'catalog', Description: 'String: Reference photometric catalog used, e.g. SDSS.' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation.' },
             ],
@@ -463,7 +462,6 @@ export default {
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
                 { Field: 'observer<sup class="text-info">&dagger;</sup>', Description: 'String: Observer(s) of the data.' },
                 { Field: 'reducer<sup class="text-info">&dagger;</sup>', Description: 'String: Person who reduced the spectrum.' },
-                { Field: 'group_associations', Description: 'String: Group associations for TNS.' },
                 { Field: 'spec_type<sup class="text-info">&dagger;</sup>', Description: 'String: Type of spectrum; Choices: [Object, Host, Synthetic, Sky, Arcs].' },
                 { Field: 'comments', Description: 'String: Free form section for comments about the observation.' },
             ]
