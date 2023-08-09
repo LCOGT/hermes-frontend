@@ -61,7 +61,7 @@
                     <b-collapse id="accordion-3" visible accordion="my-accordion" role="tabpanel">
                         <b-card-body>
                             <b-tabs class="message-tabs" content-class="mt-2">
-                                <b-tab title="Build a Basic API Post" active>
+                                <b-tab title="Build a Basic API Post" active ref="basicTab">
                                     <b>HERMES message validation and submission can be accessed via API. The available endpoints are as follows:</b>
                                     <b-list-group>
                                         <b-list-group-item>
@@ -80,7 +80,7 @@
                                             <br>
                                             <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream.</P>
                                         </b-card>
-                                        <b-card header="Example Message (Python Code):">
+                                        <b-card header="Example Submission (Python Code):">
                                             <pre>
 import requests
 
@@ -101,6 +101,94 @@ message = {
 
 # Submit to Hermes
 response = requests.post(url=hermes_submit_url, json=message, headers=headers)
+                                            </pre>
+                                        </b-card>
+                                    </b-card-group>
+                                </b-tab>
+                                <b-tab title="Build a TNS submission">
+                                    <b>HERMES messages submission can also trigger a submission to the <a href="https://www.wis-tns.org/">Transient Name Server (TNS)</a> as an AT Report. Files can also be upload to the TNS during this type of submission.</b>
+                                    <b-list-group>
+                                        <b-list-group-item>
+                                            <b>Validation:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/validate/'">{{ this.getHermesUrl}}api/v0/submit_message/validate/</a></code> (Only accepts json data without files)
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b>Submission:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/'">{{ this.getHermesUrl }}api/v0/submit_message/</a></code>
+                                        </b-list-group-item>
+                                    </b-list-group>
+                                    <b-card-group>
+                                        <b-card header="Submitting a message to Hermes API and TNS:">
+                                            <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
+                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
+                                            <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, at least one target with group and discovery information, and at least one photometry datapoint and one limiting brightness.</li>
+                                            <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
+                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page.</li>
+                                            <li>The TNS object ID and a link to it's page will be added to the hermes message on submission</li>
+                                            <br>
+                                            <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream. The validation endpoint expects only json data, as specified in the <b-link @click="activeTab1()">Build a Basic API Post</b-link> section</P>
+                                        </b-card>
+                                        <b-card header="Example Submission (Python Code):">
+                                            <pre>
+import requests
+import json
+
+hermes_submit_url = '{{ this.getHermesUrl }}api/v0/submit_message/'
+HERMES_API_KEY = '1234567890'  # Copied from your profile page
+
+# Authenticate User in Request Headers
+headers = {'Authorization': f'Token {HERMES_API_KEY}'}
+
+# Define Your Message Dictionary
+message = {
+    'topic': 'test.topic',
+    'title': 'Test Title',
+    'submit_to_tns': True,
+    'submitter': 'YourNameHere',
+    'authors': 'First Last (Institution), First2 Last2 (Institution2)'
+    'data': {
+        'targets': [{
+            'name': 'my-target-1'
+            'ra': 22.0,
+            'dec': 33.0,
+            'discovery_info': {
+                'discovery_source': 'insert_tns_group_name',
+                'reporting_group': 'insert_tns_group_name',
+            },
+            'new_discovery': True,
+            'group_association': ['tns_group_name1', 'tns_group_name2']
+        }],
+        'photometry': [{
+            'target_name': 'my-target-1',
+            'date_obs': 'JD, MJD, or ISO format date',
+            'telescope': 'insert_tns_telescope_name',
+            'instrument': 'insert_tns_instrument_name',
+            'bandpass': 'insert_tns_filter_name',
+            'brightness': '33',
+            'brightness_unit': 'AB mag'
+        },
+        {
+            'target_name': 'my-target-1',
+            'date_obs': 'earlier JD, MJD, or ISO format date',
+            'telescope': 'insert_tns_telescope_name',
+            'instrument': 'insert_tns_instrument_name',
+            'bandpass': 'insert_tns_filter_name',
+            'limiting_brightness': '25',
+            'brightness_unit': 'AB mag'
+        }]
+    }
+    'message_text': 'Sample Message',
+}
+
+# JSON encode message so it can be sent with files as part of multipart/form-data
+data = {'data': json.dumps(message)}
+
+# Define your files to upload to TNS
+files = [
+    ('files', ('insert_filename_1.csv', open('insert_filepath_1.csv', 'rb'), 'text/csv')),
+    ('files', ('insert_filename_2.fits', open('insert_filepath_2.fits', 'rb'), 'application/fits'))
+]
+
+# Submit to Hermes
+response = requests.post(url=hermes_submit_url, data=data, files=files, headers=headers)
                                             </pre>
                                         </b-card>
                                     </b-card-group>
@@ -469,6 +557,11 @@ export default {
     },
     computed: {
         ...mapGetters(["getHermesUrl"])
+    },
+    methods: {
+        activeTab1: function() {
+            this.$refs['basicTab'].activate();
+        }
     }
 }
 </script>

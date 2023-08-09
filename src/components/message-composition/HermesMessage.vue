@@ -276,6 +276,7 @@
           <data-section
             section="extra_data"
             datatype="Extra Data"
+            plural-datatype="Extra Data"
             :errors="getErrors('data.extra_data', [])"
             :sectionShowSimple="this.sectionShowSimple['extra_data']"
             :onlySimple=true
@@ -354,6 +355,35 @@
                 </ul>
               </b-tab>
             </b-tabs>
+          </data-section>
+          <data-section
+            v-if="hermesMessage.submit_to_tns"
+            section="file_upload"
+            datatype="Files"
+            plural-datatype="Files"
+            :errors="[]"
+            :sectionShowSimple="this.sectionShowSimple['extra_data']"
+            :onlySimple=true
+            :disabled=true
+            :isEmpty="hermesMessage.files.length == 0"
+            ref="file_uploadSection"
+          >
+            <div>
+              <b-row>
+                <b-col md="11">
+                  <b-form-file class="mb-2" v-model="hermesMessage.files" multiple placeholder="Choose a file or drop it here..." drop-placeholder="Drop file here...">
+                  </b-form-file>
+                </b-col>
+                <b-col md="1">
+                  <b-button title="Clear all files" @click="hermesMessage.files = [];"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                </b-col>
+              </b-row>
+              <b-list-group v-for="(file, index) in hermesMessage.files" :key="'file' + index" flush>
+                <b-list-group-item><b>{{ file.name }}</b>:  {{ file.size }} bytes
+                  <b-button title="Remove this file" @click="removeFile(index)"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                </b-list-group-item>
+              </b-list-group>
+            </div>
           </data-section>
         </b-tab>
         <b-tab>
@@ -864,6 +894,9 @@
           this.sectionShowSimple['targets'] = false;
           this.sectionShowSimple['photometry'] = false;
         }
+        else {
+          this.hermesMessage.files = [];
+        }
       }
     },
     methods: {
@@ -898,6 +931,11 @@
           this.$refs[section + 'Section'].forceVisibility(false);
         }
         this.update();
+      },
+      removeFile: function(idx) {
+        if (idx < this.hermesMessage.files.length) {
+          this.hermesMessage.files.splice(idx, 1);
+        }
       },
       generatePlainText: function() {
         this.$emit('generate-plain-text');

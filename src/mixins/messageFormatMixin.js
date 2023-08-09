@@ -69,6 +69,7 @@ export var messageFormatMixin = {
     },
     sanitizedMessageData: function() {
       let cleanMessage = _.cloneDeep(this.hermesMessage);
+      delete cleanMessage.files;
       if (_.isEmpty(cleanMessage.data.event_id)) {
         delete cleanMessage.data.event_id;
       }
