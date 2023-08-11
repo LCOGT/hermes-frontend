@@ -121,7 +121,7 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                             <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, at least one target with group and discovery information, and at least one photometry datapoint and one limiting brightness.</li>
                                             <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
-                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page.</li>
+                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page. A list of `file_comments` can be added to the message payload to associate with the files.</li>
                                             <li>The TNS object ID and a link to it's page will be added to the hermes message on submission</li>
                                             <br>
                                             <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream. The validation endpoint expects only json data, as specified in the <b-link @click="activeTab1()">Build a Basic API Post</b-link> section</P>
@@ -176,6 +176,7 @@ message = {
         }]
     }
     'message_text': 'Sample Message',
+    'file_comments': ['This is my spectrum data', 'This is my finder chart image'] # Optional
 }
 
 # JSON encode message so it can be sent with files as part of multipart/form-data

@@ -73,6 +73,9 @@ export var messageFormatMixin = {
       if (_.isEmpty(cleanMessage.data.event_id)) {
         delete cleanMessage.data.event_id;
       }
+      if (_.isEmpty(cleanMessage.file_comments)) {
+        delete cleanMessage.file_comments;
+      }
       cleanMessage.data.references = this.sanitizeMessageSection(cleanMessage.data.references);
       cleanMessage.data.targets = this.sanitizeMessageSection(cleanMessage.data.targets);
       cleanMessage.data.photometry = this.sanitizeMessageSection(cleanMessage.data.photometry);

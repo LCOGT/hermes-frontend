@@ -57,6 +57,7 @@ export default {
       default: () => {
         return {
           files: [],
+          file_comments: [],
           title: '',
           authors: '',
           topic: '',
@@ -204,6 +205,7 @@ export default {
     clearForm() {
       // Reset the page to a clean state
       this.hermesMessage.files = [];
+      this.hermesMessage.file_comments = [];
       this.hermesMessage.title = '';
       this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];

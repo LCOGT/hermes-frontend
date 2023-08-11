@@ -371,16 +371,29 @@
             <div>
               <b-row>
                 <b-col md="11">
-                  <b-form-file class="mb-2" v-model="hermesMessage.files" multiple placeholder="Choose a file or drop it here..." drop-placeholder="Drop file here...">
+                  <b-form-file class="mb-2" v-model="hermesMessage.files" multiple placeholder="Choose a file or drop it here..." drop-placeholder="Drop file here..." @input="appendFileComments">
                   </b-form-file>
                 </b-col>
                 <b-col md="1">
-                  <b-button title="Clear all files" @click="hermesMessage.files = [];"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                  <b-button title="Clear all files" @click="hermesMessage.files = []; hermesMessage.file_comments = [];"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
                 </b-col>
               </b-row>
               <b-list-group v-for="(file, index) in hermesMessage.files" :key="'file' + index" flush>
-                <b-list-group-item><b>{{ file.name }}</b>:  {{ file.size }} bytes
-                  <b-button title="Remove this file" @click="removeFile(index)"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                <b-list-group-item class="pr-0">
+                  <b-row>
+                    <b-col md="3" align-self="center" class="pr-2">
+                      <b>{{ file.name }}</b>
+                    </b-col>
+                    <b-col md="1" align-self="center" class="pl-2 pr-0">
+                      {{ getFileSize(file.size) }}
+                    </b-col>
+                    <b-col md="7">
+                      <b-form-input v-model="hermesMessage.file_comments[index]" placeholder="Comments"></b-form-input>
+                    </b-col>
+                    <b-col md="1">
+                      <b-button title="Remove this file" @click="removeFile(index)"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                    </b-col>
+                  </b-row>
                 </b-list-group-item>
               </b-list-group>
             </div>
@@ -426,6 +439,7 @@
   <script>
   import _ from 'lodash';
   import { mapGetters } from "vuex";
+  import {filesize} from "filesize";
   import '@/assets/css/submissions.css';
   import DataSection from '@/components/message-composition/DataSection.vue'
   import DataReference from '@/components/message-composition/DataReference.vue'
@@ -896,6 +910,7 @@
         }
         else {
           this.hermesMessage.files = [];
+          this.hermesMessage.file_comments = [];
         }
       }
     },
@@ -935,7 +950,19 @@
       removeFile: function(idx) {
         if (idx < this.hermesMessage.files.length) {
           this.hermesMessage.files.splice(idx, 1);
+          this.hermesMessage.file_comments.splice(idx, 1);
         }
+      },
+      appendFileComments: function() {
+        // If we change files, we should just clear all comments to be safe
+        this.hermesMessage.file_comments = [];
+        // Then add an empty comment for each file that exists
+        while (this.hermesMessage.file_comments.length < this.hermesMessage.files.length) {
+          this.hermesMessage.file_comments.push('');
+        }
+      },
+      getFileSize: function(size) {
+        return filesize(size, {standard: 'jedec'})
       },
       generatePlainText: function() {
         this.$emit('generate-plain-text');
