@@ -64,6 +64,10 @@ export default {
       type: String,
       required: true
     },
+    pluralDatatype: {
+      type: String,
+      required: false
+    },
     isEmpty: {
       type: Boolean,
       default: false
@@ -95,7 +99,6 @@ export default {
       visible: false,
       id: this.section,
       tabName: this.section.toLowerCase() + '-tab',
-      capitalSection: _.capitalize(this.section),
       fileInput: null,
     }
   },
@@ -106,6 +109,12 @@ export default {
     }
   },
   computed: {
+    capitalSection: function() {
+      if (this.pluralDatatype){
+        return this.pluralDatatype;
+      }
+      return _.capitalize(this.section);
+    },
     hasErrors: function() {
       return !_.isEmpty(this.errors);
     },

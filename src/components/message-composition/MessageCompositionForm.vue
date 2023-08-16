@@ -56,6 +56,8 @@ export default {
       type: Object,
       default: () => {
         return {
+          files: [],
+          file_comments: [],
           title: '',
           authors: '',
           topic: '',
@@ -165,17 +167,26 @@ export default {
       });
     },
     submitToHop() {
-      let payload = this.sanitizedMessageData();
+      let payload = JSON.stringify(this.sanitizedMessageData());
+      let formData = null;
+      if (this.hermesMessage.files.length > 0){
+        formData = new FormData();
+        this.hermesMessage.files.forEach(function (file) {
+          // formData.append("file" + index, file);
+          formData.append("files", file);
+        });
+        formData.append("data", payload);
+      }
       // Post message via axios
       axios({
         method: 'post',
         withCredentials: true,
         // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': 'application/json',
+        headers: {'Content-Type': _.isNull(formData) ? 'application/json' : 'multipart/form-data',
                   'X-CSRFToken': this.getCsrfToken
                   },
         url: new URL('/api/v0/' + this.submissionEndpoint + '/', this.getHermesUrl).href,
-        data: JSON.stringify(payload)
+        data: _.isNull(formData) ? payload : formData
       })
       .then(() => {
         // log response, redirect to homepage
@@ -193,6 +204,8 @@ export default {
     },
     clearForm() {
       // Reset the page to a clean state
+      this.hermesMessage.files = [];
+      this.hermesMessage.file_comments = [];
       this.hermesMessage.title = '';
       this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];
