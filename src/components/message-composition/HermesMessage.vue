@@ -63,6 +63,7 @@
                     <b-form-checkbox
                         id="submit-to-tns"
                         v-model="hermesMessage.submit_to_tns"
+                        :disabled="!isLoggedIn"
                         name="submit-to-tns"
                         switch
                         @input="update"
@@ -79,6 +80,7 @@
                     <b-form-checkbox
                         id="submit-to-gcn"
                         v-model="hermesMessage.submit_to_gcn"
+                        :disabled="!isLoggedIn"
                         name="submit-to-gcn"
                         switch
                         @input="update"
@@ -711,7 +713,7 @@
       };
     },
     computed: {
-      ...mapGetters(["getProfile"]),
+      ...mapGetters(["getProfile", "isLoggedIn"]),
       photometryFields: function () {
         return [
           {
