@@ -59,11 +59,10 @@
                       @input="update"
                     />
                   </b-col>
-                  <b-col md="2" offset-md="1">
+                  <b-col md="2" offset-md="1" v-if="isLoggedIn">
                     <b-form-checkbox
                         id="submit-to-tns"
                         v-model="hermesMessage.submit_to_tns"
-                        :disabled="!isLoggedIn"
                         name="submit-to-tns"
                         switch
                         @input="update"
@@ -80,12 +79,14 @@
                     <b-form-checkbox
                         id="submit-to-gcn"
                         v-model="hermesMessage.submit_to_gcn"
-                        :disabled="!isLoggedIn"
                         name="submit-to-gcn"
                         switch
                         @input="update"
                     > Submit to GCN
                     </b-form-checkbox>
+                  </b-col>
+                  <b-col md="3" v-else style="align-self: center; text-align:center;">
+                    <span><b-link @click="authenticate">Login</b-link> to submit to TNS or GCN</span>
                   </b-col>
                 </b-form-row>
               </b-form>
@@ -713,7 +714,7 @@
       };
     },
     computed: {
-      ...mapGetters(["getProfile", "isLoggedIn"]),
+      ...mapGetters(["getProfile", "isLoggedIn", "getHermesUrl"]),
       photometryFields: function () {
         return [
           {
@@ -917,6 +918,11 @@
       }
     },
     methods: {
+      authenticate() {
+        this.$store.commit("SET_MID_LOGIN", true);
+        location.href =
+          this.getHermesUrl + "auth/authenticate/";
+      },
       update: function (data) {
         this.$emit('hermes-message-updated', data);
       },
