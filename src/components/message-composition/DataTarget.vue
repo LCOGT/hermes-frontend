@@ -106,7 +106,7 @@
             </b-col>
             <b-col md="3">
               <ocs-custom-field v-model="target.epoch" field="epoch" label="Epoch:" :hide=false
-                :errors="errors.pm_ra" @input="update" />
+                :errors="errors.epoch" @input="update" />
             </b-col>
             <b-col md="2" offset-md="1" align-self="center">
               <b-form-checkbox
