@@ -53,20 +53,20 @@
                       v-model="hermesMessage.authors"
                       field="authors"
                       label="Authors:"
-                      :desc="''"
+                      :desc="'Authors list in format: FirstName1 LastName1 (Affil1), FirstName2 LastName2 (Affil2), ...'"
                       :hide="false"
                       :errors="errors.authors"
                       @input="update"
                     />
                   </b-col>
-                  <b-col md="2" offset-md="1">
+                  <b-col md="2" offset-md="1" v-if="isLoggedIn">
                     <b-form-checkbox
                         id="submit-to-tns"
                         v-model="hermesMessage.submit_to_tns"
                         name="submit-to-tns"
                         switch
                         @input="update"
-                    > Validate for TNS
+                    > Submit to TNS
                     </b-form-checkbox>
                     <!-- <b-form-checkbox
                         id="submit-to-mpc"
@@ -85,6 +85,9 @@
                     > Submit to GCN
                     </b-form-checkbox>
                   </b-col>
+                  <b-col md="3" v-else style="align-self: center; text-align:center;">
+                    <span><b-link @click="authenticate">Login</b-link> to submit to TNS or GCN</span>
+                  </b-col>
                 </b-form-row>
               </b-form>
             </b-container>
@@ -95,6 +98,8 @@
             :errors="getErrors('data.targets', [])"
             :isEmpty="isSectionEmpty('targets')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['targets']"
+            :disabled="hermesMessage.submit_to_tns"
             ref="targetsSection"
             @new-row="addSection('targets')"
             @copy-headers="copyHeaders"
@@ -118,6 +123,7 @@
                   :index="idx"
                   :target="target"
                   :errors="getDataErrorsArray('targets', idx)"
+                  :is-tns="hermesMessage.submit_to_tns"
                   @remove="removeSection('targets', idx)"
                   @copy="copySection('targets', idx)"
                   @message-updated="messageUpdated"
@@ -132,6 +138,8 @@
             :errors="getErrors('data.photometry', [])"
             :isEmpty="isSectionEmpty('photometry')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['photometry']"
+            :disabled="hermesMessage.submit_to_tns"
             ref="photometrySection"
             @new-row="addSection('photometry')"
             @copy-headers="copyHeaders"
@@ -156,6 +164,7 @@
                   :photometry="photometry"
                   :targets="hermesMessage.data.targets"
                   :errors="getDataErrorsArray('photometry', idx)"
+                  :is-tns="hermesMessage.submit_to_tns"
                   @remove="removeSection('photometry', idx)"
                   @copy="copySection('photometry', idx)"
                   @message-updated="messageUpdated"
@@ -169,7 +178,9 @@
             datatype="Spectroscopy (beta)"
             :errors="getErrors('data.spectroscopy', [])"
             :isEmpty="isSectionEmpty('spectroscopy')"
+            :sectionShowSimple="this.sectionShowSimple['spectroscopy']"
             :onlySimple=true
+            :disabled=true
             ref="spectroscopySection"
             @new-row="addSection('spectroscopy')"
           >
@@ -179,6 +190,7 @@
                 :spectroscopy="spectroscopy"
                 :targets="hermesMessage.data.targets"
                 :errors="getDataErrorsArray('spectroscopy', idx)"
+                :is-tns="hermesMessage.submit_to_tns"
                 @remove="removeSection('spectroscopy', idx)"
                 @copy="copySection('spectroscopy', idx)"
                 @message-updated="messageUpdated"
@@ -192,6 +204,7 @@
             :errors="getErrors('data.astrometry', [])"
             :isEmpty="isSectionEmpty('astrometry')"
             :allowLoading=true
+            :sectionShowSimple="this.sectionShowSimple['astrometry']"
             ref="astrometrySection"
             @new-row="addSection('astrometry')"
             @copy-headers="copyHeaders"
@@ -229,6 +242,7 @@
             datatype="Reference"
             :errors="getErrors('data.references', [])"
             :isEmpty="isSectionEmpty('references')"
+            :sectionShowSimple="this.sectionShowSimple['references']"
             :allowLoading=true
             ref="referencesSection"
             @new-row="addSection('references')"
@@ -265,8 +279,11 @@
           <data-section
             section="extra_data"
             datatype="Extra Data"
+            plural-datatype="Extra Data"
             :errors="getErrors('data.extra_data', [])"
+            :sectionShowSimple="this.sectionShowSimple['extra_data']"
             :onlySimple=true
+            :disabled=true
             :isEmpty="isSectionEmpty('extra_data')"
             ref="extra_dataSection"
             @new-row="addSection('extra_data')"
@@ -289,7 +306,9 @@
             ref="messageSection"
             :errors="getErrors('message_text', null)"
             :isEmpty="hermesMessage.message_text === ''"
+            :sectionShowSimple="this.sectionShowSimple['message']"
             :onlySimple=true
+            :disabled=true
           >
             <b-tabs class="message-tabs" content-class="mt-2">
               <b-tab title="Edit" active>
@@ -340,6 +359,48 @@
               </b-tab>
             </b-tabs>
           </data-section>
+          <data-section
+            v-if="hermesMessage.submit_to_tns"
+            section="file_upload"
+            datatype="Files"
+            plural-datatype="Files"
+            :errors="[]"
+            :sectionShowSimple="this.sectionShowSimple['extra_data']"
+            :onlySimple=true
+            :disabled=true
+            :isEmpty="hermesMessage.files.length == 0"
+            ref="file_uploadSection"
+          >
+            <div>
+              <b-row>
+                <b-col md="11">
+                  <b-form-file class="mb-2" v-model="hermesMessage.files" multiple placeholder="Choose a file or drop it here..." drop-placeholder="Drop file here..." @input="appendFileComments">
+                  </b-form-file>
+                </b-col>
+                <b-col md="1">
+                  <b-button title="Clear all files" @click="hermesMessage.files = []; hermesMessage.file_comments = [];"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                </b-col>
+              </b-row>
+              <b-list-group v-for="(file, index) in hermesMessage.files" :key="'file' + index" flush>
+                <b-list-group-item class="pr-0">
+                  <b-row>
+                    <b-col md="3" align-self="center" class="pr-2">
+                      <b>{{ file.name }}</b>
+                    </b-col>
+                    <b-col md="1" align-self="center" class="pl-2 pr-0">
+                      {{ getFileSize(file.size) }}
+                    </b-col>
+                    <b-col md="7">
+                      <b-form-input v-model="hermesMessage.file_comments[index]" placeholder="Comments"></b-form-input>
+                    </b-col>
+                    <b-col md="1">
+                      <b-button title="Remove this file" @click="removeFile(index)"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
+                    </b-col>
+                  </b-row>
+                </b-list-group-item>
+              </b-list-group>
+            </div>
+          </data-section>
         </b-tab>
         <b-tab>
           <template slot="title">
@@ -381,6 +442,7 @@
   <script>
   import _ from 'lodash';
   import { mapGetters } from "vuex";
+  import {filesize} from "filesize";
   import '@/assets/css/submissions.css';
   import DataSection from '@/components/message-composition/DataSection.vue'
   import DataReference from '@/components/message-composition/DataReference.vue'
@@ -605,7 +667,6 @@
             'limiting_brightness': null,
             'limiting_brightness_error': null,
             'limiting_brightness_unit': 'AB mag',
-            'group_associations': null
           },
           'spectroscopy': {
             'target_name': null,
@@ -627,7 +688,6 @@
             'comments': null,
             'reducer': null,
             'spec_type': null,
-            'group_associations': null
           },
           'astrometry': {
             'target_name': null,
@@ -654,7 +714,7 @@
       };
     },
     computed: {
-      ...mapGetters(["getProfile"]),
+      ...mapGetters(["getProfile", "isLoggedIn", "getHermesUrl"]),
       photometryFields: function () {
         return [
           {
@@ -845,9 +905,24 @@
         for (const section in this.sectionShowSimple){
           this.$refs[section + 'Section'].forceVisibility(false);
         }
+      },
+      'hermesMessage.submit_to_tns': function(value) {
+        if (value) {
+          this.sectionShowSimple['targets'] = false;
+          this.sectionShowSimple['photometry'] = false;
+        }
+        else {
+          this.hermesMessage.files = [];
+          this.hermesMessage.file_comments = [];
+        }
       }
     },
     methods: {
+      authenticate() {
+        this.$store.commit("SET_MID_LOGIN", true);
+        location.href =
+          this.getHermesUrl + "auth/authenticate/";
+      },
       update: function (data) {
         this.$emit('hermes-message-updated', data);
       },
@@ -859,6 +934,9 @@
       },
       addSection: function (section) {
         let emptySection = _.cloneDeep(this.emptySections[section]);
+        if (section == 'targets' && this.hermesMessage.submit_to_tns) {
+          emptySection['new_discovery'] = true;
+        }
         if (!(section in this.hermesMessage.data)) {
           this.hermesMessage.data[section] = [];
         }
@@ -877,6 +955,23 @@
         }
         this.update();
       },
+      removeFile: function(idx) {
+        if (idx < this.hermesMessage.files.length) {
+          this.hermesMessage.files.splice(idx, 1);
+          this.hermesMessage.file_comments.splice(idx, 1);
+        }
+      },
+      appendFileComments: function() {
+        // If we change files, we should just clear all comments to be safe
+        this.hermesMessage.file_comments = [];
+        // Then add an empty comment for each file that exists
+        while (this.hermesMessage.file_comments.length < this.hermesMessage.files.length) {
+          this.hermesMessage.file_comments.push('');
+        }
+      },
+      getFileSize: function(size) {
+        return filesize(size, {standard: 'jedec'})
+      },
       generatePlainText: function() {
         this.$emit('generate-plain-text');
       },
@@ -884,7 +979,18 @@
         return _.get(this.getErrors('data', {}), [section, idx], {});
       },
       getErrors: function (key, default_value) {
-        return _.get(this.errors, key, default_value);
+        let errors = _.get(this.errors, key, default_value);
+        let non_field_key = '';
+        if (key.includes('target')){
+          non_field_key = 'target_non_field_errors';
+        }
+        else if (key.includes('photometry')) {
+          non_field_key = 'photometry_non_field_errors';
+        }
+        if (non_field_key){
+          errors = _.concat(errors, _.get(this.errors, non_field_key, default_value));
+        }
+        return errors;
       },
       toggleSectionShowSimple: function (section) {
         this.sectionShowSimple[section] = !this.sectionShowSimple[section]

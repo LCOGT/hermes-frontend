@@ -77,6 +77,10 @@
     flex: 0 0 10%;
 }
 
+[id^="group_associations-fieldgroup-advanced-target-collapse"] label{
+    flex: 0 0 10%;
+}
+
 #aliases-fieldgroup-advanced-target-collapse-0 label{
     flex: 0 0 10%;
 }

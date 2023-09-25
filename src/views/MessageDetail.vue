@@ -149,8 +149,8 @@ export default {
       KVdataFields: [{ key: "key", class: "data-column" }, { key: "value", class: "data-column" }],
       preSetTableOrder: {
         targets: "name,ra,ra_error,ra_error_units,dec,dec_error,dec_error_units,pm_ra,pm_dec,epoch,aliases,redshift,host_redshift,host_name,group_associations",
-        photometry: "target_name,date_obs,telescope,instrument,bandpass,brightness,brightness_error,brightness_unit,limiting_brightness,limiting_brightness_error,limiting_brightness_unit,exposure_time,observer,catalog,group_associations",
-        spectroscopy: "target_name,date_obs,telescope,instrument,flux,flux_units,flux_error,wavelength,wavelength_units,flux_type,observer,reducer,classification,exposure_time,setup,spec_type,proprietary_period,proprietary_period_units,group_associations",
+        photometry: "target_name,date_obs,telescope,instrument,bandpass,brightness,brightness_error,brightness_unit,limiting_brightness,limiting_brightness_error,limiting_brightness_unit,exposure_time,observer,catalog",
+        spectroscopy: "target_name,date_obs,telescope,instrument,flux,flux_units,flux_error,wavelength,wavelength_units,flux_type,observer,reducer,classification,exposure_time,setup,spec_type,proprietary_period,proprietary_period_units",
         astrometry: "target_name,date_obs,telescope,instrument,ra,ra_error,ra_error_units,dec,dec_error,dec_error_units,mpc_sitecode,catalog",
         references: "source,citation,url",
       }

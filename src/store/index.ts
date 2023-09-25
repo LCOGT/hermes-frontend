@@ -17,20 +17,12 @@ export default new Vuex.Store({
     },
     hermesUrl: '',
     csrf_token: '',
+    tns_options: {},
     mid_login: false
   },
   getters: {
-    getMainData(state) {
-      return state.main_data;
-    },
-    getExtraData(state) {
-      return state.extra_data;
-    },
-    getMainTableName(state) {
-      return state.name;
-    },
-    getMainTableHeader(state) {
-      return state.header;
+    getTnsOptions(state) {
+      return state.tns_options;
     },
     getProfile(state) {
       return state.profile;
@@ -50,17 +42,8 @@ export default new Vuex.Store({
   },
   plugins: [createPersistedState()],
   mutations: {
-    SET_MAIN_DATA(state, main_data) {
-      state.main_data = main_data;
-    },
-    SET_EXTRA_DATA(state, extra_data) {
-      state.extra_data = extra_data;
-    },
-    SET_MAIN_TABLE_NAME(state, name) {
-      state.name = name;
-    },
-    SET_MAIN_TABLE_HEADER(state, header) {
-      state.header = header;
+    SET_TNS_OPTIONS(state, tns_options) {
+      state.tns_options = tns_options;
     },
     SET_PROFILE(state, profile) {
       state.profile = profile;
@@ -76,6 +59,24 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    getTnsOptionsData(context) {
+      return axios.get(context.state.hermesUrl + "api/v0/tns_options/", {
+        withCredentials: true,
+      })
+      .then((response) => {
+        context.commit("SET_TNS_OPTIONS", response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.response.status == 401){
+          context.commit("SET_MID_LOGIN", false);
+          context.commit("SET_PROFILE", {
+            "email": "HERMES Guest",
+            "writable_topics": ["hermes.test"]
+          });
+        }
+      })
+    },
     getProfileData(context) {
       return axios.get(context.state.hermesUrl + "api/v0/profile/", {
           withCredentials: true,

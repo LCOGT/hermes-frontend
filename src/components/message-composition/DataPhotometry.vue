@@ -70,8 +70,18 @@
               :errors="errors.brightness_error" @input="update" />
           </b-col>
           <b-col md="3">
-            <ocs-custom-field v-model="photometry.bandpass" field="bandpass" label="Band:" :hide=false
+            <ocs-custom-field v-if="!isTns" v-model="photometry.bandpass" field="bandpass" label="Band:" :hide=false
               :errors="errors.bandpass" @input="update" />
+            <ocs-custom-select
+              v-else
+              v-model="photometry.bandpass"
+              field="bandpass"
+              label="Band:"
+              :hide=false
+              :options="getTnsValuesList('filters')"
+              :errors="errors.bandpass"
+              @input="update"
+            />
           </b-col>
         </b-form-row>
         <b-form-row>
@@ -89,12 +99,32 @@
             </ocs-custom-field>  
           </b-col>
           <b-col md="3">
-            <ocs-custom-field v-model="photometry.telescope" field="telescope" label="Telescope:" :hide=false
+            <ocs-custom-field v-if="!isTns" v-model="photometry.telescope" field="telescope" label="Telescope:" :hide=false
               :errors="errors.telescope" @input="update" />
+            <ocs-custom-select
+              v-else
+              v-model="photometry.telescope"
+              field="telescope"
+              label="Telescope:"
+              :hide=false
+              :options="getTnsValuesList('telescopes')"
+              :errors="errors.telescope"
+              @input="update"
+            />
           </b-col>
           <b-col md="3">
-            <ocs-custom-field v-model="photometry.instrument" field="instrument" label="Instrument:" :hide=false
+            <ocs-custom-field v-if="!isTns" v-model="photometry.instrument" field="instrument" label="Instrument:" :hide=false
               :errors="errors.instrument" @input="update" />
+            <ocs-custom-select
+              v-else
+              v-model="photometry.instrument"
+              field="instrument"
+              label="Instrument:"
+              :hide=false
+              :options="getTnsValuesList('instruments')"
+              :errors="errors.instrument"
+              @input="update"
+            />
           </b-col>
         </b-form-row>
         <b-collapse :id="'advanced-photometry-collapse-' + index" class="mt-2">
@@ -110,10 +140,6 @@
             <b-col md="3">
               <ocs-custom-field v-model="photometry.catalog" field="catalog" label="Catalog:" :hide=false
                 :errors="errors.catalog" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="photometry.group_associations" field="group_associations" label="Group Associations:" :hide=false
-                :errors="errors.group_associations" @input="update" />
             </b-col>
           </b-form-row>
           <b-form-row>
@@ -149,6 +175,7 @@
   <script>
   import { OCSMixin } from 'ocs-component-lib';
   import _ from 'lodash';
+  import { mapGetters } from "vuex";
   import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
 
   export default {
@@ -173,6 +200,10 @@
         default: () => {
           return [];
         }
+      },
+      isTns: {
+        type: Boolean,
+        default: false
       }
     },
     data: function() {
@@ -184,8 +215,20 @@
       };
     },
     computed: {
+      ...mapGetters(["getTnsOptions"]),
       targetNames: function() {
         return _.map(this.targets, 'name');
+      }
+    },
+    methods: {
+      getTnsValuesList: function(category) {
+        let tnsOptions = this.getTnsOptions;
+        if (_.isArray(tnsOptions[category])) {
+          return tnsOptions[category].sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
+        }
+        else {
+          return _.values(tnsOptions[category]).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
+        }
       }
     }
   };

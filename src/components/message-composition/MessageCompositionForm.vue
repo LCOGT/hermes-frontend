@@ -14,12 +14,20 @@
       </b-col>
       <b-col sm="5"> to {{this.hermesMessage.topic}}
         <div v-if="this.hermesMessage.submit_to_gcn">
-          and {{getGCNDestination()}}
+          and {{getGcnDestination()}}
+        </div>
+        <div v-if="this.hermesMessage.submit_to_tns">
+          and {{getTnsDestination()}}
         </div>
       </b-col>
       <b-col sm="6">
         <b-button class="clear-button shadow mb-2" variant="outline-primary" @click="clearForm">Clear Form</b-button>
       </b-col>
+    </b-row>
+    <b-row v-if="submissionError">
+      <b-alert show dismissible variant="danger" @dismissed="clearError()">
+        {{this.submissionError}}
+      </b-alert>
     </b-row>
   </b-container>
 </template>
@@ -48,6 +56,8 @@ export default {
       type: Object,
       default: () => {
         return {
+          files: [],
+          file_comments: [],
           title: '',
           authors: '',
           topic: '',
@@ -77,16 +87,20 @@ export default {
         validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
         validationErrors: {},
         readyToSubmit: false,
-        show: true
+        show: true,
+        submissionError: '',
       };
   },
   mounted() {
+    if (_.isEmpty(this.getTnsOptions)) {
+      this.$store.dispatch('getTnsOptionsData');
+    }
     this.topicOptions = this.getProfile.writable_topics;
     this.hermesMessage.topic = this.topicOptions[0];
     this.hermesMessage.submitter = this.getProfile.email;
   },
   computed: {
-    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl"]),
+    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions"]),
   },
   methods: {
     validate: _.debounce(function() {
@@ -115,12 +129,19 @@ export default {
         this.logout();
       }
     },
-    getGCNDestination: function() {
+    getGcnDestination: function() {
       // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
       if (this.getHermesUrl == "https://hermes.lco.global/") {
-        return "circulars@gcn.nasa.gov"
+        return "circulars@gcn.nasa.gov";
       }
-      return "circulars@dev.gcn.nasa.gov"
+      return "circulars@dev.gcn.nasa.gov";
+    },
+    getTnsDestination: function() {
+      // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
+      if (this.getHermesUrl == "https://hermes.lco.global/") {
+        return "TNS";
+      }
+      return "TNS (sandbox)";
     },
     generatePlainText: function() {
       let payload = this.sanitizedMessageData();
@@ -146,17 +167,26 @@ export default {
       });
     },
     submitToHop() {
-      let payload = this.sanitizedMessageData();
+      let payload = JSON.stringify(this.sanitizedMessageData());
+      let formData = null;
+      if (this.hermesMessage.files.length > 0){
+        formData = new FormData();
+        this.hermesMessage.files.forEach(function (file) {
+          // formData.append("file" + index, file);
+          formData.append("files", file);
+        });
+        formData.append("data", payload);
+      }
       // Post message via axios
       axios({
         method: 'post',
         withCredentials: true,
         // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': 'application/json',
+        headers: {'Content-Type': _.isNull(formData) ? 'application/json' : 'multipart/form-data',
                   'X-CSRFToken': this.getCsrfToken
                   },
         url: new URL('/api/v0/' + this.submissionEndpoint + '/', this.getHermesUrl).href,
-        data: JSON.stringify(payload)
+        data: _.isNull(formData) ? payload : formData
       })
       .then(() => {
         // log response, redirect to homepage
@@ -167,10 +197,15 @@ export default {
         if (error.response.status == 401){
           this.logout();
         }
+        else if (error.response.status == 400) {
+          this.submissionError = error.response.data.error;
+        }
       });
     },
     clearForm() {
       // Reset the page to a clean state
+      this.hermesMessage.files = [];
+      this.hermesMessage.file_comments = [];
       this.hermesMessage.title = '';
       this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];
@@ -189,6 +224,9 @@ export default {
         astrometry: [],
       };
       this.validate();
+    },
+    clearSubmissionError() {
+      this.submissionError = '';
     },
     hermesMessageUpdated: function() {
       this.validate();

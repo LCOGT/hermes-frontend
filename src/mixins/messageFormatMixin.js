@@ -47,7 +47,10 @@ export var messageFormatMixin = {
         }
         message[i] = _.omitBy(message[i], (value, key) => key.includes('unit') && key.replace('_unit', '')  in message[i] && message[i][key.replace('_unit', '')] === null);
         message[i] = _.omitBy(message[i], field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
-        if (!_.isEmpty(message[i].aliases)){
+        if (!_.isEmpty(message[i].group_associations) && _.isString(message[i].group_associations)){
+          message[i].group_associations = message[i].group_associations.split(',');
+        }
+        if (!_.isEmpty(message[i].aliases)  && _.isString(message[i].aliases)){
           message[i].aliases = message[i].aliases.split(',');
         }
       }
@@ -66,8 +69,12 @@ export var messageFormatMixin = {
     },
     sanitizedMessageData: function() {
       let cleanMessage = _.cloneDeep(this.hermesMessage);
+      delete cleanMessage.files;
       if (_.isEmpty(cleanMessage.data.event_id)) {
         delete cleanMessage.data.event_id;
+      }
+      if (_.isEmpty(cleanMessage.file_comments)) {
+        delete cleanMessage.file_comments;
       }
       cleanMessage.data.references = this.sanitizeMessageSection(cleanMessage.data.references);
       cleanMessage.data.targets = this.sanitizeMessageSection(cleanMessage.data.targets);
