@@ -81,6 +81,7 @@
                         v-model="hermesMessage.submit_to_gcn"
                         name="submit-to-gcn"
                         switch
+                        :disabled="!isDev()"
                         @input="update"
                     > Submit to GCN
                     </b-form-checkbox>
@@ -918,6 +919,13 @@
       }
     },
     methods: {
+      isDev: function() {
+        // Hack right now to determine if we are a dev deploy
+        if (this.getHermesUrl == "https://hermes.lco.global/") {
+          return false;
+        }
+        return true;
+      },
       authenticate() {
         this.$store.commit("SET_MID_LOGIN", true);
         location.href =
