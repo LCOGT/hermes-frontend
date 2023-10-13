@@ -50,7 +50,23 @@
             Revoke Credential
           </b-button>
         </div>
-      </b-col>  
+      </b-col>
+    </b-row>
+    <b-row v-if="isLoggedIn">
+      <b-col md="4">
+        <h3 class="text-center">GCN Authorization</h3>
+        <p>
+          To submit messages to GCN circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/user">NASA GCN account</a>
+          with gcn circular submission priveledges. Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
+        </p>
+        <p>Current Status: {{ gcnAuthorizationText }}
+        </p>
+        <div class="text-center">
+          <b-button variant="info" @click="authorizeGcn">
+            Authorize GCN
+          </b-button>
+        </div>
+      </b-col>
     </b-row>
   </b-container>
 </template>
@@ -73,9 +89,25 @@ export default {
     ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
     writableTopics: function() {
       return this.getProfile.writable_topics.join('\n');
+    },
+    isGcnAuthorized: function() {
+      return this.getProfile.integrated_apps.includes('GCN');
+    },
+    gcnAuthorizationText: function() {
+      if (this.isGcnAuthorized()) {
+        return '<font color="green">Connected</font>'
+      }
+      else {
+        return '<font color="red">Not Connected</font>'
+      }
     }
   },
   methods: {
+    authorizeGcn: function(evt) {
+      evt.preventDefault();
+      location.href =
+        this.getHermesUrl + "gcn-auth/login";
+    },
     performRevokeToken: function (evt) {
       evt.preventDefault();
       axios({
