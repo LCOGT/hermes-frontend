@@ -94,7 +94,7 @@ export default {
       return this.getProfile.integrated_apps.includes('GCN');
     },
     gcnAuthorizationText: function() {
-      if (this.isGcnAuthorized()) {
+      if (this.isGcnAuthorized) {
         return '<font color="green">Connected</font>'
       }
       else {
