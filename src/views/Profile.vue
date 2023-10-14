@@ -59,8 +59,7 @@
           To submit messages to GCN circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/user">NASA GCN account</a>
           with gcn circular submission priveledges. Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
         </p>
-        <p>Current Status: {{ gcnAuthorizationText }}
-        </p>
+        <div v-html="gcnAuthorizationText"></div>
         <div class="text-center">
           <b-button variant="info" @click="authorizeGcn">
             Authorize GCN
@@ -95,10 +94,10 @@ export default {
     },
     gcnAuthorizationText: function() {
       if (this.isGcnAuthorized) {
-        return '<font color="green">Connected</font>'
+        return 'Current Status: <font color="green">Connected</font>'
       }
       else {
-        return '<font color="red">Not Connected</font>'
+        return 'Current Status: <font color="red">Not Connected</font>'
       }
     }
   },
