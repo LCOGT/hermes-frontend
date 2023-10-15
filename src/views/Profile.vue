@@ -59,7 +59,7 @@
           To submit messages to GCN circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/user">NASA GCN account</a>
           with gcn circular submission priveledges. Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
         </p>
-        <div v-html="gcnAuthorizationText"></div>
+        <div v-html="gcnAuthorizationText"></div><br />
         <div class="text-center">
           <b-button variant="info" @click="authorizeGcn">
             Authorize GCN
