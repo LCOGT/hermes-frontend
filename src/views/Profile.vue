@@ -3,7 +3,7 @@
     <b-alert :show="!isLoggedIn" variant="danger">
       <p>You must login to access your profile</p>
     </b-alert>
-    <b-alert dismissible variant="warning" v-model="showAlert" @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
+    <b-alert dismissible :variant="alertVariant" v-model="showAlert" @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
     <b-row v-if="isLoggedIn">
       <b-col md="4" class="border-right">
         <h3 class="text-center">Writable Topics</h3>
@@ -81,8 +81,16 @@ export default {
   data: function () {
     return {
       alertMessage: null,
-      showAlert: false
+      showAlert: false,
+      alertVariant: 'warning'
     };
+  },
+  mounted() {
+    if (this.$route.query.alert){
+      this.alertMessage = this.$route.query.alert;
+      this.alertVariant = 'danger';
+      this.showAlert = true;
+    }
   },
   computed: {
     ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
@@ -99,6 +107,9 @@ export default {
       else {
         return 'Current Status: <font color="red">Not Connected</font>'
       }
+    },
+    alertText: function() {
+      return this.$route.query.alert;
     }
   },
   methods: {
@@ -121,6 +132,7 @@ export default {
       .then(() => {
         this.$store.dispatch('getProfileData');
         this.alertMessage = 'Token Successfully Revoked!';
+        this.alertVariant = 'warning';
         this.showAlert = true;
       })
       .catch(error => {
@@ -144,6 +156,7 @@ export default {
       .then(() => {
         this.$store.dispatch('getProfileData');
         this.alertMessage = 'Hop Credentials Successfully Revoked!';
+        this.alertVariant = 'warning';
         this.showAlert = true;
       })
       .catch(error => {
