@@ -96,11 +96,19 @@ export default {
       this.$store.dispatch('getTnsOptionsData');
     }
     this.topicOptions = this.getProfile.writable_topics;
-    this.hermesMessage.topic = this.topicOptions[0];
+    if (this.isProd) {
+      this.hermesMessage.topic = this.topicOptions[0];
+    }
+    else {
+      this.hermesMessage.topic = 'hermes.test';
+    }
     this.hermesMessage.submitter = this.getProfile.email;
   },
   computed: {
     ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions"]),
+    isProd: function() {
+      return this.getHermesUrl == "https://hermes.lco.global/";
+    }
   },
   methods: {
     validate: _.debounce(function() {
@@ -131,14 +139,14 @@ export default {
     },
     getGcnDestination: function() {
       // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
-      if (this.getHermesUrl == "https://hermes.lco.global/") {
+      if (this.isProd) {
         return "circulars@gcn.nasa.gov";
       }
       return "circulars@dev.gcn.nasa.gov";
     },
     getTnsDestination: function() {
       // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
-      if (this.getHermesUrl == "https://hermes.lco.global/") {
+      if (this.isProd) {
         return "TNS";
       }
       return "TNS (sandbox)";

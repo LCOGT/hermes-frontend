@@ -57,7 +57,12 @@
         <h3 class="text-center">GCN Authorization</h3>
         <p>
           To submit messages to GCN circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/user">NASA GCN account</a>
-          with gcn circular submission priveledges. Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
+          with gcn circular <a class="text-secondary" href="https://gcn.nasa.gov/user/endorsements">submission priveledges</a>.
+          Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
+          <ul class="pl-4">
+            <li>You <b>must</b> use the same identity provider you originally created your GCN account with.</li>
+            <li>You <b>must</b> re-authorize your account after making changes or adding permissions at GCN.</li>
+          </ul>
         </p>
         <div v-html="gcnAuthorizationText"></div><br />
         <div class="text-center">
@@ -91,6 +96,8 @@ export default {
       this.alertVariant = 'danger';
       this.showAlert = true;
     }
+    // I think its reasonable to trigger a refresh of the profile data when you hit the /profile view.
+    this.$store.dispatch('getProfileData');
   },
   computed: {
     ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
@@ -100,12 +107,20 @@ export default {
     isGcnAuthorized: function() {
       return this.getProfile.integrated_apps.includes('GCN');
     },
+    canSubmitToGcn: function() {
+      return this.getProfile.can_submit_to_gcn;
+    },
     gcnAuthorizationText: function() {
       if (this.isGcnAuthorized) {
-        return 'Current Status: <font color="green">Connected</font>'
+        if (this.canSubmitToGcn) {
+          return 'Current Status: <font color="green">Connected / Permitted</font>'
+        }
+        else {
+          return 'Current Status: <font color="darkorange" title="Please check your GCN accounts peer endorsements to make sure you have gcn circular submission priveledges">Connected / Not Permitted</font>'
+        }
       }
       else {
-        return 'Current Status: <font color="red">Not Connected</font>'
+        return 'Current Status: <font color="red" title="You must authorize your GCN account">Not Connected</font>'
       }
     },
     alertText: function() {
