@@ -24,6 +24,11 @@
           <b-link :to="{ name: 'nonlocalizedevent', params: { id: message.data.superevent_id } }" v-b-tooltip.hover
             :title="message.data.superevent_id">{{ message.data.superevent_id }}</b-link>
         </b-card-sub-title>
+        <b-card-sub-title class="mt-1" v-if="isGcnCircular">
+          Originally published as
+          <b-link :href="getGcnCircularLink(message)" v-b-tooltip.hover
+            :title="getGcnCircularLink(message)">GCN Circular {{ getGcnCircularNumber(message) }}</b-link>
+        </b-card-sub-title>
         <hr>
         <!-- Main Message -->
         <b-row>
@@ -156,6 +161,11 @@ export default {
       }
     };
   },
+  computed: {
+    isGcnCircular: function() {
+      return this.message.topic == 'gcn.circular';
+    }
+  },
   methods: {
     copy(value, type) {
       // Copy text to Clipboard
@@ -185,6 +195,12 @@ export default {
       this.jsonData.title = '';
       this.jsonData.content = '';
       this.showCopyAlert = false;
+    },
+    getGcnCircularLink(message) {
+      return 'https://gcn.nasa.gov/circulars/' + this.getGcnCircularNumber(message);
+    },
+    getGcnCircularNumber (message) {
+      return message.data.number;
     },
     getGraceDBLink(superevent_id) {
       return 'https://gracedb.ligo.org/superevents/' + superevent_id + '/view/';

@@ -506,6 +506,7 @@
               { value: "hop_uuid", text: "Hop UUID" },
               { value: "doi", text: "DOI" },
               { value: "gracedb_id", text: "GraceDB ID" },
+              { value: "gcn_circular", text: "GCN Circular ID" },
             ],
             placeholder: "Source",
             class: "source-column"

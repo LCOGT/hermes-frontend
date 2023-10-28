@@ -63,6 +63,7 @@ export default {
         { value: "hop_uuid", text: "Hop UUID" },
         { value: "doi", text: "DOI" },
         { value: "gracedb_id", text: "GraceDB ID" },
+        { value: 'gcn_circular', text: 'GCN Circular ID'}
       ],
       id: 'reference-' + this.index
     }
