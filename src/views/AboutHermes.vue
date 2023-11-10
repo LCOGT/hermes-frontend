@@ -61,7 +61,7 @@
                     <b-collapse id="accordion-3" visible accordion="my-accordion" role="tabpanel">
                         <b-card-body>
                             <b-tabs class="message-tabs" content-class="mt-2">
-                                <b-tab title="Build a Basic API Post" active ref="basicTab">
+                                <b-tab title="Basic API Post" active ref="basicTab">
                                     <b>HERMES message validation and submission can be accessed via API. The available endpoints are as follows:</b>
                                     <b-list-group>
                                         <b-list-group-item>
@@ -105,96 +105,7 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                         </b-card>
                                     </b-card-group>
                                 </b-tab>
-                                <b-tab title="Build a TNS submission">
-                                    <b>HERMES messages submission can also trigger a submission to the <a href="https://www.wis-tns.org/">Transient Name Server (TNS)</a> as an AT Report. Files can also be upload to the TNS during this type of submission.</b>
-                                    <b-list-group>
-                                        <b-list-group-item>
-                                            <b>Validation:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/validate/'">{{ this.getHermesUrl}}api/v0/submit_message/validate/</a></code> (Only accepts json data without files)
-                                        </b-list-group-item>
-                                        <b-list-group-item>
-                                            <b>Submission:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/'">{{ this.getHermesUrl }}api/v0/submit_message/</a></code>
-                                        </b-list-group-item>
-                                    </b-list-group>
-                                    <b-card-group>
-                                        <b-card header="Submitting a message to Hermes API and TNS:">
-                                            <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
-                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
-                                            <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, at least one target with group and discovery information, and at least one photometry datapoint and one limiting brightness.</li>
-                                            <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
-                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page. A list of `file_comments` can be added to the message payload to associate with the files.</li>
-                                            <li>The TNS object ID and a link to it's page will be added to the hermes message on submission</li>
-                                            <br>
-                                            <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream. The validation endpoint expects only json data, as specified in the <b-link @click="activeTab1()">Build a Basic API Post</b-link> section</P>
-                                        </b-card>
-                                        <b-card header="Example Submission (Python Code):">
-                                            <pre>
-import requests
-import json
-
-hermes_submit_url = '{{ this.getHermesUrl }}api/v0/submit_message/'
-HERMES_API_KEY = '1234567890'  # Copied from your profile page
-
-# Authenticate User in Request Headers
-headers = {'Authorization': f'Token {HERMES_API_KEY}'}
-
-# Define Your Message Dictionary
-message = {
-    'topic': 'test.topic',
-    'title': 'Test Title',
-    'submit_to_tns': True,
-    'submitter': 'YourNameHere',
-    'authors': 'First Last (Institution), First2 Last2 (Institution2)'
-    'data': {
-        'targets': [{
-            'name': 'my-target-1'
-            'ra': 22.0,
-            'dec': 33.0,
-            'discovery_info': {
-                'discovery_source': 'insert_tns_group_name',
-                'reporting_group': 'insert_tns_group_name',
-            },
-            'new_discovery': True,
-            'group_association': ['tns_group_name1', 'tns_group_name2']
-        }],
-        'photometry': [{
-            'target_name': 'my-target-1',
-            'date_obs': 'JD, MJD, or ISO format date',
-            'telescope': 'insert_tns_telescope_name',
-            'instrument': 'insert_tns_instrument_name',
-            'bandpass': 'insert_tns_filter_name',
-            'brightness': '33',
-            'brightness_unit': 'AB mag'
-        },
-        {
-            'target_name': 'my-target-1',
-            'date_obs': 'earlier JD, MJD, or ISO format date',
-            'telescope': 'insert_tns_telescope_name',
-            'instrument': 'insert_tns_instrument_name',
-            'bandpass': 'insert_tns_filter_name',
-            'limiting_brightness': '25',
-            'brightness_unit': 'AB mag'
-        }]
-    }
-    'message_text': 'Sample Message',
-    'file_comments': ['This is my spectrum data', 'This is my finder chart image'] # Optional
-}
-
-# JSON encode message so it can be sent with files as part of multipart/form-data
-data = {'data': json.dumps(message)}
-
-# Define your files to upload to TNS
-files = [
-    ('files', ('insert_filename_1.csv', open('insert_filepath_1.csv', 'rb'), 'text/csv')),
-    ('files', ('insert_filename_2.fits', open('insert_filepath_2.fits', 'rb'), 'application/fits'))
-]
-
-# Submit to Hermes
-response = requests.post(url=hermes_submit_url, data=data, files=files, headers=headers)
-                                            </pre>
-                                        </b-card>
-                                    </b-card-group>
-                                </b-tab>
-                                <b-tab title="Build a Hermes Data Table">
+                                <b-tab title="Hermes Data Table">
                                     <b-card-group>
                                         <b-card header="Construct your Data Dictionary:">
                                             <b>You can check the specifics of the API schema using the registry below.</b>
@@ -225,6 +136,183 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
         'key2': 'value2',
     }
 }
+                                            </pre>
+                                        </b-card>
+                                    </b-card-group>
+                                </b-tab>
+                                <b-tab title="Spectroscopy files">
+                                    <b>Files referenced in the spectroscopy section can be uploaded to be stored and accesible publicly from the Scimma Archive.</b>
+                                    <b-card-group>
+                                        <b-card header="Submitting a message with spectroscopy files to upload:">
+                                            <li>Same as the basic submission, except files are separate from the json data, and filenames are referenced in the json data. Payload is submitted as multipart/form-data instead of json.</li>
+                                            <li>Spectroscopy section contains an optional <code>files</code> list of file objects containing [<code>name, description, url</code>].</li>
+                                            <li>Only file <code>name</code> is required, and must match the name of a file being uploaded if no url is supplied.</li>
+                                            <li>If your file is already accessible on the web, you can choose not to upload it to the Scimma Archive and just reference it with the <code>url</code>.</li>
+                                            <li>If not, after your file is uploaded to the Scimma Archive, its publicly accessible <code>url</code> will be inserted into the message before submission.</li>
+                                            <li><font color="red">NOTE:</font> All files in the spectroscopy section with <code>name</code>s matching an uploaded file will be uploaded to the Scimma Archive and publicly accessible!</li>
+                                            <br>
+                                            <P>Note: During development, you can use the validation endpoint that your message passes validation without submitting to the stream. The validation endpoint expects only json data, as specified in the <b-link @click="activeTab1()">Build a Basic API Post</b-link> section</P>
+                                        </b-card>
+                                        <b-card header="Example Submission (Python Code):">
+                                            <pre>
+import requests
+import json
+
+hermes_submit_url = '{{ this.getHermesUrl }}api/v0/submit_message/'
+HERMES_API_KEY = '1234567890'  # Copied from your profile page
+
+# Authenticate User in Request Headers
+headers = {'Authorization': f'Token {HERMES_API_KEY}'}
+
+# Define Your Message Dictionary
+message = {
+    'topic': 'test.topic',
+    'title': 'Test Title',
+    'submitter': 'YourNameHere',
+    'authors': 'First Last (Institution), First2 Last2 (Institution2)',
+    'data': {
+        'targets': [{
+            'name': 'my-target-1',
+            'ra': 22.0,
+            'dec': 33.0
+        }],
+        'spectroscopy': [{
+            'target_name': 'my-target-1',
+            'date_obs': 'JD, MJD, or ISO format date',
+            'telescope': 'insert_telescope_name',
+            'instrument': 'insert_instrument_name',
+            'bandpass': 'insert_filter_name',
+            'files': [
+            {
+                'name': 'MySpectrumFile1.fits',
+                'description': 'This is a reduced spectrum of my target.'
+            },
+            {
+                'name': 'MySpectrumImage1.jpg',
+                'description': 'This is a finder chart for my target.'
+            },
+            {
+                'name': 'MySpectrumData1.csv',
+                'description': 'This is a csv file of data from my spectrum.'
+            }],
+        },
+        {
+            'target_name': 'my-target-1',
+            'date_obs': 'JD, MJD, or ISO format date',
+            'telescope': 'insert_telescope_name',
+            'instrument': 'insert_instrument_name',
+            'bandpass': 'insert_filter_name',
+            'files': [{
+                'name': 'MySpectrumFile2.fits',
+                'description': 'This is an example of a file hosted on my own server.',
+                'url': 'https://my-server/path-to-my-file/MySpectrumFile2.fits'
+            }],
+        }]
+    },
+    'message_text': 'Sample Spectroscopy Message',
+}
+
+# JSON encode message so it can be sent with files as part of multipart/form-data
+data = {'data': json.dumps(message)}
+
+# Define your files to upload to TNS
+files = [
+    ('files', ('MySpectrumData1.csv', open('insert_filepath_1.csv', 'rb'), 'text/csv')),
+    ('files', ('MySpectrumFile1.fits', open('insert_filepath_2.fits', 'rb'), 'application/fits')),
+    ('files', ('MySpectrumImage1.jpg', open('insert_filepath_3.jpg', 'rb'), 'image/jpeg'))
+]
+
+# Submit to Hermes
+response = requests.post(url=hermes_submit_url, data=data, files=files, headers=headers)
+                                            </pre>
+                                        </b-card>
+                                    </b-card-group>
+                                </b-tab>
+                                <b-tab title="TNS submission">
+                                    <b>HERMES messages submission can also trigger a submission to the <a href="https://www.wis-tns.org/">Transient Name Server (TNS)</a> as an AT Report. Files can also be upload to the TNS during this type of submission.</b>
+                                    <b-list-group>
+                                        <b-list-group-item>
+                                            <b>Validation:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/validate/'">{{ this.getHermesUrl}}api/v0/submit_message/validate/</a></code> (Only accepts json data without files)
+                                        </b-list-group-item>
+                                        <b-list-group-item>
+                                            <b>Submission:</b> <code><a :href="this.getHermesUrl + 'api/v0/submit_message/'">{{ this.getHermesUrl }}api/v0/submit_message/</a></code>
+                                        </b-list-group-item>
+                                    </b-list-group>
+                                    <b-card-group>
+                                        <b-card header="Submitting a message to Hermes API and TNS:">
+                                            <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
+                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
+                                            <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, at least one target with group and discovery information, and at least one photometry datapoint and one limiting brightness.</li>
+                                            <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
+                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page. A list of `file_descriptions` can be added to the message payload to associate with the files.</li>
+                                            <li>The TNS object ID and a link to it's page will be added to the hermes message on submission</li>
+                                            <br>
+                                            <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream. The validation endpoint expects only json data, as specified in the <b-link @click="activeTab1()">Build a Basic API Post</b-link> section</P>
+                                        </b-card>
+                                        <b-card header="Example Submission (Python Code):">
+                                            <pre>
+import requests
+import json
+
+hermes_submit_url = '{{ this.getHermesUrl }}api/v0/submit_message/'
+HERMES_API_KEY = '1234567890'  # Copied from your profile page
+
+# Authenticate User in Request Headers
+headers = {'Authorization': f'Token {HERMES_API_KEY}'}
+
+# Define Your Message Dictionary
+message = {
+    'topic': 'test.topic',
+    'title': 'Test Title',
+    'submit_to_tns': True,
+    'submitter': 'YourNameHere',
+    'authors': 'First Last (Institution), First2 Last2 (Institution2)',
+    'data': {
+        'targets': [{
+            'name': 'my-target-1',
+            'ra': 22.0,
+            'dec': 33.0,
+            'discovery_info': {
+                'discovery_source': 'insert_tns_group_name',
+                'reporting_group': 'insert_tns_group_name',
+            },
+            'new_discovery': True,
+            'group_association': ['tns_group_name1', 'tns_group_name2']
+        }],
+        'photometry': [{
+            'target_name': 'my-target-1',
+            'date_obs': 'JD, MJD, or ISO format date',
+            'telescope': 'insert_tns_telescope_name',
+            'instrument': 'insert_tns_instrument_name',
+            'bandpass': 'insert_tns_filter_name',
+            'brightness': '33',
+            'brightness_unit': 'AB mag'
+        },
+        {
+            'target_name': 'my-target-1',
+            'date_obs': 'earlier JD, MJD, or ISO format date',
+            'telescope': 'insert_tns_telescope_name',
+            'instrument': 'insert_tns_instrument_name',
+            'bandpass': 'insert_tns_filter_name',
+            'limiting_brightness': '25',
+            'brightness_unit': 'AB mag'
+        }]
+    },
+    'message_text': 'Sample Message',
+    'file_descriptions': ['This is my spectrum data', 'This is my finder chart image'] # Optional
+}
+
+# JSON encode message so it can be sent with files as part of multipart/form-data
+data = {'data': json.dumps(message)}
+
+# Define your files to upload to TNS
+files = [
+    ('files', ('insert_filename_1.csv', open('insert_filepath_1.csv', 'rb'), 'text/csv')),
+    ('files', ('insert_filename_2.fits', open('insert_filepath_2.fits', 'rb'), 'application/fits'))
+]
+
+# Submit to Hermes
+response = requests.post(url=hermes_submit_url, data=data, files=files, headers=headers)
                                             </pre>
                                         </b-card>
                                     </b-card-group>
@@ -400,6 +488,7 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
                                         <b-card text-variant="danger">
                                             * Required. <br>
                                             <sup>1</sup> Either <code>telescope</code> or <code>instrument</code> is required. <br>
+                                            <sup>2</sup> Either <code>flux, wavelength</code> or <code>files</code> are required. <br>
                                             <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
                                         </b-card>
                                     </b-collapse>
@@ -540,11 +629,12 @@ export default {
                 { Field: 'instrument<sup class="text-danger">1</sup><sup class="text-info">&dagger;</sup>', Description: 'String: Instrument used to obtain spectra.' },
                 { Field: 'setup', Description: 'String: Setup of the instrument.' },
                 { Field: 'exposure_time', Description: 'Float: Exposure time in seconds.' },
-                { Field: 'flux<span class="text-danger">*</span>', Description: 'Array of floats: the flux values of the spectrum.' },
+                { Field: 'flux<span class="text-danger">2</span>', Description: 'Array of floats: the flux values of the spectrum.' },
                 { Field: 'flux_unit', Description: 'String: Units of the flux values; Choices: [mJy, erg / s / cm<sup>2</sup> / &#8491].' },
                 { Field: 'error', Description: 'Array of floats: the flux errors of the spectrum.' },
-                { Field: 'wavelength<span class="text-danger">*</span>', Description: 'Array of floats: the wavelength values of the spectral bins.' },
+                { Field: 'wavelength<span class="text-danger">2</span>', Description: 'Array of floats: the wavelength values of the spectral bins.' },
                 { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [&#8491, nm, &mu;m, Hz, GHz, THz].' },
+                { Field: 'files<span class="text-danger">2</span>', Description: 'List of Dicts: List of files to upload, with each entry containing 3 keys (name, description, url). References files to upload in multipart/form-data by name.' },
                 { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [F&lambda;, F&nu;, Flambda, Fnu].' },
                 { Field: 'classification', Description: 'String: Classification of target. If submitting to TNS, classification must be a recognized TNS type.' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time spectrum/classification should remain proprietary on TNS.' },

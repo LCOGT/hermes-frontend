@@ -37,6 +37,17 @@ export var messageFormatMixin = {
     }
   },
   methods: {
+    hasAnyFiles: function(message) {
+      if (message.files.length > 0) {
+        return true;
+      }
+      for (var i = 0; i < message.data.spectroscopy.length; i += 1) {
+        if (message.data.spectroscopy[i].files.length > 0) {
+          return true;
+        }
+      }
+      return false;
+    },
     sanitizeMessageSection: function(message) {
       for(var i = 0; i < message.length; i += 1) {
         if (!_.isEmpty(message[i].discovery_info)){
@@ -73,8 +84,22 @@ export var messageFormatMixin = {
       if (_.isEmpty(cleanMessage.data.event_id)) {
         delete cleanMessage.data.event_id;
       }
-      if (_.isEmpty(cleanMessage.file_comments)) {
-        delete cleanMessage.file_comments;
+      if (_.isEmpty(cleanMessage.file_descriptions)) {
+        delete cleanMessage.file_descriptions;
+      }
+      // Clean up the spectroscopy file sections into what the serializer expects
+      for (var i = 0; i < cleanMessage.data.spectroscopy.length; i += 1) {
+        if (cleanMessage.data.spectroscopy[i].files.length > 0) {
+          let cleanFiles = [];
+          for (var j = 0; j < cleanMessage.data.spectroscopy[i].files.length; j += 1) {
+            cleanFiles.push({
+              'name': cleanMessage.data.spectroscopy[i].files[j].name,
+              'description': cleanMessage.data.spectroscopy[i].file_descriptions[j]
+            });
+          }
+          cleanMessage.data.spectroscopy[i].files = cleanFiles;
+          delete cleanMessage.data.spectroscopy[i].file_descriptions;
+        }
       }
       cleanMessage.data.references = this.sanitizeMessageSection(cleanMessage.data.references);
       cleanMessage.data.targets = this.sanitizeMessageSection(cleanMessage.data.targets);
