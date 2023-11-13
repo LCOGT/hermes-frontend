@@ -145,7 +145,7 @@ response = requests.post(url=hermes_submit_url, json=message, headers=headers)
                                     <b-card-group>
                                         <b-card header="Submitting a message with spectroscopy files to upload:">
                                             <li>Same as the basic submission, except files are separate from the json data, and filenames are referenced in the json data. Payload is submitted as multipart/form-data instead of json.</li>
-                                            <li>Spectroscopy section contains an optional <code>files</code> list of file objects containing [<code>name, description, url</code>].</li>
+                                            <li>Spectroscopy section contains an optional <code>file_info</code> list of file objects containing [<code>name, description, url</code>].</li>
                                             <li>Only file <code>name</code> is required, and must match the name of a file being uploaded if no url is supplied.</li>
                                             <li>If your file is already accessible on the web, you can choose not to upload it to the Scimma Archive and just reference it with the <code>url</code>.</li>
                                             <li>If not, after your file is uploaded to the Scimma Archive, its publicly accessible <code>url</code> will be inserted into the message before submission.</li>
@@ -182,7 +182,7 @@ message = {
             'telescope': 'insert_telescope_name',
             'instrument': 'insert_instrument_name',
             'bandpass': 'insert_filter_name',
-            'files': [
+            'file_info': [
             {
                 'name': 'MySpectrumFile1.fits',
                 'description': 'This is a reduced spectrum of my target.'
@@ -244,7 +244,8 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
                                             <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, at least one target with group and discovery information, and at least one photometry datapoint and one limiting brightness.</li>
                                             <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
-                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page. A list of `file_descriptions` can be added to the message payload to associate with the files.</li>
+                                            <li>Files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page. Their filenames must be included in the message data, and the file must be uploaded with the submission.</li>
+                                            <li>A list of <code>file_info</code> objects must be added to the payload with at least the file <code>name</code> as a parameter, but optionally a <code>description</code> as well.</li>
                                             <li>The TNS object ID and a link to it's page will be added to the hermes message on submission</li>
                                             <br>
                                             <P>Note: During development, you can use the validation endpoint above to check that your message passes validation without submitting to the stream. The validation endpoint expects only json data, as specified in the <b-link @click="activeTab1()">Build a Basic API Post</b-link> section</P>
@@ -299,7 +300,14 @@ message = {
         }]
     },
     'message_text': 'Sample Message',
-    'file_descriptions': ['This is my spectrum data', 'This is my finder chart image'] # Optional
+    'file_info': [{
+        'name': 'insert_filename_1.csv',
+        'description': 'This is my spectrum data'  # Optional
+    },
+    {
+        'name': 'insert_filename_2.fits',
+        'description': 'This is my finder chart image'  # Optional
+    }]
 }
 
 # JSON encode message so it can be sent with files as part of multipart/form-data
@@ -307,8 +315,8 @@ data = {'data': json.dumps(message)}
 
 # Define your files to upload to TNS
 files = [
-    ('files', ('insert_filename_1.csv', open('insert_filepath_1.csv', 'rb'), 'text/csv')),
-    ('files', ('insert_filename_2.fits', open('insert_filepath_2.fits', 'rb'), 'application/fits'))
+    ('files', ('insert_filename_1.csv', open('/path/insert_filename_1.csv', 'rb'), 'text/csv')),
+    ('files', ('insert_filename_2.fits', open('/path/insert_filename_2.fits', 'rb'), 'application/fits'))
 ]
 
 # Submit to Hermes
@@ -348,7 +356,8 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
                             </template>
                         </b-table>
                         <b-card text-variant="danger">
-                            * Required.
+                            * Required. <br>
+                            <sup>1</sup> Only for TNS submissions. <br>
                             <p class="card-text text-info"><sup>&dagger;</sup> Required if <code>submit_to_tns</code> is set to true.</p>
                         </b-card>
                         <b-card no-body class="mb-2">
@@ -534,6 +543,7 @@ export default {
                 { Field: 'data', Description: 'Object / Dict: Semi-structured message <code>Data</code>, format shown below.' },
                 { Field: 'submit_to_tns', Description: 'Bool: Submit to the Transient Name Server?' },
                 { Field: 'submit_to_mpc', Description: 'Bool: Submit to the Minor Planet Center?' },
+                { Field: 'file_info<sup class="text-danger">1</sup>', Description: 'List of Dicts: List of files to upload, with each entry containing 3 keys (name, description, url). References files to upload in multipart/form-data by name.' },
             ],
             data_items: [
                 { Field: 'event_id', Description: 'String: Non-localized event ID to associate this message e.g. S170817.' },
@@ -634,7 +644,7 @@ export default {
                 { Field: 'error', Description: 'Array of floats: the flux errors of the spectrum.' },
                 { Field: 'wavelength<span class="text-danger">2</span>', Description: 'Array of floats: the wavelength values of the spectral bins.' },
                 { Field: 'wavelegnth_unit', Description: 'String: Units of the wavelength values; Choices: [&#8491, nm, &mu;m, Hz, GHz, THz].' },
-                { Field: 'files<span class="text-danger">2</span>', Description: 'List of Dicts: List of files to upload, with each entry containing 3 keys (name, description, url). References files to upload in multipart/form-data by name.' },
+                { Field: 'file_info<span class="text-danger">2</span>', Description: 'List of Dicts: List of files to upload, with each entry containing 3 keys (name, description, url). References files to upload in multipart/form-data by name.' },
                 { Field: 'flux_type', Description: 'String: Type of flux in the reported spectrum; Choices: [F&lambda;, F&nu;, Flambda, Fnu].' },
                 { Field: 'classification', Description: 'String: Classification of target. If submitting to TNS, classification must be a recognized TNS type.' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time spectrum/classification should remain proprietary on TNS.' },

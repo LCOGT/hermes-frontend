@@ -376,7 +376,7 @@
           >
             <files-with-descriptions
               id="outerfiles"
-              :errors="{}"
+              :errors="[]"
               v-bind:files.sync="hermesMessage.files"
               v-bind:fileDescriptions.sync="hermesMessage.file_descriptions"
             >
