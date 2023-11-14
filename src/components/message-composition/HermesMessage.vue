@@ -81,7 +81,9 @@
                         v-model="hermesMessage.submit_to_gcn"
                         name="submit-to-gcn"
                         switch
-                        :disabled="!isDev()"
+                        :disabled="!canSubmitToGcn"
+                        v-b-tooltip
+                        :title="submitToGcnTooltip"
                         @input="update"
                     > Submit to GCN
                     </b-form-checkbox>
@@ -504,6 +506,7 @@
               { value: "hop_uuid", text: "Hop UUID" },
               { value: "doi", text: "DOI" },
               { value: "gracedb_id", text: "GraceDB ID" },
+              { value: "gcn_circular", text: "GCN Circular ID" },
             ],
             placeholder: "Source",
             class: "source-column"
@@ -716,6 +719,17 @@
     },
     computed: {
       ...mapGetters(["getProfile", "isLoggedIn", "getHermesUrl"]),
+      canSubmitToGcn: function() {
+        return this.getProfile.can_submit_to_gcn;
+      },
+      submitToGcnTooltip: function() {
+        if (this.canSubmitToGcn) {
+          return '';
+        }
+        else {
+          return 'You must link a GCN account with circular submission priveledges on your Hermes Profile page';
+        }
+      },
       photometryFields: function () {
         return [
           {

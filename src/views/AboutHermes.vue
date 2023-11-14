@@ -456,7 +456,7 @@ export default {
                 { Field: 'key1, key2, ...', Description: 'Users can specify any other key-value pairs that are desired.' },
             ],
             reference_items: [
-                { Field: 'source<sup class="text-danger">1</sup>', Description: 'String: Source of the reference, e.g. hop_uuid, doi, or gracedb_id.' },
+                { Field: 'source<sup class="text-danger">1</sup>', Description: 'String: Source of the reference, e.g. hop_uuid, doi, gracedb_id, or gcn_circular.' },
                 { Field: 'citation<sup class="text-danger">1</sup>', Description: 'String: Text to reference in th message, e.g. GCN number.' },
                 { Field: 'url<sup class="text-danger">2</sup>', Description: 'String: URL to the reference e.g. https://doi.org/mydoi.' }
             ],

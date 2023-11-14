@@ -3,7 +3,7 @@
     <b-alert :show="!isLoggedIn" variant="danger">
       <p>You must login to access your profile</p>
     </b-alert>
-    <b-alert dismissible variant="warning" v-model="showAlert" @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
+    <b-alert dismissible :variant="alertVariant" v-model="showAlert" @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
     <b-row v-if="isLoggedIn">
       <b-col md="4" class="border-right">
         <h3 class="text-center">Writable Topics</h3>
@@ -50,7 +50,27 @@
             Revoke Credential
           </b-button>
         </div>
-      </b-col>  
+      </b-col>
+    </b-row>
+    <b-row v-if="isLoggedIn">
+      <b-col md="4">
+        <h3 class="text-center">GCN Authorization</h3>
+        <p>
+          To submit messages to GCN circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/user">NASA GCN account</a>
+          with gcn circular <a class="text-secondary" href="https://gcn.nasa.gov/user/endorsements">submission priveledges</a>.
+          Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
+          <ul class="pl-4">
+            <li>You <b>must</b> use the same identity provider you originally created your GCN account with.</li>
+            <li>You <b>must</b> re-authorize your account after making changes or adding permissions at GCN.</li>
+          </ul>
+        </p>
+        <div v-html="gcnAuthorizationText"></div><br />
+        <div class="text-center">
+          <b-button variant="info" @click="authorizeGcn">
+            Authorize GCN
+          </b-button>
+        </div>
+      </b-col>
     </b-row>
   </b-container>
 </template>
@@ -66,16 +86,53 @@ export default {
   data: function () {
     return {
       alertMessage: null,
-      showAlert: false
+      showAlert: false,
+      alertVariant: 'warning'
     };
+  },
+  mounted() {
+    if (this.$route.query.alert){
+      this.alertMessage = this.$route.query.alert;
+      this.alertVariant = 'danger';
+      this.showAlert = true;
+    }
+    // I think its reasonable to trigger a refresh of the profile data when you hit the /profile view.
+    this.$store.dispatch('getProfileData');
   },
   computed: {
     ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
     writableTopics: function() {
       return this.getProfile.writable_topics.join('\n');
+    },
+    isGcnAuthorized: function() {
+      return this.getProfile.integrated_apps.includes('GCN');
+    },
+    canSubmitToGcn: function() {
+      return this.getProfile.can_submit_to_gcn;
+    },
+    gcnAuthorizationText: function() {
+      if (this.isGcnAuthorized) {
+        if (this.canSubmitToGcn) {
+          return 'Current Status: <font color="green">Connected / Permitted</font>'
+        }
+        else {
+          return 'Current Status: <font color="darkorange" title="Please check your GCN accounts peer endorsements to make sure you have gcn circular submission priveledges">Connected / Not Permitted</font>'
+        }
+      }
+      else {
+        return 'Current Status: <font color="red" title="You must authorize your GCN account">Not Connected</font>'
+      }
+    },
+    alertText: function() {
+      return this.$route.query.alert;
     }
   },
   methods: {
+    authorizeGcn: function(evt) {
+      evt.preventDefault();
+      location.href =
+        this.getHermesUrl + "gcn-auth/login";
+    },
     performRevokeToken: function (evt) {
       evt.preventDefault();
       axios({
@@ -90,6 +147,7 @@ export default {
       .then(() => {
         this.$store.dispatch('getProfileData');
         this.alertMessage = 'Token Successfully Revoked!';
+        this.alertVariant = 'warning';
         this.showAlert = true;
       })
       .catch(error => {
@@ -113,6 +171,7 @@ export default {
       .then(() => {
         this.$store.dispatch('getProfileData');
         this.alertMessage = 'Hop Credentials Successfully Revoked!';
+        this.alertVariant = 'warning';
         this.showAlert = true;
       })
       .catch(error => {
