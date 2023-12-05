@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <b-col class="m-0 p-0">
-        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText"
+        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText" ref="messageForm"
           @hermes-message-updated="hermesMessageUpdated" @generate-plain-text="generatePlainText">
         </hermes-message>
       </b-col>
@@ -36,7 +36,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import axios from "axios";
 import { mapGetters } from "vuex";
-
+import { decode } from "js-base64";
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
 import { OCSUtil } from 'ocs-component-lib';
 import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
@@ -103,6 +103,11 @@ export default {
       this.hermesMessage.topic = 'hermes.test';
     }
     this.hermesMessage.submitter = this.getProfile.email;
+    // Accept base64 url-encoded json data to load in in the 'preload' query param and then clear it when done loading
+    if (!_.isEmpty(this.$route.query) && 'preload' in this.$route.query){
+      this.updateDataFromQueryParams(this.$route.query.preload);
+      this.$router.replace({'query': null});
+    }
   },
   computed: {
     ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions"]),
@@ -238,6 +243,24 @@ export default {
     },
     hermesMessageUpdated: function() {
       this.validate();
+    },
+    updateDataFromQueryParams: function(queryParams) {
+      let decodedQueryParams = decode(queryParams);
+      let decodedData = JSON.parse(decodedQueryParams);
+      if (!_.isEmpty(decodedData)) {
+        // We only pull in fields we want to preload here
+        this.hermesMessage.title = 'title' in decodedData ? decodedData['title'] : this.hermesMessage.title;
+        this.hermesMessage.authors = 'authors' in decodedData ? decodedData['authors'] : this.hermesMessage.authors;
+        this.hermesMessage.message_text = 'message_text' in decodedData ? decodedData['message_text'] : this.hermesMessage.message_text;
+        this.hermesMessage.submit_to_tns = 'submit_to_tns' in decodedData ? decodedData['submit_to_tns'] : this.hermesMessage.submit_to_tns;
+        this.hermesMessage.submit_to_mpc = 'submit_to_mpc' in decodedData ? decodedData['submit_to_mpc'] : this.hermesMessage.submit_to_mpc;
+        this.hermesMessage.submit_to_gcn = 'submit_to_gcn' in decodedData ? decodedData['submit_to_gcn'] : this.hermesMessage.submit_to_gcn;
+        if (!_.isEmpty(decodedData.data)) {
+          // Here we pass down into the hermesMessage component since it better understands how to check and update values of the data sections
+          this.$refs.messageForm.preloadData(decodedData.data);
+        }
+        this.validate();
+      }
     }
   }
 };
