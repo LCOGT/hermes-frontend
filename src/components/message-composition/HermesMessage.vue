@@ -963,13 +963,22 @@
           validSectionInstance = _.cloneDeep(this.emptySections[section]);
           Object.keys(validSectionInstance).forEach(key => {
             if (key in instance){
-              if (_.isObject(instance[key])) {
+              if (key == 'aliases' && _.isArray(instance[key])) {
+                // Aliases are submitted as arrays, but stored in the frontend as a list of comma-delimited strings
+                validSectionInstance[key] = instance[key].join(',');
+                changes = true;
+              }
+              else if (_.isObject(instance[key])) {
                 Object.keys(validSectionInstance[key]).forEach(nestedKey => {
                   if (nestedKey in instance[key]) {
                     validSectionInstance[key][nestedKey] = instance[key][nestedKey];
                     changes = true;
                   }
                 })
+              }
+              else if (_.isNumber(instance[key])) {
+                // The frontend likes to deal in strings, to correct this here for numbers
+                validSectionInstance[key] = instance[key].toString();
               }
               else {
                 validSectionInstance[key] = instance[key];

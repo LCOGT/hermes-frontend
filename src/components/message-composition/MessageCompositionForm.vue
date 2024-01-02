@@ -249,6 +249,9 @@ export default {
       let decodedData = JSON.parse(decodedQueryParams);
       if (!_.isEmpty(decodedData)) {
         // We only pull in fields we want to preload here
+        if ('topic' in decodedData && this.topicOptions.includes(decodedData['topic'])) {
+          this.hermesMessage.topic = decodedData['topic'];
+        }
         this.hermesMessage.title = 'title' in decodedData ? decodedData['title'] : this.hermesMessage.title;
         this.hermesMessage.authors = 'authors' in decodedData ? decodedData['authors'] : this.hermesMessage.authors;
         this.hermesMessage.message_text = 'message_text' in decodedData ? decodedData['message_text'] : this.hermesMessage.message_text;
