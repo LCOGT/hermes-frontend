@@ -728,7 +728,7 @@
           return '';
         }
         else {
-          return 'You must link a GCN account with Circular submission priveledges on your Hermes Profile page';
+          return 'You must link a GCN account with Circular submission privileges on your Hermes Profile page';
         }
       },
       photometryFields: function () {
