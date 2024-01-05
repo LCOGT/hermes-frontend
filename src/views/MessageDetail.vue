@@ -27,7 +27,7 @@
         <b-card-sub-title class="mt-1" v-if="isGcnCircular">
           Originally published as
           <b-link :href="getGcnCircularLink(message)" v-b-tooltip.hover
-            :title="getGcnCircularLink(message)">GCN Circular {{ getGcnCircularNumber(message) }}</b-link>
+            :title="getGcnCircularLink(message)" target="_blank">GCN Circular {{ getGcnCircularNumber(message) }}</b-link>
         </b-card-sub-title>
         <hr>
         <!-- Main Message -->
@@ -49,13 +49,13 @@
                   <b-link v-if="data.item.source == 'hop_uuid'" :to="{ name: 'message', params: { id: data.item.citation } }">
                     {{ data.item.citation }}
                   </b-link>
-                  <b-link v-else-if="data.item.source == 'gracedb_id'" :href="getGraceDBLink(data.item.citation)" v-b-tooltip.hover :title="getGraceDBLink(data.item.citation)">
+                  <b-link v-else-if="data.item.source == 'gracedb_id'" :href="getGraceDBLink(data.item.citation)" target="_blank" v-b-tooltip.hover :title="getGraceDBLink(data.item.citation)">
                     {{ data.item.citation }}
                   </b-link>
                   <p v-else>{{ data.item.citation }}</p>
                 </template>
                 <template #cell(url)="data">
-                  <b-link :href="data.item.url">
+                  <b-link :href="data.item.url" target="_blank">
                     {{ data.item.url }}
                   </b-link>
                 </template>
@@ -73,7 +73,7 @@
             <b-row class="mx-2">
               <b-table small reactive class="kv-b-table" :items="getKVItems(dictvalue)" :fields="KVdataFields">
                 <template #cell(value)="data">
-                  <b-link v-if="isLink(data.item.value)" :href="data.item.value">
+                  <b-link v-if="isLink(data.item.value)" :href="data.item.value" target="_blank">
                     {{ data.item.value }}
                   </b-link>
                   <p v-else>{{ data.item.value }}</p>
@@ -91,7 +91,7 @@
             <b-row class="mx-2">
               <b-table small reactive class="kv-b-table" :items="getNonObjectDataItems(message)" :fields="KVdataFields">
                 <template #cell(value)="data">
-                  <b-link v-if="isLink(data.item.value)" :href="data.item.value">
+                  <b-link v-if="isLink(data.item.value)" :href="data.item.value" target="_blank">
                     {{ data.item.value }}
                   </b-link>
                   <p v-else>{{ data.item.value }}</p>

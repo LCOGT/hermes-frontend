@@ -56,9 +56,9 @@
       <b-col md="4">
         <h3 class="text-center">GCN Authorization</h3>
         <p>
-          To submit messages to GCN circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/user">NASA GCN account</a>
-          with gcn circular <a class="text-secondary" href="https://gcn.nasa.gov/user/endorsements">submission priveledges</a>.
-          Click below to authorize hermes to submit to gcn on your behalf with your GCN account credentials.
+          To submit messages to GCN Circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/">NASA GCN</a> account
+          with GCN Circular <a class="text-secondary" href="https://gcn.nasa.gov/docs/circulars/submitting#become-a-gcn-circulars-submitter">submission privileges</a>.
+          Click below to authorize hermes to submit to GCN on your behalf with your GCN account credentials.
           <ul class="pl-4">
             <li>You <b>must</b> use the same identity provider you originally created your GCN account with.</li>
             <li>You <b>must</b> re-authorize your account after making changes or adding permissions at GCN.</li>
@@ -116,7 +116,7 @@ export default {
           return 'Current Status: <font color="green">Connected / Permitted</font>'
         }
         else {
-          return 'Current Status: <font color="darkorange" title="Please check your GCN accounts peer endorsements to make sure you have gcn circular submission priveledges">Connected / Not Permitted</font>'
+          return 'Current Status: <font color="darkorange" title="Please check your GCN accounts peer endorsements to make sure you have GCN Circular submission privileges">Connected / Not Permitted</font>'
         }
       }
       else {

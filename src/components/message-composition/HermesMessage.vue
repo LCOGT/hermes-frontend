@@ -6,6 +6,7 @@
             <span><i class="far fa-edit" />Submission Form</span>
           </template>
           <show-wrapper id="main-fields">
+            <b-alert show v-if="hermesMessage.submit_to_gcn" variant="primary">Please review the <b-link href="https://gcn.nasa.gov/docs/circulars/styleguide" target="_blank">GCN Style Guide</b-link> before your first GCN submission.</b-alert>
             <ocs-custom-alert v-for="error in errors.non_field_errors" :key="error" alert-class="danger" :dismissible="false">
               <span v-html="error"></span>
             </ocs-custom-alert>
@@ -727,7 +728,7 @@
           return '';
         }
         else {
-          return 'You must link a GCN account with circular submission priveledges on your Hermes Profile page';
+          return 'You must link a GCN account with Circular submission privileges on your Hermes Profile page';
         }
       },
       photometryFields: function () {
