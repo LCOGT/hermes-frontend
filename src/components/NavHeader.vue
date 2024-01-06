@@ -117,30 +117,21 @@ export default {
         }
     });
 
+    this.checkHeartbeat();
+
     // If this is the first refresh after a login workflow, attempt to get the profile data and store it
     if (this.getMidLogin) {
       this.$store.dispatch('getProfileData');
     }
     this.username = this.getProfile.email;
 
-    // Attempt to get the last updated time for the various datastreams and display a marker and tooltip based on that
-    axios
-      .get(this.getHermesUrl + "api/v0/heartbeat/", {
-          withCredentials: true,
-        })
-      .then((response) =>
-        this.heartbeat_data = response.data
-      )
-      .catch((error) => {
-        console.log(error);
-        if (error.response.status == 401){
-          this.deauthenticate();
-        }
-    });
   },
   watch: {
     "getProfile.email": function(value) {
       this.username = value;
+    },
+    $route: function() {
+      this.checkHeartbeat();
     }
   },
   methods: {
@@ -154,6 +145,25 @@ export default {
       location.href =
         this.getHermesUrl + "auth/logout/";
     },
+    checkHeartbeat() {
+      // Attempt to get the last updated time for the various datastreams and display a marker and tooltip based on that
+      axios
+        .get(this.getHermesUrl + "api/v0/heartbeat/", {
+            withCredentials: true,
+          })
+        .then((response) => {
+          this.heartbeat_data = response.data.last_timestamps;
+          if (this.isLoggedIn && !response.data.is_authenticated) {
+            this.logout();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status == 401){
+            this.deauthenticate();
+          }
+      });
+    }
   }
 };
 </script>

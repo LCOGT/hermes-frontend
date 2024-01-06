@@ -9,7 +9,7 @@
     </b-row>
     <b-row class="mt-2">
       <b-col sm="1" class="submit-container">
-        <b-button class="submit-button shadow" variant="success" @click="submitToHop"
+        <b-button class="submit-button shadow" variant="success" @click="checkSessionAndSubmitToHop"
           :disabled="!readyToSubmit">Submit</b-button>
       </b-col>
       <b-col sm="5"> to {{this.hermesMessage.topic}}
@@ -110,7 +110,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions"]),
+    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions", "isLoggedIn"]),
     isProd: function() {
       return this.getHermesUrl == "https://hermes.lco.global/";
     }
@@ -264,6 +264,33 @@ export default {
         }
         this.validate();
       }
+    },
+    checkSessionAndSubmitToHop() {
+      // Attempt to check the user session is still valid before submitting, to ensure no confusion in who is submitting the message
+      axios
+        .get(this.getHermesUrl + "api/v0/heartbeat/", {
+            withCredentials: true,
+          })
+        .then((response) => {
+          if (this.isLoggedIn && !response.data.is_authenticated) {
+            this.logout(false);
+            this.submissionError = 'Your user session expired while composing this message.' +
+                                   ' Refresh the page and login again to submit as your user account' +
+                                   ', or click the submit button again to send the message as the HERMES Guest user';
+          }
+          else {
+            this.submitToHop();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status == 401){
+            this.logout(false);
+            this.submissionError = 'Your user session expired while composing this message.' +
+                                   ' Refresh the page and login again to submit as your user account' +
+                                   ', or click the submit button again to send the message as the HERMES Guest user';
+          }
+      });
     }
   }
 };
