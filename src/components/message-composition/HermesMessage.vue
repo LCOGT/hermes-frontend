@@ -6,6 +6,7 @@
             <span><i class="far fa-edit" />Submission Form</span>
           </template>
           <show-wrapper id="main-fields">
+            <b-alert show v-if="hermesMessage.submit_to_gcn" variant="primary">Please review the <b-link href="https://gcn.nasa.gov/docs/circulars/styleguide" target="_blank">GCN Style Guide</b-link> before your first GCN submission.</b-alert>
             <ocs-custom-alert v-for="error in errors.non_field_errors" :key="error" alert-class="danger" :dismissible="false">
               <span v-html="error"></span>
             </ocs-custom-alert>
@@ -708,7 +709,7 @@
           return '';
         }
         else {
-          return 'You must link a GCN account with circular submission priveledges on your Hermes Profile page';
+          return 'You must link a GCN account with Circular submission privileges on your Hermes Profile page';
         }
       },
       photometryFields: function () {
@@ -931,6 +932,60 @@
       },
       messageUpdated: function (data) {
         this.update(data);
+      },
+      preloadSection: function(section, sectionData) {
+        if (!_.isArray(sectionData)) {
+          return false;
+        }
+        let validSection = [];
+        let changes = false;
+        let validSectionInstance = {}
+        sectionData.forEach(instance => {
+          validSectionInstance = _.cloneDeep(this.emptySections[section]);
+          Object.keys(validSectionInstance).forEach(key => {
+            if (key in instance){
+              if (key == 'aliases' && _.isArray(instance[key])) {
+                // Aliases are submitted as arrays, but stored in the frontend as a list of comma-delimited strings
+                validSectionInstance[key] = instance[key].join(',');
+                changes = true;
+              }
+              else if (_.isObject(instance[key])) {
+                Object.keys(validSectionInstance[key]).forEach(nestedKey => {
+                  if (nestedKey in instance[key]) {
+                    validSectionInstance[key][nestedKey] = instance[key][nestedKey];
+                    changes = true;
+                  }
+                })
+              }
+              else if (_.isNumber(instance[key])) {
+                // The frontend likes to deal in strings, to correct this here for numbers
+                validSectionInstance[key] = instance[key].toString();
+              }
+              else {
+                validSectionInstance[key] = instance[key];
+                changes = true;
+              }
+            }
+          })
+          validSection.push(validSectionInstance);
+        });
+        if (changes) {
+          this.hermesMessage.data[section] = validSection;
+        }
+        return changes;
+      },
+      preloadData: function(data) {
+        if ('event_id' in data) {
+          this.hermesMessage.data.event_id = data['event_id'];
+        }
+        Object.keys(this.emptySections).forEach(section => {
+          // For each section, preload the data if present, and if preloaded, show that section in the UI
+          this.$refs[section + 'Section'].forceVisibility(this.preloadSection(section, data[section]));
+        });
+        if (!_.isEmpty(this.hermesMessage.message_text)) {
+          // If the message was preloaded, show that section as well
+          this.$refs['messageSection'].forceVisibility(true);
+        }
       },
       isSectionEmpty: function (section) {
         return _.isEmpty(this.hermesMessage.data[section]);
