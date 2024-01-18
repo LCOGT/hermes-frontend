@@ -26,14 +26,14 @@
                             <b-card-text>
                                 <p>
                                     If you already have an account with SCiMMA HopSkotch, simply click on
-                                    <em>Log in</em> under the "HERMES Guest" username above.
+                                    <em>Log in</em> under the <b-icon icon="person-fill"></b-icon> menu above.
                                 </p>
                                 <p>
                                     If you are new to SCiMMA HopSkotch, you will need to make an account there
                                     before you can log into Hermes. We’ve worked hard to make signing up easy and
                                     simple by using single-sign-on (SSO) technology.
                                     <br>
-                                    Click on <em>Register</em> under the "HERMES Guest" username above. This will
+                                    Click on <em>Register</em> under the <b-icon icon="person-fill"></b-icon> menu above. This will
                                     redirect you to <b>CILogon</b> where you can choose an identity provider like
                                     Google or ORCID. Sign into the provider, and you will be redirected to <a href="https://hop.scimma.org/">
                                     <b>hop.scimma.org</b></a>. Once you have accepted the use policy, you will now
