@@ -431,39 +431,28 @@
         }
         return header;
       },
+      fillInFieldFromHeader: function(header, headerKeys, fieldName){
+        headerKeys.forEach((headerKey) => {
+          if (headerKey in header) {
+            this.spectroscopy[fieldName] = header[headerKey];
+            return;
+          }
+        });
+      },
       fillInFromHeader: function(header) {
         if (header === {}) {
           return;
         }
         // Attempt to fill in the obs date
-        if ('DATE-OBS' in header) {
-          this.spectroscopy.date_obs = header['DATE-OBS'];
-        }
-        else if ('MJD-OBS' in header) {
-          this.spectroscopy.date_obs = header['MJD-OBS'];
-        }
+        this.fillInFieldFromHeader(header, ['DATE-OBS', 'MJD-OBS'], 'date_obs');
         // Attempt to fill in the exposure time
-        if ('EXPTIME' in header) {
-          this.spectroscopy.exposure_time = header['EXPTIME'];
-        }
+        this.fillInFieldFromHeader(header, ['EXPTIME'], 'exposure_time');
         // Attempt to fill in the observer
-        if ('USERID' in header) {
-          this.spectroscopy.observer = header['USERID'];
-        }
+        this.fillInFieldFromHeader(header, ['USERID'], 'observer');
         // Attempt to fill in the instrument field
-        if ('INSTRUME' in header) {
-          this.spectroscopy.instrument = header['INSTRUME'];
-        }
+        this.fillInFieldFromHeader(header, ['INSTRUME'], 'instrument');
         // Attempt to fill in the telescope field
-        if ('TELESCOP' in header) {
-          this.spectroscopy.telescope = header['TELESCOP'];
-        }
-        else if ('SITE' in header) {
-          this.spectroscopy.telescope = header['SITE'];
-        }
-        else if('ORIGIN' in header) {
-          this.spectroscopy.telescope = header['ORIGIN'];
-        }
+        this.fillInFieldFromHeader(header, ['TELESCOP', 'SITE', 'ORIGIN'], 'telescope');
         this.update();
       },
       copyFlux: function(idx) {
