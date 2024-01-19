@@ -12,7 +12,7 @@ export default new Vuex.Store({
     name: '',
     header: '',
     profile: {
-      'email': 'HERMES Guest',
+      'email': '',
       'writable_topics': ['hermes.test']
     },
     hermesUrl: '',
@@ -37,7 +37,7 @@ export default new Vuex.Store({
       return state.mid_login;
     },
     isLoggedIn(state) {
-      return state.profile.email != 'HERMES Guest';
+      return state.profile.email != '';
     }
   },
   plugins: [createPersistedState()],
@@ -71,7 +71,7 @@ export default new Vuex.Store({
         if (error.response.status == 401){
           context.commit("SET_MID_LOGIN", false);
           context.commit("SET_PROFILE", {
-            "email": "HERMES Guest",
+            "email": "",
             "writable_topics": ["hermes.test"]
           });
         }
@@ -90,7 +90,7 @@ export default new Vuex.Store({
           if (error.response.status == 401){
             context.commit("SET_MID_LOGIN", false);
             context.commit("SET_PROFILE", {
-              "email": "HERMES Guest",
+              "email": "",
               "writable_topics": ["hermes.test"]
             });
           }
