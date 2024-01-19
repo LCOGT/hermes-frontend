@@ -57,7 +57,7 @@ export default {
       default: () => {
         return {
           files: [],
-          file_comments: [],
+          file_descriptions: [],
           title: '',
           authors: '',
           topic: '',
@@ -182,12 +182,18 @@ export default {
     submitToHop() {
       let payload = JSON.stringify(this.sanitizedMessageData());
       let formData = null;
-      if (this.hermesMessage.files.length > 0){
+      if (this.hasAnyFiles(this.hermesMessage)){
         formData = new FormData();
+        // Add files from the outer part of the message
         this.hermesMessage.files.forEach(function (file) {
-          // formData.append("file" + index, file);
           formData.append("files", file);
         });
+        // Add files from within the spectroscopy sections of the message
+        for (var i = 0; i < this.hermesMessage.data.spectroscopy.length; i += 1) {
+          this.hermesMessage.data.spectroscopy[i].files.forEach(function (file) {
+            formData.append("files", file);
+          });
+        }
         formData.append("data", payload);
       }
       // Post message via axios
@@ -218,7 +224,7 @@ export default {
     clearForm() {
       // Reset the page to a clean state
       this.hermesMessage.files = [];
-      this.hermesMessage.file_comments = [];
+      this.hermesMessage.file_descriptions = [];
       this.hermesMessage.title = '';
       this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];

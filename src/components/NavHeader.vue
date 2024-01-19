@@ -30,7 +30,9 @@
           <b-nav-item-dropdown right>
             <!-- Using 'button-content' slot -->
             <template #button-content>
-              <em>{{ username }}</em>
+              <b-icon v-if="!isLoggedIn" icon="person-fill"></b-icon>
+              <b-spinner small v-if="getMidLogin"></b-spinner>
+              <em v-if="isLoggedIn">{{ username }}</em>
             </template>
             <b-dropdown-item v-if="isLoggedIn" to="/profile">
               Profile

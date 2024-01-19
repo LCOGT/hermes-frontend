@@ -54,6 +54,9 @@
                   </b-link>
                   <p v-else>{{ data.item.citation }}</p>
                 </template>
+                <template #cell(file_info)="data">
+                  <b-link v-for="(file_info, idx) in data.item.file_info" :key="'file_info-' + file_info.name" :href="file_info.url" target="_blank">{{ file_info.name }}</b-link>
+                </template>
                 <template #cell(url)="data">
                   <b-link :href="data.item.url" target="_blank">
                     {{ data.item.url }}
@@ -155,7 +158,7 @@ export default {
       preSetTableOrder: {
         targets: "name,ra,ra_error,ra_error_units,dec,dec_error,dec_error_units,pm_ra,pm_dec,epoch,aliases,redshift,host_redshift,host_name,group_associations",
         photometry: "target_name,date_obs,telescope,instrument,bandpass,brightness,brightness_error,brightness_unit,limiting_brightness,limiting_brightness_error,limiting_brightness_unit,exposure_time,observer,catalog",
-        spectroscopy: "target_name,date_obs,telescope,instrument,flux,flux_units,flux_error,wavelength,wavelength_units,flux_type,observer,reducer,classification,exposure_time,setup,spec_type,proprietary_period,proprietary_period_units",
+        spectroscopy: "target_name,date_obs,telescope,instrument,file_info,flux,flux_units,flux_error,wavelength,wavelength_units,flux_type,observer,reducer,classification,exposure_time,setup,spec_type,proprietary_period,proprietary_period_units",
         astrometry: "target_name,date_obs,telescope,instrument,ra,ra_error,ra_error_units,dec,dec_error,dec_error_units,mpc_sitecode,catalog",
         references: "source,citation,url",
       }

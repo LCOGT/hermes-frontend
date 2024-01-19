@@ -8,8 +8,8 @@ export default {
   name: 'ShowWrapper',
   props: {
       id: {
-      type: String,
-      required: true
+        type: String,
+        required: true
       }
   },
   data: function() {

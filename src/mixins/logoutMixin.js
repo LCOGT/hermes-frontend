@@ -3,7 +3,7 @@ export var logoutMixin = {
     logout: function() {
       this.$store.commit("SET_MID_LOGIN", false);
       this.$store.commit("SET_PROFILE", {
-        "email": "HERMES Guest",
+        "email": "",
         "writable_topics": ["hermes.test"]
       });
 

@@ -375,35 +375,13 @@
             :isEmpty="hermesMessage.files.length == 0"
             ref="file_uploadSection"
           >
-            <div>
-              <b-row>
-                <b-col md="11">
-                  <b-form-file class="mb-2" v-model="hermesMessage.files" multiple placeholder="Choose a file or drop it here..." drop-placeholder="Drop file here..." @input="appendFileComments">
-                  </b-form-file>
-                </b-col>
-                <b-col md="1">
-                  <b-button title="Clear all files" @click="hermesMessage.files = []; hermesMessage.file_comments = [];"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
-                </b-col>
-              </b-row>
-              <b-list-group v-for="(file, index) in hermesMessage.files" :key="'file' + index" flush>
-                <b-list-group-item class="pr-0">
-                  <b-row>
-                    <b-col md="3" align-self="center" class="pr-2">
-                      <b>{{ file.name }}</b>
-                    </b-col>
-                    <b-col md="1" align-self="center" class="pl-2 pr-0">
-                      {{ getFileSize(file.size) }}
-                    </b-col>
-                    <b-col md="7">
-                      <b-form-input v-model="hermesMessage.file_comments[index]" placeholder="Comments"></b-form-input>
-                    </b-col>
-                    <b-col md="1">
-                      <b-button title="Remove this file" @click="removeFile(index)"><b-icon icon="trash" aria-hidden="true"></b-icon></b-button>
-                    </b-col>
-                  </b-row>
-                </b-list-group-item>
-              </b-list-group>
-            </div>
+            <files-with-descriptions
+              id="outerfiles"
+              :errors="[]"
+              v-bind:files.sync="hermesMessage.files"
+              v-bind:fileDescriptions.sync="hermesMessage.file_descriptions"
+            >
+            </files-with-descriptions>
           </data-section>
         </b-tab>
         <b-tab>
@@ -446,7 +424,6 @@
   <script>
   import _ from 'lodash';
   import { mapGetters } from "vuex";
-  import {filesize} from "filesize";
   import '@/assets/css/submissions.css';
   import DataSection from '@/components/message-composition/DataSection.vue'
   import DataReference from '@/components/message-composition/DataReference.vue'
@@ -456,6 +433,7 @@
   import DataPhotometry from '@/components/message-composition/DataPhotometry.vue'
   import DataSpectroscopy from '@/components/message-composition/DataSpectroscopy.vue'
   import DataAstrometry from '@/components/message-composition/DataAstrometry.vue'
+  import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
   import ShowWrapper from '@/components/message-composition/ShowWrapper.vue'
   import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
 
@@ -470,7 +448,8 @@
       DataPhotometry,
       DataSpectroscopy,
       DataAstrometry,
-      DataView
+      DataView,
+      FilesWithDescriptions
     },
     mixins: [messageFormatMixin],
     props: {
@@ -678,9 +657,9 @@
             'date_obs': '',
             'telescope': null,
             'instrument': null,
-            'flux': [null],
-            'flux_error': [0],
-            'wavelength': [null],
+            'flux': [],
+            'flux_error': [],
+            'wavelength': [],
             'flux_units': 'mJy',
             'wavelength_units': 'nm',
             'flux_type': 'Fλ',
@@ -693,6 +672,8 @@
             'comments': null,
             'reducer': null,
             'spec_type': null,
+            'files': [],
+            'file_descriptions': [],
           },
           'astrometry': {
             'target_name': null,
@@ -929,7 +910,7 @@
         }
         else {
           this.hermesMessage.files = [];
-          this.hermesMessage.file_comments = [];
+          this.hermesMessage.file_descriptions = [];
         }
       }
     },
@@ -1031,23 +1012,6 @@
           this.$refs[section + 'Section'].forceVisibility(false);
         }
         this.update();
-      },
-      removeFile: function(idx) {
-        if (idx < this.hermesMessage.files.length) {
-          this.hermesMessage.files.splice(idx, 1);
-          this.hermesMessage.file_comments.splice(idx, 1);
-        }
-      },
-      appendFileComments: function() {
-        // If we change files, we should just clear all comments to be safe
-        this.hermesMessage.file_comments = [];
-        // Then add an empty comment for each file that exists
-        while (this.hermesMessage.file_comments.length < this.hermesMessage.files.length) {
-          this.hermesMessage.file_comments.push('');
-        }
-      },
-      getFileSize: function(size) {
-        return filesize(size, {standard: 'jedec'})
       },
       generatePlainText: function() {
         this.$emit('generate-plain-text');
