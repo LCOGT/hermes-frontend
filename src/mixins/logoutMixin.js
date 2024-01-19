@@ -1,13 +1,14 @@
 export var logoutMixin = {
   methods: {
-    logout: function() {
+    logout: function(reload=true) {
       this.$store.commit("SET_MID_LOGIN", false);
       this.$store.commit("SET_PROFILE", {
         "email": "",
         "writable_topics": ["hermes.test"]
       });
-
-      location.reload();
-    }
+      if (reload){
+        location.reload();
+      }
+    },
   }
 };
