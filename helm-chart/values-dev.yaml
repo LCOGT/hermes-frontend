@@ -15,9 +15,11 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-buffers-number: "16"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "5M"
     nginx.ingress.kubernetes.io/large-client-header-buffers: 16 5M
-    nginx.ingress.kubernetes.io/server-snippet: | # this is where the magic happens
+    nginx.ingress.kubernetes.io/server-snippet: |
       client_header_buffer_size 5M;
       large_client_header_buffers 16 5M;
+      http2_max_header_size 5M;
+      http2_max_field_size 5M;
   # This is LCO specific nomenclature for lco.gtn vs lco.global.
   # This makes sure the load balancer picks up the dns stuff.
   hosts:
