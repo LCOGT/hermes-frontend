@@ -1,5 +1,10 @@
 <template>
   <b-container>
+    <b-row v-if="preloadError">
+      <b-alert show dismissible variant="danger" @dismissed="clearPreloadError()" style="width:100%;">
+        {{this.preloadError}}
+      </b-alert>
+    </b-row>
     <b-row>
       <b-col class="m-0 p-0">
         <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText" ref="messageForm"
@@ -25,7 +30,7 @@
       </b-col>
     </b-row>
     <b-row v-if="submissionError">
-      <b-alert show dismissible variant="danger" @dismissed="clearError()">
+      <b-alert show dismissible variant="danger" @dismissed="clearSubmissionError()">
         {{this.submissionError}}
       </b-alert>
     </b-row>
@@ -36,7 +41,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import axios from "axios";
 import { mapGetters } from "vuex";
-import { decode } from "js-base64";
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
 import { OCSUtil } from 'ocs-component-lib';
 import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
@@ -89,6 +93,7 @@ export default {
         readyToSubmit: false,
         show: true,
         submissionError: '',
+        preloadError: '',
       };
   },
   mounted() {
@@ -103,10 +108,9 @@ export default {
       this.hermesMessage.topic = 'hermes.test';
     }
     this.hermesMessage.submitter = this.getProfile.email;
-    // Accept base64 url-encoded json data to load in in the 'preload' query param and then clear it when done loading
-    if (!_.isEmpty(this.$route.query) && 'preload' in this.$route.query){
-      this.updateDataFromQueryParams(this.$route.query.preload);
-      this.$router.replace({'query': null});
+    // Accept a id in the route that will cause this to load a preloaded message from the server with that id
+    if (!_.isEmpty(this.$route.query) && 'id' in this.$route.query){
+      this.preloadData(this.$route.query.id);
     }
   },
   computed: {
@@ -247,29 +251,46 @@ export default {
     clearSubmissionError() {
       this.submissionError = '';
     },
+    clearPreloadError() {
+      this.preloadError = '';
+    },
     hermesMessageUpdated: function() {
       this.validate();
     },
-    updateDataFromQueryParams: function(queryParams) {
-      let decodedQueryParams = decode(queryParams);
-      let decodedData = JSON.parse(decodedQueryParams);
-      if (!_.isEmpty(decodedData)) {
-        // We only pull in fields we want to preload here
-        if ('topic' in decodedData && this.topicOptions.includes(decodedData['topic'])) {
-          this.hermesMessage.topic = decodedData['topic'];
+    preloadData: function(preloadId) {
+      axios
+      .get(new URL('/api/v0/' + this.submissionEndpoint + '/load/' + preloadId, this.getHermesUrl).href, {
+          withCredentials: true,
+        })
+      .then((response) => {
+        let preloadData = response.data;
+        if ('topic' in preloadData && this.topicOptions.includes(preloadData['topic'])) {
+          this.hermesMessage.topic = preloadData['topic'];
         }
-        this.hermesMessage.title = 'title' in decodedData ? decodedData['title'] : this.hermesMessage.title;
-        this.hermesMessage.authors = 'authors' in decodedData ? decodedData['authors'] : this.hermesMessage.authors;
-        this.hermesMessage.message_text = 'message_text' in decodedData ? decodedData['message_text'] : this.hermesMessage.message_text;
-        this.hermesMessage.submit_to_tns = 'submit_to_tns' in decodedData ? decodedData['submit_to_tns'] : this.hermesMessage.submit_to_tns;
-        this.hermesMessage.submit_to_mpc = 'submit_to_mpc' in decodedData ? decodedData['submit_to_mpc'] : this.hermesMessage.submit_to_mpc;
-        this.hermesMessage.submit_to_gcn = 'submit_to_gcn' in decodedData ? decodedData['submit_to_gcn'] : this.hermesMessage.submit_to_gcn;
-        if (!_.isEmpty(decodedData.data)) {
+        this.hermesMessage.title = 'title' in preloadData ? preloadData['title'] : this.hermesMessage.title;
+        this.hermesMessage.authors = 'authors' in preloadData ? preloadData['authors'] : this.hermesMessage.authors;
+        this.hermesMessage.message_text = 'message_text' in preloadData ? preloadData['message_text'] : this.hermesMessage.message_text;
+        this.hermesMessage.submit_to_tns = 'submit_to_tns' in preloadData ? preloadData['submit_to_tns'] : this.hermesMessage.submit_to_tns;
+        this.hermesMessage.submit_to_mpc = 'submit_to_mpc' in preloadData ? preloadData['submit_to_mpc'] : this.hermesMessage.submit_to_mpc;
+        this.hermesMessage.submit_to_gcn = 'submit_to_gcn' in preloadData ? preloadData['submit_to_gcn'] : this.hermesMessage.submit_to_gcn;
+        if (!_.isEmpty(preloadData.data)) {
           // Here we pass down into the hermesMessage component since it better understands how to check and update values of the data sections
-          this.$refs.messageForm.preloadData(decodedData.data);
+          this.$refs.messageForm.preloadData(preloadData.data);
         }
         this.validate();
-      }
+      })
+      .catch((error) => {
+        if (error.response.status == 404) {
+          // If a message with this preload ID is not found on the server, report that to the user
+          this.preloadError = 'Preloaded Message with ID ' + preloadId + ' does not exist on the server.';
+        }
+        else if (error.response.status == 401) {
+          this.logout();
+        }
+        else {
+          console.log(error);
+        }
+      });
     },
     checkSessionAndSubmitToHop() {
       // Attempt to check the user session is still valid before submitting, to ensure no confusion in who is submitting the message

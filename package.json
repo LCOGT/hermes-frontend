@@ -29,7 +29,6 @@
     "https-browserify": "^1.0.0",
     "import": "^0.0.6",
     "jquery": "^3.5.x",
-    "js-base64": "^3.7.5",
     "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.x",
     "mutationobserver-shim": "^0.3.7",
