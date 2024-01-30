@@ -952,7 +952,12 @@
               else if (_.isObject(instance[key])) {
                 Object.keys(validSectionInstance[key]).forEach(nestedKey => {
                   if (nestedKey in instance[key]) {
-                    validSectionInstance[key][nestedKey] = instance[key][nestedKey];
+                    if (_.isNumber(instance[key][nestedKey])){
+                      validSectionInstance[key][nestedKey] = instance[key][nestedKey].toString();
+                    }
+                    else {
+                      validSectionInstance[key][nestedKey] = instance[key][nestedKey];
+                    }
                     changes = true;
                   }
                 })
