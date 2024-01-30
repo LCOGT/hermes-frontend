@@ -99,6 +99,11 @@ export var messageFormatMixin = {
         delete cleanMessage.file_info;
       }
 
+      // Remove target type from the message
+      for (i = 0; i < cleanMessage.data.targets.length; i += 1) {
+        delete cleanMessage.data.targets[i].type;
+      }
+
       // Clean up the spectroscopy file sections into what the serializer expects
       for (i = 0; i < cleanMessage.data.spectroscopy.length; i += 1) {
         if (cleanMessage.data.spectroscopy[i].files.length > 0) {

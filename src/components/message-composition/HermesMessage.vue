@@ -598,6 +598,7 @@
           },
           'targets': {
             'name': null,
+            'type': 'Sidereal',
             'discovery_info': {
               'reporting_group': null,
               'discovery_source': null,
@@ -617,14 +618,14 @@
             'new_discovery': false,
             'orbital_elements': {
               'epoch_of_elements': null,
-              'orbinc': null,
-              'longascnode': null,
-              'argofperih': null,
+              'orbital_inclination': null,
+              'longitude_of_the_ascending_node': null,
+              'argument_of_the_perihelion': null,
               'eccentricity': null,
-              'meandist': null,
-              'meananom': null,
-              'perihdist': null,
-              'epochofperih': null
+              'semimajor_axis': null,
+              'mean_anomaly': null,
+              'perihelion_distance': null,
+              'epoch_of_perihelion': null
             },
             'redshift': null,
             'host_name': null,
@@ -950,6 +951,10 @@
                 changes = true;
               }
               else if (_.isObject(instance[key])) {
+                if (key == 'orbital_elements') {
+                  validSectionInstance['type'] = 'Non-Sidereal';
+                  this.sectionShowSimple['targets'] = false;
+                }
                 Object.keys(validSectionInstance[key]).forEach(nestedKey => {
                   if (nestedKey in instance[key]) {
                     if (_.isNumber(instance[key][nestedKey])){
