@@ -51,34 +51,61 @@
             </b-col>
           </b-form-row>
         </template>
-        <b-form-row class="mb-1" v-for="(flux, idx) in spectroscopy.flux" :key="'flux-' + idx">
-          <b-col md="3">
-            <ocs-custom-field v-model="spectroscopy.flux[idx]" field="flux" label="Flux:" :hide=false
-            :errors="getArrayErrors('flux', idx)" @input="update" />
-          </b-col>
-          <b-col md="3">
-            <ocs-custom-field v-model="spectroscopy.flux_error[idx]" field="flux_error" label="Error:" :hide=false
-            :errors="getArrayErrors('flux_error', idx)" @input="update" />
-          </b-col>
+        <div>
+          <b-tabs pills card content-class='mt-4' justified active-nav-item-class="bg-secondary">
+            <b-tab title="File Input" class="no-padding">
+              <p class="text-danger">
+                Upload one or more spectrum files to associate with your message.
+                These files will be stored in the Scimma Archive and will be publicly accessible and linked from the message.
+                They should follow commonly used spectrum data formats.
+              </p>
+              <files-with-descriptions
+                :id="id + '-files'"
+                :errors="getErrors('files', [])"
+                :multiple=false
+                v-bind:files.sync="spectroscopy.files"
+                v-bind:fileDescriptions.sync="spectroscopy.file_descriptions"
+                @message-updated="update"
+              >
+              </files-with-descriptions>
+            </b-tab>
+            <b-tab title="Raw Data" class="no-padding" @click="switchToRaw">
+              <ocs-custom-alert v-if="getErrors('flux', []).length > 0 && this.spectroscopy.flux.length == 0" :key="fluxError" alert-class="danger" :dismissible="false">
+                <span v-html="getErrors('flux', [])[0]"></span>
+              </ocs-custom-alert>
+              <show-wrapper :id="id + '-raw-data-fields'">
+                <b-form-row class="mb-1" v-for="(flux, idx) in spectroscopy.flux" :key="'flux-' + idx">
+                  <b-col md="3">
+                    <ocs-custom-field v-model="spectroscopy.flux[idx]" field="flux" label="Flux:" :hide=false
+                    :errors="getArrayErrors('flux', idx)" @input="update" />
+                  </b-col>
+                  <b-col md="3">
+                    <ocs-custom-field v-model="spectroscopy.flux_error[idx]" field="flux_error" label="Error:" :hide=false
+                    :errors="getArrayErrors('flux_error', idx)" @input="update" />
+                  </b-col>
+                  <b-col md="4">
+                    <ocs-custom-field v-model="spectroscopy.wavelength[idx]" field="wavelength" label="Wavelength:" :hide=false
+                    :errors="getArrayErrors('wavelength', idx)" @input="update" />
+                  </b-col>
+                  <b-col md="1" class="text-right">
+                    <b-button-toolbar>
+                      <b-button-group class="mr-1">
+                        <b-button title="Copy this Flux value" @click="copyFlux(idx)">
+                          <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
+                        </b-button>
+                        <b-button :disabled="spectroscopy.flux.length == 0" title="Remove this Flux value" @click="removeFlux(idx)">
+                          <b-icon icon="trash" aria-hidden="true"></b-icon>
+                        </b-button>
+                      </b-button-group>
+                    </b-button-toolbar>
+                  </b-col>
+                </b-form-row>
+              </show-wrapper>
+            </b-tab>
+          </b-tabs>
+        </div>
+        <b-form-row class="mt-4">
           <b-col md="4">
-            <ocs-custom-field v-model="spectroscopy.wavelength[idx]" field="wavelength" label="Wavelength:" :hide=false
-            :errors="getArrayErrors('wavelength', idx)" @input="update" />
-          </b-col>
-          <b-col md="1" class="text-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <b-button title="Copy this Flux value" @click="copyFlux(idx)">
-                  <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
-                </b-button>
-                <b-button :disabled="spectroscopy.flux.length == 1" title="Remove this Flux value" @click="removeFlux(idx)">
-                  <b-icon icon="trash" aria-hidden="true"></b-icon>
-                </b-button>
-              </b-button-group>
-            </b-button-toolbar>
-          </b-col>
-        </b-form-row>
-        <b-form-row class="mt-2">
-          <b-col md="3">
             <ocs-custom-select
               v-model="spectroscopy.flux_units"
               field="flux_units"
@@ -89,7 +116,7 @@
               @input="update"
             />
           </b-col>
-          <b-col md="3">
+          <b-col md="4">
             <ocs-custom-select
               v-model="spectroscopy.wavelength_units"
               field="wavelength_units"
@@ -100,7 +127,7 @@
               @input="update"
             />
           </b-col>
-          <b-col md="3">
+          <b-col md="4">
             <ocs-custom-select
               v-model="spectroscopy.flux_type"
               field="flux_type"
@@ -126,11 +153,11 @@
               </b-input-group-append>
             </ocs-custom-field>
           </b-col>
-          <b-col md="3">
+          <b-col md="4">
             <ocs-custom-field v-model="spectroscopy.telescope" field="telescope" label="Telescope:" :hide=false
               :errors="errors.telescope" @input="update" />
           </b-col>
-          <b-col md="3">
+          <b-col md="4">
             <ocs-custom-field v-model="spectroscopy.instrument" field="instrument" label="Instrument:" :hide=false
               :errors="errors.instrument" @input="update" />
           </b-col>
@@ -213,10 +240,17 @@
   <script>
   import { OCSMixin } from 'ocs-component-lib';
   import _ from 'lodash';
+  import '@/assets/css/view.css';
   import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
+  import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
+  import ShowWrapper from '@/components/message-composition/ShowWrapper.vue'
 
   export default {
     name: 'DataSpectroscopy',
+    components: {
+      ShowWrapper,
+      FilesWithDescriptions
+    },
     mixins: [OCSMixin.confirmMixin, schemaDataMixin],
     props: {
       index: {
@@ -320,6 +354,7 @@
           'WR-WO',
           'Other'
         ],
+        header: {},
         advancedOptionsCollapsed: true,
         show: true,
         id: 'spectroscopy-' + this.index
@@ -330,7 +365,96 @@
         return _.map(this.targets, 'name');
       }
     },
+    watch: {
+      "spectroscopy.files": function(files) {
+        if (files.length > 0) {
+          files[0].arrayBuffer().then( (value) => {
+            this.header = this.getHeader(value);
+            this.fillInFromHeader(this.header);
+          }, (reason) => {
+            console.log(reason);
+          })
+        }
+        else {
+          this.header = {};
+        }
+      }
+    },
     methods: {
+      getHeader: function(fileData) {
+        var header = {};
+        var headerPos = 0;
+        // This fits header parsing code is adapted from www.clearskyinstitute.com/fits/ fits viewer javascript code
+        try {
+          for (headerPos = 0; headerPos < fileData.byteLength; headerPos += 80) {
+            var line = String.fromCharCode.apply(null, new Uint8Array(fileData, headerPos, 80));
+            if (line.match(/^END */)) {
+              headerPos += 80;
+              break;
+            }
+
+            if (line.indexOf("=") < 0) {
+              // Skip COMMENT/HISTORY
+              continue;
+            }
+            // Key is first 8 characters of line
+            var key = line.substring(0, 8);
+            // Remove trailing blanks from key
+            key = key.replace(/ *$/, "");
+
+            // Value starts in line 11
+            var value = line.substring(10);
+            value = value.replace(/^ */, "");  // remove leading breaks
+            value = value.replace(/\/.*$/, "");  // remove comments
+            value = value.replace(/ *$/, "");  // remove trailing blanks
+            if (value.indexOf("'") >= 0) {
+              value = value.substring(1, value.length-2);  // treat value is a string
+              value = value.trim();
+            }
+            else if (value.indexOf("T") >= 0) {
+              value = true;  // treat value as a boolean True
+            }
+            else if (value.indexOf("F") >= 0) {
+              value = false;  // treat value as a boolean False
+            }
+            else if (value.indexOf(".") >= 0) {
+              value = parseFloat(value);  // treat value as a float
+            }
+            else {
+              value = parseInt(value);  // treat value as an int
+            }
+            header[key] = value;
+          }
+          console.log(header);
+        } catch(e) {
+          console.log("File does not have standard .fits format");
+        }
+        return header;
+      },
+      fillInFieldFromHeader: function(header, headerKeys, fieldName){
+        headerKeys.forEach((headerKey) => {
+          if (headerKey in header) {
+            this.spectroscopy[fieldName] = header[headerKey];
+            return;
+          }
+        });
+      },
+      fillInFromHeader: function(header) {
+        if (header === {}) {
+          return;
+        }
+        // Attempt to fill in the obs date
+        this.fillInFieldFromHeader(header, ['DATE-OBS', 'MJD-OBS'], 'date_obs');
+        // Attempt to fill in the exposure time
+        this.fillInFieldFromHeader(header, ['EXPTIME'], 'exposure_time');
+        // Attempt to fill in the observer
+        this.fillInFieldFromHeader(header, ['USERID'], 'observer');
+        // Attempt to fill in the instrument field
+        this.fillInFieldFromHeader(header, ['INSTRUME'], 'instrument');
+        // Attempt to fill in the telescope field
+        this.fillInFieldFromHeader(header, ['TELESCOP', 'SITE', 'ORIGIN'], 'telescope');
+        this.update();
+      },
       copyFlux: function(idx) {
         this.spectroscopy.flux.push(_.cloneDeep(this.spectroscopy.flux[idx]));
         this.spectroscopy.flux_error.push(_.cloneDeep(this.spectroscopy.flux_error[idx]));
@@ -345,6 +469,14 @@
       },
       getArrayErrors: function(section, idx) {
         return _.get(this.errors, [section, idx], {});
+      },
+      switchToRaw: function() {
+        if (this.spectroscopy.flux.length == 0){
+          this.spectroscopy.flux.push(null);
+          this.spectroscopy.flux_error.push(0);
+          this.spectroscopy.wavelength.push(null);
+          this.update();
+        }
       }
     }
   };

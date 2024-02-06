@@ -1,15 +1,20 @@
 <template>
   <b-container>
+    <b-row v-if="preloadError">
+      <b-alert show dismissible variant="danger" @dismissed="clearPreloadError()" style="width:100%;">
+        {{this.preloadError}}
+      </b-alert>
+    </b-row>
     <b-row>
       <b-col class="m-0 p-0">
-        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText"
+        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText" ref="messageForm"
           @hermes-message-updated="hermesMessageUpdated" @generate-plain-text="generatePlainText">
         </hermes-message>
       </b-col>
     </b-row>
     <b-row class="mt-2">
       <b-col sm="1" class="submit-container">
-        <b-button class="submit-button shadow" variant="success" @click="submitToHop"
+        <b-button class="submit-button shadow" variant="success" @click="checkSessionAndSubmitToHop"
           :disabled="!readyToSubmit">Submit</b-button>
       </b-col>
       <b-col sm="5"> to {{this.hermesMessage.topic}}
@@ -25,7 +30,7 @@
       </b-col>
     </b-row>
     <b-row v-if="submissionError">
-      <b-alert show dismissible variant="danger" @dismissed="clearError()">
+      <b-alert show dismissible variant="danger" @dismissed="clearSubmissionError()">
         {{this.submissionError}}
       </b-alert>
     </b-row>
@@ -36,7 +41,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import axios from "axios";
 import { mapGetters } from "vuex";
-
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
 import { OCSUtil } from 'ocs-component-lib';
 import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
@@ -57,7 +61,7 @@ export default {
       default: () => {
         return {
           files: [],
-          file_comments: [],
+          file_descriptions: [],
           title: '',
           authors: '',
           topic: '',
@@ -89,6 +93,7 @@ export default {
         readyToSubmit: false,
         show: true,
         submissionError: '',
+        preloadError: '',
       };
   },
   mounted() {
@@ -103,9 +108,13 @@ export default {
       this.hermesMessage.topic = 'hermes.test';
     }
     this.hermesMessage.submitter = this.getProfile.email;
+    // Accept a id in the route that will cause this to load a preloaded message from the server with that id
+    if (!_.isEmpty(this.$route.query) && 'id' in this.$route.query){
+      this.preloadData(this.$route.query.id);
+    }
   },
   computed: {
-    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions"]),
+    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions", "isLoggedIn"]),
     isProd: function() {
       return this.getHermesUrl == "https://hermes.lco.global/";
     }
@@ -177,12 +186,18 @@ export default {
     submitToHop() {
       let payload = JSON.stringify(this.sanitizedMessageData());
       let formData = null;
-      if (this.hermesMessage.files.length > 0){
+      if (this.hasAnyFiles(this.hermesMessage)){
         formData = new FormData();
+        // Add files from the outer part of the message
         this.hermesMessage.files.forEach(function (file) {
-          // formData.append("file" + index, file);
           formData.append("files", file);
         });
+        // Add files from within the spectroscopy sections of the message
+        for (var i = 0; i < this.hermesMessage.data.spectroscopy.length; i += 1) {
+          this.hermesMessage.data.spectroscopy[i].files.forEach(function (file) {
+            formData.append("files", file);
+          });
+        }
         formData.append("data", payload);
       }
       // Post message via axios
@@ -213,7 +228,7 @@ export default {
     clearForm() {
       // Reset the page to a clean state
       this.hermesMessage.files = [];
-      this.hermesMessage.file_comments = [];
+      this.hermesMessage.file_descriptions = [];
       this.hermesMessage.title = '';
       this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];
@@ -236,8 +251,73 @@ export default {
     clearSubmissionError() {
       this.submissionError = '';
     },
+    clearPreloadError() {
+      this.preloadError = '';
+    },
     hermesMessageUpdated: function() {
       this.validate();
+    },
+    preloadData: function(preloadId) {
+      axios
+      .get(new URL('/api/v0/' + this.submissionEndpoint + '/load/' + preloadId, this.getHermesUrl).href, {
+          withCredentials: true,
+        })
+      .then((response) => {
+        let preloadData = response.data;
+        if ('topic' in preloadData && this.topicOptions.includes(preloadData['topic'])) {
+          this.hermesMessage.topic = preloadData['topic'];
+        }
+        this.hermesMessage.title = 'title' in preloadData ? preloadData['title'] : this.hermesMessage.title;
+        this.hermesMessage.authors = 'authors' in preloadData ? preloadData['authors'] : this.hermesMessage.authors;
+        this.hermesMessage.message_text = 'message_text' in preloadData ? preloadData['message_text'] : this.hermesMessage.message_text;
+        this.hermesMessage.submit_to_tns = 'submit_to_tns' in preloadData ? preloadData['submit_to_tns'] : this.hermesMessage.submit_to_tns;
+        this.hermesMessage.submit_to_mpc = 'submit_to_mpc' in preloadData ? preloadData['submit_to_mpc'] : this.hermesMessage.submit_to_mpc;
+        this.hermesMessage.submit_to_gcn = 'submit_to_gcn' in preloadData ? preloadData['submit_to_gcn'] : this.hermesMessage.submit_to_gcn;
+        if (!_.isEmpty(preloadData.data)) {
+          // Here we pass down into the hermesMessage component since it better understands how to check and update values of the data sections
+          this.$refs.messageForm.preloadData(preloadData.data);
+        }
+        this.validate();
+      })
+      .catch((error) => {
+        if (error.response.status == 404) {
+          // If a message with this preload ID is not found on the server, report that to the user
+          this.preloadError = 'Preloaded Message with ID ' + preloadId + ' does not exist on the server.';
+        }
+        else if (error.response.status == 401) {
+          this.logout();
+        }
+        else {
+          console.log(error);
+        }
+      });
+    },
+    checkSessionAndSubmitToHop() {
+      // Attempt to check the user session is still valid before submitting, to ensure no confusion in who is submitting the message
+      axios
+        .get(this.getHermesUrl + "api/v0/heartbeat/", {
+            withCredentials: true,
+          })
+        .then((response) => {
+          if (this.isLoggedIn && !response.data.is_authenticated) {
+            this.logout(false);
+            this.submissionError = 'Your user session expired while composing this message.' +
+                                   ' Refresh the page and login again to submit as your user account' +
+                                   ', or click the submit button again to send the message as the HERMES Guest user';
+          }
+          else {
+            this.submitToHop();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status == 401){
+            this.logout(false);
+            this.submissionError = 'Your user session expired while composing this message.' +
+                                   ' Refresh the page and login again to submit as your user account' +
+                                   ', or click the submit button again to send the message as the HERMES Guest user';
+          }
+      });
     }
   }
 };

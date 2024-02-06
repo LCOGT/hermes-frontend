@@ -12,7 +12,7 @@
             </b-col>
             <b-col md="3">
               <ocs-custom-select
-                  v-model="type"
+                  v-model="target.type"
                   field="type"
                   label="Type:"
                   :hide=false
@@ -332,14 +332,14 @@
         if (this.type === 'Sidereal') {
           this.target.orbital_elements = {
             'epoch_of_elements': null,
-            'orbinc': null,
-            'longascnode': null,
-            'argofperih': null,
+            'orbital_inclination': null,
+            'longitude_of_the_ascending_node': null,
+            'argument_of_the_perihelion': null,
             'eccentricity': null,
-            'meandist': null,
-            'meananom': null,
-            'perihdist': null,
-            'epochofperih': null
+            'semimajor_axis': null,
+            'mean_anomaly': null,
+            'perihelion_distance': null,
+            'epoch_of_perihelion': null
           }
         }
         else {
