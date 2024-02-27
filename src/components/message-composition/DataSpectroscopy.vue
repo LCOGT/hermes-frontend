@@ -32,7 +32,7 @@
             <b-col md="2" offset-md="1" class="text-right">
               <b-button-toolbar>
                 <b-button-group class="mr-1">
-                  <b-button title="Advanced Spectroscopy Fields" v-b-toggle="'advanced-spectroscopy-collapse-' + index" @click="toggleCollapse">
+                  <b-button title="Advanced Spectroscopy Fields" :class="advancedOptionsCollapsed ? 'collapsed': null" :aria-expanded="advancedOptionsCollapsed ? 'false': 'true'" v-b-toggle="'advanced-spectroscopy-collapse-' + index" @click="toggleCollapse" :disabled="isTns">
                     <span v-if="advancedOptionsCollapsed">
                       <b-icon icon="arrows-expand" aria-hidden="true"></b-icon>
                     </span>
@@ -54,15 +54,15 @@
         <div>
           <b-tabs pills card content-class='mt-4' justified active-nav-item-class="bg-secondary">
             <b-tab title="File Input" class="no-padding">
-              <p class="text-danger">
+              <p class="text-primary">
                 Upload one or more spectrum files to associate with your message.
-                These files will be stored in the Scimma Archive and will be publicly accessible and linked from the message.
+                These files will be stored in the Scimma Archive and will be <b>publicly accessible</b> and linked from the message.
                 They should follow commonly used spectrum data formats.
               </p>
               <files-with-descriptions
                 :id="id + '-files'"
                 :errors="getErrors('files', [])"
-                :multiple=false
+                :multiple=true
                 v-bind:files.sync="spectroscopy.files"
                 v-bind:fileDescriptions.sync="spectroscopy.file_descriptions"
                 @message-updated="update"
@@ -154,15 +154,35 @@
             </ocs-custom-field>
           </b-col>
           <b-col md="4">
-            <ocs-custom-field v-model="spectroscopy.telescope" field="telescope" label="Telescope:" :hide=false
+            <ocs-custom-field v-if="!isTns" v-model="spectroscopy.telescope" field="telescope" label="Telescope:" :hide=false
               :errors="errors.telescope" @input="update" />
+            <ocs-custom-select
+              v-else
+              v-model="spectroscopy.telescope"
+              field="telescope"
+              label="Telescope:"
+              :hide=false
+              :options="getTnsValuesList('telescopes')"
+              :errors="errors.telescope"
+              @input="update"
+            />
           </b-col>
           <b-col md="4">
-            <ocs-custom-field v-model="spectroscopy.instrument" field="instrument" label="Instrument:" :hide=false
+            <ocs-custom-field v-if="!isTns" v-model="spectroscopy.instrument" field="instrument" label="Instrument:" :hide=false
               :errors="errors.instrument" @input="update" />
+            <ocs-custom-select
+              v-else
+              v-model="spectroscopy.instrument"
+              field="instrument"
+              label="Instrument:"
+              :hide=false
+              :options="getTnsValuesList('instruments')"
+              :errors="errors.instrument"
+              @input="update"
+            />
           </b-col>
         </b-form-row>
-        <b-collapse :id="'advanced-spectroscopy-collapse-' + index" class="mt-2">
+        <b-collapse :id="'advanced-spectroscopy-collapse-' + index" class="mt-2" v-model="collapseVisible">
           <b-form-row  class="mt-3">
             <b-col md="3">
               <ocs-custom-field v-model="spectroscopy.observer" field="observer" label="Observer:" :hide=false
@@ -180,7 +200,7 @@
                   desc="Classification of spectroscopic datum"
                   :hide=false
                   :errors="errors.classification"
-                  :options="classificationTypes"
+                  :options="getTnsValuesList('object_types')"
                   @input="update"
               />
             </b-col>
@@ -202,7 +222,7 @@
                   desc="Type of the Spectrograph"
                   :hide=false
                   :errors="errors.spec_type"
-                  :options="specTypes"
+                  :options="getTnsValuesList('spectra_types')"
                   @input="update"
               />
             </b-col>
@@ -239,6 +259,7 @@
   </template>
   <script>
   import { OCSMixin } from 'ocs-component-lib';
+  import { mapGetters } from "vuex";
   import _ from 'lodash';
   import '@/assets/css/view.css';
   import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
@@ -283,97 +304,45 @@
         fluxUnits: ['mJy', 'erg / s / cm² / Å'],
         fluxTypes: ['Fλ', 'Fν'],
         proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
-        specTypes: ['Object', 'Host', 'Synthetic', 'Sky', 'Arcs'],
-        classificationTypes: [
-          'Afterglow',
-          'AGN',
-          'Computed-Ia',
-          'Computed-IIb',
-          'Computed-IIn',
-          'Computed-IIP',
-          'Computed-PISN',
-          'CV',
-          'FBOT',
-          'FRB',
-          'Galaxy',
-          'Gap',
-          'Gap I',
-          'Gap II',
-          'ILRT',
-          'Impostor-SN',
-          'Kilonova',
-          'LBV',
-          'Light-Echo',
-          'LRN',
-          'M dwarf',
-          'Nova',
-          'QSO',
-          'SLSN-I',
-          'SLSN-II',
-          'SLSN-R',
-          'SN',
-          'SN I',
-          'SN I-faint',
-          'SN I-rapid',
-          'SN Ia',
-          'SN Ia-91bg-like',
-          'SN Ia-91T-like',
-          'SN Ia-Ca-rich',
-          'SN Ia-CSM',
-          'SN Ia-pec',
-          'SN Ia-SC',
-          'SN Iax[02cx-like]',
-          'SN Ib',
-          'SN Ib-Ca-rich',
-          'SN Ib-pec',
-          'SN Ib/c',
-          'SN Ib/c-Ca-rich',
-          'SN Ibn',
-          'SN Ibn/Icn',
-          'SN Ic',
-          'SN Ic-BL',
-          'SN Ic-Ca-rich',
-          'SN Ic-pec',
-          'SN Icn',
-          'SN II',
-          'SN II-pec',
-          'SN IIb',
-          'SN IIL',
-          'SN IIn',
-          'SN IIn-pec',
-          'SN IIP',
-          'Std-spec',
-          'TDE',
-          'TDE-H',
-          'TDE-H-He',
-          'TDE-He',
-          'Varstar',
-          'WR',
-          'WR-WC',
-          'WR-WN',
-          'WR-WO',
-          'Other'
-        ],
         header: {},
-        advancedOptionsCollapsed: true,
+        advancedOptionsCollapsed: !this.isTns,
         show: true,
         id: 'spectroscopy-' + this.index
       };
     },
     computed: {
+      ...mapGetters(["getTnsOptions"]),
       targetNames: function() {
         return _.map(this.targets, 'name');
-      }
+      },
+      collapseVisible: {
+        get: function() {
+          return !this.advancedOptionsCollapsed;
+        },
+        set: function(_val) {
+
+        }
+      },
     },
     watch: {
+      isTns: function(value) {
+        if (value){
+          this.advancedOptionsCollapsed = false;
+        }
+      },
       "spectroscopy.files": function(files) {
         if (files.length > 0) {
-          files[0].arrayBuffer().then( (value) => {
-            this.header = this.getHeader(value);
-            this.fillInFromHeader(this.header);
-          }, (reason) => {
-            console.log(reason);
-          })
+          for (let i = 0; i < files.length; i++){
+            if (files[i].name.includes('.fits')) {
+              files[i].arrayBuffer().then( (value) => {
+                this.header = this.getHeader(value);
+                this.fillInFromHeader(this.header);
+              }, (reason) => {
+                console.log(reason);
+              })
+              break;
+            }
+          }
         }
         else {
           this.header = {};
@@ -434,7 +403,7 @@
       fillInFieldFromHeader: function(header, headerKeys, fieldName){
         headerKeys.forEach((headerKey) => {
           if (headerKey in header) {
-            this.spectroscopy[fieldName] = header[headerKey];
+            this.spectroscopy[fieldName] = header[headerKey].toString();
             return;
           }
         });
@@ -477,7 +446,11 @@
           this.spectroscopy.wavelength.push(null);
           this.update();
         }
-      }
+      },
+      getTnsValuesList: function(category) {
+        let tnsOptions = this.getTnsOptions;
+        return _.values(tnsOptions[category]).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
+      },
     }
   };
   </script>
