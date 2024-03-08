@@ -53,7 +53,7 @@
       </b-col>
     </b-row>
     <b-row v-if="isLoggedIn">
-      <b-col md="4">
+      <b-col md="4" class="border-right border-top pt-4">
         <h3 class="text-center">GCN Authorization</h3>
         <p>
           To submit messages to GCN Circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/">NASA GCN</a> account
@@ -71,6 +71,30 @@
           </b-button>
         </div>
       </b-col>
+      <b-col md="4" class="border-top pt-4">
+        <h3 class="text-center">TNS Bot Credentials</h3>
+        <p>
+          By default, TNS submissions will use the built-in <b>Hermes_bot</b>.
+          You can override this behaviour and submit with your own TNS Bot credentials by adding then to your profile
+          here or via the api.
+        </p>
+        <div v-html="botOverrideText"></div><br />
+        <b-form>
+          <b-form-input class="mb-1" v-model="tns_form.bot_id" type="number" placeholder="Enter your TNS Bot ID"></b-form-input>
+          <b-form-input class="mb-1" v-model="tns_form.bot_name" placeholder="Enter your TNS Bot Name"></b-form-input>
+          <b-form-input class="mb-1" v-model="tns_form.bot_api_token" placeholder="Enter your TNS Bot API Token"></b-form-input>
+          <div class="mt-4">
+            <b-button class="mr-2" variant="danger" @click="performRevokeBotCredentials">
+              <b-spinner small v-if="updatingBotCredentials"></b-spinner>
+              Revoke Credentials
+            </b-button>
+            <b-button variant="success" @click="performUpdateBotCredentials" :disabled="!canSetTNSCredentials">
+              <b-spinner small v-if="updatingBotCredentials"></b-spinner>
+              Set Credentials
+            </b-button>
+          </div>
+        </b-form>
+      </b-col>
     </b-row>
   </b-container>
 </template>
@@ -87,7 +111,15 @@ export default {
     return {
       alertMessage: null,
       showAlert: false,
-      alertVariant: 'warning'
+      alertVariant: 'warning',
+      tns_form: {
+        'bot_id': null,
+        'bot_name': null,
+        'bot_api_token': null
+      },
+      updatingBotCredentials: false,
+      revokingCredential: false,
+      revokingApiToken: false
     };
   },
   mounted() {
@@ -98,6 +130,18 @@ export default {
     }
     // I think its reasonable to trigger a refresh of the profile data when you hit the /profile view.
     this.$store.dispatch('getProfileData');
+    if (this.getProfile) {
+      this.setTnsBotId(this.getProfile.tns_bot_id);
+      this.setTnsBotName(this.getProfile.tns_bot_name);
+    }
+  },
+  watch: {
+    "this.getProfile.tns_bot_id": function(value) {
+      this.setTnsBotId(value);
+    },
+    "this.getProfile.tns_bot_name": function(value) {
+      this.setTnsBotName(value);
+    }
   },
   computed: {
     ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
@@ -123,11 +167,38 @@ export default {
         return 'Current Status: <font color="red" title="You must authorize your GCN account">Not Connected</font>'
       }
     },
+    tnsBotCredentialsSet: function() {
+      return this.getProfile.integrated_apps.includes('TNS');
+    },
+    canSetTNSCredentials: function() {
+      if (this.tns_form.bot_id && this.tns_form.bot_name && this.tns_form.bot_api_token) {
+        return true;
+      }
+      return false;
+    },
+    botOverrideText: function() {
+      if (this.tnsBotCredentialsSet) {
+        return 'Current Status: <font color="green">Bot Override Set</font>';
+      }
+      else {
+        return 'Current Status: <font color="red">No Bot Override Set</font>';
+      }
+    },
     alertText: function() {
       return this.$route.query.alert;
     }
   },
   methods: {
+    setTnsBotId: function(value) {
+      if (value != -1) {
+        this.tns_form.bot_id = value;
+      }
+    },
+    setTnsBotName: function(value) {
+      if (value != '') {
+        this.tns_form.bot_name = value;
+      }
+    },
     authorizeGcn: function(evt) {
       evt.preventDefault();
       location.href =
@@ -178,6 +249,54 @@ export default {
         console.log(error);
         if (error.response.status == 401){
           this.logout();
+        }
+      });
+    },
+    performRevokeBotCredentials: function(evt) {
+      evt.preventDefault();
+      this.tns_form.bot_id = null;
+      this.tns_form.bot_name = null;
+      this.tns_form.bot_api_token = null;
+      this.updateTNSBotCredentials('TNS Bot Credentials Successfully Revoked!');
+    },
+    performUpdateBotCredentials: function(evt) {
+      evt.preventDefault();
+      this.updateTNSBotCredentials('TNS Bot Credentials Successfully Updated!');
+    },
+    updateTNSBotCredentials(success_message) {
+      this.updatingBotCredentials = true;
+      var tns_data = {
+        'tns_bot_id': this.tns_form.bot_id || -1,
+        'tns_bot_name': this.tns_form.bot_name || '',
+        'tns_bot_api_token': this.tns_form.bot_api_token || ''
+      };
+      axios({
+        method: 'patch',
+        withCredentials: true,
+        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
+        headers: {'Content-Type': 'application/json',
+                  'X-CSRFToken': this.getCsrfToken
+                  },
+        url: new URL('/api/v0/profile/', this.getHermesUrl).href,
+        data: tns_data
+      })
+      .then(() => {
+        this.$store.dispatch('getProfileData');
+        this.alertMessage = success_message;
+        this.alertVariant = 'warning';
+        this.showAlert = true;
+        this.updatingBotCredentials = false;
+      })
+      .catch(error => {
+        console.log(error);
+        this.updatingBotCredentials = false;
+        if (error.response.status == 401){
+          this.logout();
+        }
+        else {
+          this.alertMessage = error.response.data;
+          this.alertVariant = 'danger';
+          this.showAlert = true;
         }
       });
     }
