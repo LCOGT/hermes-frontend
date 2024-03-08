@@ -74,7 +74,7 @@
                                     <b-card-group>
                                         <b-card header="Submitting a message to Hermes API:">
                                             <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
-                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
+                                            <li>Create a header for your submission including the API token from your <a :href="getHermesUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. This can just be as simple as a topic, a title, and a submitter.</li>
                                             <li>Post your request.</li>
                                             <br>
@@ -242,7 +242,7 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
                                     <b-card-group>
                                         <b-card header="Submitting a message to Hermes API and TNS:">
                                             <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
-                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
+                                            <li>Create a header for your submission including the API token from your <a :href="getHermesUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, at least one target with group and discovery information, and at least one photometry datapoint and one limiting brightness.</li>
                                             <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
                                             <li>Related files can also be uploaded as part of the TNS submission. They will reside on the TNS and can be downloaded from the TNS object page. Their filenames must be included in Targets <code>file_info</code> section, and the file must be uploaded with the submission.</li>
@@ -444,7 +444,7 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
                                 </b-tab>
                                 <b-tab title="Working with SCiMMA Credentials">
                                     <p>Hermes will create and store <b>SCiMMA Credentials</b> the first time you log in. These <b>SCiMMA Credentials</b> are what Hermes will use to send messages
-                                    through HopSkotch on your behalf. They include a username that you can get from your <a :href="baseUrl + 'profile'">Hermes profile</a>. In general
+                                    through HopSkotch on your behalf. They include a username that you can get from your <a :href="getHermesUrl + 'profile'">Hermes profile</a>. In general
                                     you shouldn't need to alter these credentials unless they somehow get in a bad state or you wish to add or remove topic permissions. If you want
                                     to reset your credentials, simply use the button on the profile page. If you wish to change your topic permissions, use the following steps:
                                     </p>
