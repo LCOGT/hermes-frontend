@@ -111,9 +111,11 @@
             <b-col md="2" offset-md="1" align-self="center">
               <b-form-checkbox
                 :id="'target-new-discovery-' + index"
-                :disabled="isTns"
                 v-model="target.new_discovery"
                 name="new_discovery"
+                :state="newDiscoveryError"
+                v-b-tooltip.hover
+                :title="errors.new_discovery"
                 switch
                 @input="update"
               >
@@ -224,8 +226,55 @@
                 :errors="errors.aliases" @input="update" />
             </b-col>
           </b-form-row>
+          <b-form-row>
+            <b-col md="12">
+              <b-form-group
+                :id="'target-comments-fieldgroup' + id"
+                label-size="sm"
+                label-align-sm="right"
+                label-cols-sm="1"
+                label-for="comments"
+              >
+                <template slot="label">
+                  Comments:
+                </template>
+                <b-input-group>
+                  <b-form-textarea
+                    :id="'target-comments-field' + id"
+                    v-model="target.comments"
+                    placeholder="Enter something..."
+                    rows="2"
+                    max-rows="4"
+                    @input="update"
+                  />
+                  <slot name="inline-input" />
+                </b-input-group>
+              </b-form-group>
+            </b-col>
+          </b-form-row>
           <discovery-info :data="target.discovery_info" :errors="getErrors('discovery_info', {})" :index="index" :is-tns="isTns" @message-updated="update">
           </discovery-info>
+          <b-card no-body class="mt-2">
+            <b-card-header header-tag="header" class="p-1" role="tab">
+              <b>Related Target Files</b>
+            </b-card-header>
+            <b-card-body>
+              <p class="text-primary">
+                Upload one or more related target files to associate with your message. If you are submitting to the TNS, these files
+                will be uploaded there. If your target proprietary period is 0, the files will also be stored
+                in the Scimma Archive and will be <b>publicly accessible</b> and linked from the message.
+              </p>
+              <files-with-descriptions
+                :id="id + '-files'"
+                :errors="getErrors('files', [])"
+                :multiple=true
+                v-bind:files.sync="target.files"
+                v-bind:fileDescriptions.sync="target.file_descriptions"
+                @message-updated="update"
+              >
+              </files-with-descriptions>
+            </b-card-body>
+          </b-card>
         </b-collapse>
       </b-card>
     </b-container>
@@ -240,12 +289,14 @@
   import { OCSMixin } from 'ocs-component-lib';
   import DiscoveryInfo from '@/components/message-composition/DiscoveryInfo.vue'
   import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
+  import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
 
   export default {
     name: 'DataTarget',
     components: {
       DiscoveryInfo,
-      Multiselect
+      Multiselect,
+      FilesWithDescriptions
     },
     mixins: [OCSMixin.confirmMixin, schemaDataMixin],
     props: {
@@ -287,7 +338,6 @@
           this.advancedOptionsCollapsed = false;
           this.typeOptions = ['Sidereal'];
           this.type = 'Sidereal';
-          this.target.new_discovery = true;
           this.groupsArray = [];
         }
         else {
@@ -308,6 +358,14 @@
         },
         set: function(_val) {
 
+        }
+      },
+      newDiscoveryError: function() {
+        if (_.isEmpty(this.errors.new_discovery)){
+          return null;
+        }
+        else {
+          return false;
         }
       },
       getDefaultType: function() {

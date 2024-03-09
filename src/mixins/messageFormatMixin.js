@@ -38,10 +38,12 @@ export var messageFormatMixin = {
   },
   methods: {
     hasAnyFiles: function(message) {
-      if (message.files.length > 0) {
-        return true;
+      for (var i = 0; i < message.data.targets.length; i += 1) {
+        if (message.data.targets[i].files.length > 0) {
+          return true;
+        }
       }
-      for (var i = 0; i < message.data.spectroscopy.length; i += 1) {
+      for (i = 0; i < message.data.spectroscopy.length; i += 1) {
         if (message.data.spectroscopy[i].files.length > 0) {
           return true;
         }
@@ -50,6 +52,19 @@ export var messageFormatMixin = {
     },
     sanitizeMessageSection: function(message) {
       for(var i = 0; i < message.length; i += 1) {
+        if (message[i].files && message[i].files.length > 0) {
+          let cleanFiles = [];
+          for (var j = 0; j < message[i].files.length; j += 1) {
+            cleanFiles.push({
+              'name': message[i].files[j].name,
+              'description': message[i].file_descriptions[j]
+            });
+          }
+          message[i].file_info = cleanFiles;
+          delete message[i].files;
+          delete message[i].file_descriptions;
+        }
+
         if (!_.isEmpty(message[i].discovery_info)){
           message[i].discovery_info = _.omitBy(message[i].discovery_info, field => field === null || (_.isEmpty(field) && !_.isBoolean(field)));
         }
@@ -84,41 +99,11 @@ export var messageFormatMixin = {
         delete cleanMessage.data.event_id;
       }
 
-      // Clean up the general file sections into what the serializer expects
-      let cleanGeneralFiles = [];
-      for (var i = 0; i < cleanMessage.files.length; i += 1){
-        cleanGeneralFiles.push({
-          'name': cleanMessage.files[i].name,
-          'description': cleanMessage.file_descriptions[i]
-        });
-      }
-      cleanMessage.file_info = cleanGeneralFiles;
-      delete cleanMessage.file_descriptions;
-      delete cleanMessage.files;
-      if (_.isEmpty(cleanMessage.file_info)) {
-        delete cleanMessage.file_info;
-      }
-
       // Remove target type from the message
-      for (i = 0; i < cleanMessage.data.targets.length; i += 1) {
+      for (var i = 0; i < cleanMessage.data.targets.length; i += 1) {
         delete cleanMessage.data.targets[i].type;
       }
 
-      // Clean up the spectroscopy file sections into what the serializer expects
-      for (i = 0; i < cleanMessage.data.spectroscopy.length; i += 1) {
-        if (cleanMessage.data.spectroscopy[i].files.length > 0) {
-          let cleanFiles = [];
-          for (var j = 0; j < cleanMessage.data.spectroscopy[i].files.length; j += 1) {
-            cleanFiles.push({
-              'name': cleanMessage.data.spectroscopy[i].files[j].name,
-              'description': cleanMessage.data.spectroscopy[i].file_descriptions[j]
-            });
-          }
-          cleanMessage.data.spectroscopy[i].file_info = cleanFiles;
-          delete cleanMessage.data.spectroscopy[i].files;
-          delete cleanMessage.data.spectroscopy[i].file_descriptions;
-        }
-      }
       cleanMessage.data.references = this.sanitizeMessageSection(cleanMessage.data.references);
       cleanMessage.data.targets = this.sanitizeMessageSection(cleanMessage.data.targets);
       cleanMessage.data.photometry = this.sanitizeMessageSection(cleanMessage.data.photometry);

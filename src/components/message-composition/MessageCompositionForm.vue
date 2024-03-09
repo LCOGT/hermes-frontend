@@ -60,8 +60,6 @@ export default {
       type: Object,
       default: () => {
         return {
-          files: [],
-          file_descriptions: [],
           title: '',
           authors: '',
           topic: '',
@@ -188,12 +186,14 @@ export default {
       let formData = null;
       if (this.hasAnyFiles(this.hermesMessage)){
         formData = new FormData();
-        // Add files from the outer part of the message
-        this.hermesMessage.files.forEach(function (file) {
-          formData.append("files", file);
-        });
+        // Add files from within the targets sections of the message
+        for (var i = 0; i < this.hermesMessage.data.targets.length; i += 1) {
+          this.hermesMessage.data.targets[i].files.forEach(function (file) {
+            formData.append("files", file);
+          });
+        }
         // Add files from within the spectroscopy sections of the message
-        for (var i = 0; i < this.hermesMessage.data.spectroscopy.length; i += 1) {
+        for (i = 0; i < this.hermesMessage.data.spectroscopy.length; i += 1) {
           this.hermesMessage.data.spectroscopy[i].files.forEach(function (file) {
             formData.append("files", file);
           });
@@ -227,8 +227,6 @@ export default {
     },
     clearForm() {
       // Reset the page to a clean state
-      this.hermesMessage.files = [];
-      this.hermesMessage.file_descriptions = [];
       this.hermesMessage.title = '';
       this.hermesMessage.authors = '';
       this.hermesMessage.topic = this.topicOptions[0];
