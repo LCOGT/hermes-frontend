@@ -363,26 +363,6 @@
               </b-tab>
             </b-tabs>
           </data-section>
-          <data-section
-            v-if="hermesMessage.submit_to_tns"
-            section="file_upload"
-            datatype="Files"
-            plural-datatype="Files"
-            :errors="[]"
-            :sectionShowSimple="this.sectionShowSimple['extra_data']"
-            :onlySimple=true
-            :disabled=true
-            :isEmpty="hermesMessage.files.length == 0"
-            ref="file_uploadSection"
-          >
-            <files-with-descriptions
-              id="outerfiles"
-              :errors="[]"
-              v-bind:files.sync="hermesMessage.files"
-              v-bind:fileDescriptions.sync="hermesMessage.file_descriptions"
-            >
-            </files-with-descriptions>
-          </data-section>
         </b-tab>
         <b-tab>
           <template slot="title">
@@ -433,7 +413,6 @@
   import DataPhotometry from '@/components/message-composition/DataPhotometry.vue'
   import DataSpectroscopy from '@/components/message-composition/DataSpectroscopy.vue'
   import DataAstrometry from '@/components/message-composition/DataAstrometry.vue'
-  import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
   import ShowWrapper from '@/components/message-composition/ShowWrapper.vue'
   import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
 
@@ -449,7 +428,6 @@
       DataSpectroscopy,
       DataAstrometry,
       DataView,
-      FilesWithDescriptions
     },
     mixins: [messageFormatMixin],
     props: {
@@ -634,7 +612,10 @@
             'distance_error': null,
             'distance_units': null,
             'aliases': null,
-            'group_associations': null
+            'group_associations': null,
+            'comments': null,
+            'files': [],
+            'file_descriptions': [],
           },
           'photometry': {
             'target_name': null,
@@ -908,10 +889,7 @@
         if (value) {
           this.sectionShowSimple['targets'] = false;
           this.sectionShowSimple['photometry'] = false;
-        }
-        else {
-          this.hermesMessage.files = [];
-          this.hermesMessage.file_descriptions = [];
+          this.sectionShowSimple['spectroscopy'] = false;
         }
       }
     },
@@ -1002,9 +980,6 @@
       },
       addSection: function (section) {
         let emptySection = _.cloneDeep(this.emptySections[section]);
-        if (section == 'targets' && this.hermesMessage.submit_to_tns) {
-          emptySection['new_discovery'] = true;
-        }
         if (!(section in this.hermesMessage.data)) {
           this.hermesMessage.data[section] = [];
         }
@@ -1037,6 +1012,9 @@
         }
         else if (key.includes('photometry')) {
           non_field_key = 'photometry_non_field_errors';
+        }
+        else if (key.includes('spectroscopy')) {
+          non_field_key = 'spectroscopy_non_field_errors';
         }
         if (non_field_key){
           errors = _.concat(errors, _.get(this.errors, non_field_key, default_value));
