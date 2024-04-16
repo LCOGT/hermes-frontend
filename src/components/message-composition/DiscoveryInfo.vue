@@ -17,7 +17,7 @@
               field="reporting_group"
               label="Reporting Group:"
               :hide=false
-              :options="getTnsGroups()"
+              :options="getTnsValuesList('groups', true)"
               :errors="errors.reporting_group"
               @input="update"
           />
@@ -31,7 +31,7 @@
               field="discovery_source"
               label="Source:"
               :hide=false
-              :options="getTnsGroups()"
+              :options="getTnsValuesList('groups', true)"
               :errors="errors.discovery_source"
               @input="update"
           />
@@ -60,15 +60,35 @@
           </ocs-custom-field>
         </b-col>
       </b-form-row>
+      <b-form-row>
+            <b-col md="4">
+              <ocs-custom-field v-if="!isTns" v-model="data.nondetection_source" field="nondetection_source" label="Nondetection Source:" :hide=false
+                :errors="errors.nondetection_source" @input="update" />
+              <ocs-custom-select
+                  v-else
+                  v-model="data.nondetection_source"
+                  field="nondetection_source"
+                  label="Nondetection Source:"
+                  :hide=false
+                  :options="getTnsValuesList('archives', true)"
+                  :errors="errors.nondetection_source"
+                  @input="update"
+              />
+            </b-col>
+            <b-col md="8">
+              <ocs-custom-field v-model="data.nondetection_comments" field="nondetection_comments" label="Nondetection Comments:" :hide=false
+                :errors="errors.nondetection_comments" @input="update" />
+            </b-col>
+          </b-form-row>
     </b-card-body>
   </b-card>
 </template>
 <script>
-  import _ from 'lodash';
-  import { mapGetters } from "vuex";
+  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
 
   export default {
     name: 'DiscoveryInfo',
+    mixins: [tnsUtilsMixin],
     props: {
       index: {
         type: Number,
@@ -89,22 +109,15 @@
     },
     data: function() {
       return {
-        transientTypes: ['AGN', 'FRB', 'NUC', 'Other', 'PNV', 'PSN'],
+        transientTypes: [{value: null, text: ''}, 'AGN', 'FRB', 'NUC', 'Other', 'PNV', 'PSN'],
         proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
         show: true,
         id: 'discovery-info-' + this.index
       };
     },
-    computed: {
-      ...mapGetters(["getTnsOptions"])
-    },
     methods: {
       update: function () {
         this.$emit('message-updated');
-      },
-      getTnsGroups: function() {
-        let tnsOptions = this.getTnsOptions;
-        return _.values(tnsOptions['groups']).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
       }
     }
   };
