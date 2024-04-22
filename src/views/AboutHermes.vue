@@ -716,6 +716,8 @@ export default {
                 { Field: 'transient_type', Description: 'String: Type of transient; Accepted values are [PSN, nuc, PNV, AGN, Other].' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time discovery should remain proprietary on TNS.' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
+                { Field: 'nondetection_source', Description: 'String: Source catalog for the last nondetection on this target. Used in TNS reports.' },
+                { Field: 'nondetection_comments', Description: 'String: Comments on the last nondetection of this target. Used in TNS reports.' },
             ],
             photometry_items: [
                 { Field: 'target_name<span class="text-danger">*</span>', Description: 'String: Name of the target. Must match the name of a target in the targets section.' },

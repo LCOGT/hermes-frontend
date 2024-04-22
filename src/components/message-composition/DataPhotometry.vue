@@ -78,7 +78,7 @@
               field="bandpass"
               label="Band:"
               :hide=false
-              :options="getTnsValuesList('filters')"
+              :options="getTnsValuesList('filters', true)"
               :errors="errors.bandpass"
               @input="update"
             />
@@ -107,7 +107,7 @@
               field="telescope"
               label="Telescope:"
               :hide=false
-              :options="getTnsValuesList('telescopes')"
+              :options="getTnsValuesList('telescopes', true)"
               :errors="errors.telescope"
               @input="update"
             />
@@ -121,7 +121,7 @@
               field="instrument"
               label="Instrument:"
               :hide=false
-              :options="getTnsValuesList('instruments')"
+              :options="getTnsValuesList('instruments', true)"
               :errors="errors.instrument"
               @input="update"
             />
@@ -175,12 +175,12 @@
   <script>
   import { OCSMixin } from 'ocs-component-lib';
   import _ from 'lodash';
-  import { mapGetters } from "vuex";
-  import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
+  import { schemaDataMixin } from '@/mixins/schemaDataMixin.js';
+  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
 
   export default {
     name: 'DataPhotometry',
-    mixins: [OCSMixin.confirmMixin, schemaDataMixin],
+    mixins: [OCSMixin.confirmMixin, schemaDataMixin, tnsUtilsMixin],
     props: {
       index: {
         type: Number,
@@ -215,20 +215,8 @@
       };
     },
     computed: {
-      ...mapGetters(["getTnsOptions"]),
       targetNames: function() {
         return _.map(this.targets, 'name');
-      }
-    },
-    methods: {
-      getTnsValuesList: function(category) {
-        let tnsOptions = this.getTnsOptions;
-        if (_.isArray(tnsOptions[category])) {
-          return tnsOptions[category].sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
-        }
-        else {
-          return _.values(tnsOptions[category]).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
-        }
       }
     }
   };

@@ -582,7 +582,9 @@
               'discovery_source': null,
               'transient_type': null,
               'proprietary_period': null,
-              'proprietary_period_units': null
+              'proprietary_period_units': null,
+              'nondetection_source': null,
+              'nondetection_comments': null,
             },
             'ra': null,
             'dec': null,

@@ -162,7 +162,7 @@
               field="telescope"
               label="Telescope:"
               :hide=false
-              :options="getTnsValuesList('telescopes')"
+              :options="getTnsValuesList('telescopes', true)"
               :errors="errors.telescope"
               @input="update"
             />
@@ -176,7 +176,7 @@
               field="instrument"
               label="Instrument:"
               :hide=false
-              :options="getTnsValuesList('instruments')"
+              :options="getTnsValuesList('instruments', true)"
               :errors="errors.instrument"
               @input="update"
             />
@@ -200,7 +200,7 @@
                   desc="Classification of spectroscopic datum"
                   :hide=false
                   :errors="errors.classification"
-                  :options="getTnsValuesList('object_types')"
+                  :options="getTnsValuesList('object_types', true)"
                   @input="update"
               />
             </b-col>
@@ -222,7 +222,7 @@
                   desc="Type of the Spectrograph"
                   :hide=false
                   :errors="errors.spec_type"
-                  :options="getTnsValuesList('spectra_types')"
+                  :options="getTnsValuesList('spectra_types', true)"
                   @input="update"
               />
             </b-col>
@@ -259,10 +259,10 @@
   </template>
   <script>
   import { OCSMixin } from 'ocs-component-lib';
-  import { mapGetters } from "vuex";
   import _ from 'lodash';
   import '@/assets/css/view.css';
-  import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
+  import { schemaDataMixin } from '@/mixins/schemaDataMixin.js';
+  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
   import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
   import ShowWrapper from '@/components/message-composition/ShowWrapper.vue'
 
@@ -272,7 +272,7 @@
       ShowWrapper,
       FilesWithDescriptions
     },
-    mixins: [OCSMixin.confirmMixin, schemaDataMixin],
+    mixins: [OCSMixin.confirmMixin, schemaDataMixin, tnsUtilsMixin],
     props: {
       index: {
         type: Number,
@@ -311,7 +311,6 @@
       };
     },
     computed: {
-      ...mapGetters(["getTnsOptions"]),
       targetNames: function() {
         return _.map(this.targets, 'name');
       },
@@ -446,11 +445,7 @@
           this.spectroscopy.wavelength.push(null);
           this.update();
         }
-      },
-      getTnsValuesList: function(category) {
-        let tnsOptions = this.getTnsOptions;
-        return _.values(tnsOptions[category]).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
-      },
+      }
     }
   };
   </script>
