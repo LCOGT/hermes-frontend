@@ -95,7 +95,7 @@ message = {
     'topic': 'test.topic',
     'title': 'Test Title',
     'submitter': 'YourNameHere',
-    'data': {}
+    'data': {},
     'message_text': 'Sample Message',
 }
 
