@@ -215,7 +215,7 @@
                 placeholder="Associate TNS Groups:"
                 :maxHeight=500
                 :optionHeight=38
-                :options="getTnsGroups()"
+                :options="getTnsValuesList('groups')"
                 :multiple="true"
                 @input="update"
               >
@@ -281,14 +281,14 @@
   </template>
   <script>
   import _ from 'lodash';
-  import { mapGetters } from "vuex";
   import '@/assets/css/submissions.css';
   import Multiselect from 'vue-multiselect';
   import "vue-multiselect/dist/vue-multiselect.min.css";
   import "vue-multiselect-bootstrap-theme/dist/vue-multiselect-bootstrap4.scss";
   import { OCSMixin } from 'ocs-component-lib';
   import DiscoveryInfo from '@/components/message-composition/DiscoveryInfo.vue'
-  import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
+  import { schemaDataMixin } from '@/mixins/schemaDataMixin.js';
+  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
   import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
 
   export default {
@@ -298,7 +298,7 @@
       Multiselect,
       FilesWithDescriptions
     },
-    mixins: [OCSMixin.confirmMixin, schemaDataMixin],
+    mixins: [OCSMixin.confirmMixin, schemaDataMixin, tnsUtilsMixin],
     props: {
       index: {
         type: Number,
@@ -351,7 +351,6 @@
       }
     },
     computed: {
-      ...mapGetters(["getTnsOptions"]),
       collapseVisible: {
         get: function() {
           return !this.advancedOptionsCollapsed;
@@ -409,10 +408,6 @@
           this.target.pm_dec = null;
         }
         this.update();
-      },
-      getTnsGroups: function() {
-        let tnsOptions = this.getTnsOptions;
-        return _.values(tnsOptions['groups']).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
       }
     }
   };
