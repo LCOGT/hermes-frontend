@@ -578,6 +578,7 @@
             'name': null,
             'type': 'Sidereal',
             'discovery_info': {
+              'date': null,
               'reporting_group': null,
               'discovery_source': null,
               'transient_type': null,
@@ -930,7 +931,7 @@
                 validSectionInstance[key] = instance[key].join(',');
                 changes = true;
               }
-              else if (_.isObject(instance[key])) {
+              else if (_.isObject(instance[key]) && !_.isArray(instance[key])) {
                 if (key == 'orbital_elements') {
                   validSectionInstance['type'] = 'Non-Sidereal';
                   this.sectionShowSimple['targets'] = false;
