@@ -2,7 +2,7 @@
   <b-container>
     <b-row v-if="preloadError">
       <b-alert show dismissible variant="danger" @dismissed="clearPreloadError()" style="width:100%;">
-        {{this.preloadError}}
+        {{ this.preloadError }}
       </b-alert>
     </b-row>
     <b-row>
@@ -17,12 +17,13 @@
         <b-button class="submit-button shadow" variant="success" @click="checkSessionAndSubmitToHop"
           :disabled="!readyToSubmit">Submit</b-button>
       </b-col>
-      <b-col sm="5"> to {{this.hermesMessage.topic}}
+      <b-col sm="5"> to {{ this.hermesMessage.topic }}
         <div v-if="this.hermesMessage.submit_to_gcn">
-          and {{getGcnDestination()}}
+          and {{ getGcnDestination() }}
         </div>
         <div v-if="this.hermesMessage.submit_to_tns">
-          and {{getTnsDestination()}}
+          and {{ getTnsDestination() }} through {{ getTnsBot() }}
+          <div v-if="getTnsBot() === 'Hermes Bot'">&#42; Click <a href="profile" target="_blank">here</a> to set your own TNS Bot credentials</div>
         </div>
       </b-col>
       <b-col sm="6">
@@ -31,7 +32,7 @@
     </b-row>
     <b-row v-if="submissionError">
       <b-alert show dismissible variant="danger" @dismissed="clearSubmissionError()">
-        {{this.submissionError}}
+        {{ this.submissionError }}
       </b-alert>
     </b-row>
   </b-container>
@@ -150,6 +151,9 @@ export default {
         return "circulars@gcn.nasa.gov";
       }
       return "circulars@dev.gcn.nasa.gov";
+    },
+    getTnsBot: function() {
+      return this.getProfile.tns_bot_name ? this.getProfile.tns_bot_name + " Bot" : 'Hermes Bot'
     },
     getTnsDestination: function() {
       // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
