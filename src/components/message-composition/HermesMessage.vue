@@ -32,7 +32,7 @@
                       :desc="''"
                       :hide="false"
                       :errors="errors.topic"
-                      :options="getProfile.writable_topics"
+                      :options="topicOptions"
                       @input="update"
                     />
                   </b-col>
@@ -66,6 +66,7 @@
                         v-model="hermesMessage.submit_to_tns"
                         name="submit-to-tns"
                         switch
+                        v-b-tooltip.hover="submitToTnsTooltip"
                         @input="update"
                     > Submit to TNS
                     </b-form-checkbox>
@@ -686,8 +687,37 @@
     },
     computed: {
       ...mapGetters(["getProfile", "isLoggedIn", "getHermesUrl"]),
+      isProd: function() {
+        return this.getHermesUrl == "https://hermes.lco.global/";
+      },
       canSubmitToGcn: function() {
         return this.getProfile.can_submit_to_gcn;
+      },
+      topicOptions: function() {
+        if (this.hermesMessage.submit_to_tns && this.isProd) {
+          let topics = new Array('hermes.discovery', 'hermes.spectroscopy');
+          if (!this.isSectionEmpty('photometry') && this.getProfile.writable_topics.includes('hermes.discovery')) {
+            return _.without(topics, 'hermes.spectroscopy');
+          }
+          if (!this.isSectionEmpty('spectroscopy') && this.getProfile.writable_topics.includes('hermes.spectroscopy')) {
+            return _.without(topics, 'hermes.discovery');
+          }
+        }
+        return this.getProfile.writable_topics;
+      },
+      submitToTnsTooltip: function() {
+        if (this.getProfile.tns_bot_name) {
+          return{
+            title: 'Submit to TNS with your configured <b>' + this.getProfile.tns_bot_name + '</b> Bot credential',
+            html: true
+          };
+        }
+        else {
+          return {
+            title: 'Hermes Bot credentials will be used by default. Click <a href="profile" target="_blank">here</a> to set your own TNS Bot credentials',
+            html: true
+          };
+        }
       },
       submitToGcnTooltip: function() {
         if (this.canSubmitToGcn) {

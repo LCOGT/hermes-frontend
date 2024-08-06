@@ -341,7 +341,7 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
                                     <b-card-group>
                                         <b-card header="Submitting a message to Hermes API and TNS:">
                                             <b>Using your Hermes API Token and the above submission API path, you can use Hermes to submit a message to a kafka topic.</b>
-                                            <li>Create a header for your submission including the API token from your <a :href="baseUrl + 'profile'">profile</a>.</li>
+                                            <li>Create a header for your submission including the API token from your <a :href="getHermesUrl + 'profile'">profile</a>.</li>
                                             <li>Build a message dictionary. TNS submission requires certain fields, including title, authors, a target whose name matches an existing TNS object, and one or more spectroscopy sections with uploaded ascii spectrum files</li>
                                             <li>Certain fields are required to use one of the available <a href="https://www.wis-tns.org/api/values">TNS options values</a> when submitting to TNS.</li>
                                             <li>Related files can also be uploaded as part of the TNS classification report. They will reside on the TNS and can be downloaded from the TNS object page. Their filenames must be included in the Targets <code>file_info</code> section, and the file must be uploaded with the submission.</li>
