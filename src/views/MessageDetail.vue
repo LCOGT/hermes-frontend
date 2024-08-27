@@ -37,6 +37,11 @@
           </span>
         </b-row>
         <hr>
+        <div v-for="plotName in Object.keys(plotDataByName)" :key="plotName + '-spectra-plot'">
+          <b-row>
+            <PlotlyChart :data="new Array(plotDataByName[plotName])" :layout="layoutByName[plotName]"></PlotlyChart>
+          </b-row>
+        </div>
         <!-- Main Data Table -->
         <div v-for="(value, field) in getArrayDataItems(message)" :key="field + '-array-table'">
           <b-row sm="3" v-b-toggle:[field] class="text-sm-right mx-2">
@@ -135,9 +140,14 @@
 <script>
 import _ from 'lodash';
 import '@/assets/css/view.css';
+import PlotlyChart from '@/components/PlotlyChart.vue';
+import axios from "axios";
 
 export default {
   name: "MessageDetail",
+  components: {
+    PlotlyChart
+  },
   props: {
     message: {
       type: Object,
@@ -156,15 +166,58 @@ export default {
         title: '',
         content: ''
       },
+      plotDataByName: {},
+      layoutByName: {},
+      baseLayout: {
+        margin: {
+          r: 20,
+          b: 40,
+          l: 80
+        },
+        title: {
+          text: 'Spectrum Plot',
+          font: {
+            size: 26
+          },
+          yref: 'paper',
+          automargin: true
+        },
+        yaxis: {
+          title: {
+            text: 'Flux'
+          },
+          tickformat: '.1e',
+          type: 'linear'
+        },
+        xaxis: {
+          title: {
+            text: 'Wavelength'
+          },
+          showgrid: false
+        },
+        legend: {
+          x: 0.85,
+          y: 1.0
+        }
+      },
       KVdataFields: [{ key: "key", class: "data-column" }, { key: "value", class: "data-column" }],
       preSetTableOrder: {
         targets: "name,ra,ra_error,ra_error_units,dec,dec_error,dec_error_units,file_info,pm_ra,pm_dec,epoch,aliases,redshift,host_redshift,host_name,group_associations",
         photometry: "target_name,date_obs,telescope,instrument,bandpass,brightness,brightness_error,brightness_unit,limiting_brightness,limiting_brightness_error,limiting_brightness_unit,exposure_time,observer,catalog",
-        spectroscopy: "target_name,date_obs,telescope,instrument,file_info,flux,flux_units,flux_error,wavelength,wavelength_units,flux_type,observer,reducer,classification,exposure_time,setup,spec_type,proprietary_period,proprietary_period_units",
+        spectroscopy: "target_name,date_obs,telescope,instrument,file_info,flux_units,wavelength_units,flux_type,observer,reducer,classification,exposure_time,setup,spec_type,proprietary_period,proprietary_period_units",
         astrometry: "target_name,date_obs,telescope,instrument,ra,ra_error,ra_error_units,dec,dec_error,dec_error_units,mpc_sitecode,catalog",
         references: "source,citation,url",
       }
     };
+  },
+  mounted() {
+    // Check for spectrum data and if present set up plotly plots with it
+    this.createSpectraPlots();
+  },
+  watch: {
+    message: function() {
+      this.createSpectraPlots();
+    }
   },
   computed: {
     isGcnCircular: function() {
@@ -172,6 +225,70 @@ export default {
     }
   },
   methods: {
+    createSpectraPlots: function() {
+      this.plotDataByName = {};
+      this.layoutByName = {};
+      if (_.has(this.message, 'data.spectroscopy') && !_.isEmpty(this.message, 'data.spectroscopy')) {
+        let i = 1;
+        for (const spectro_entry of this.message.data.spectroscopy) {
+          if (!_.isEmpty(spectro_entry.flux) && !_.isEmpty(spectro_entry.wavelength)) {
+            let title = i + ': ' + spectro_entry.date_obs;
+            this.addSpectraPlot(spectro_entry.flux, spectro_entry.flux_units, spectro_entry.flux_error,
+                                spectro_entry.wavelength, spectro_entry.wavelength_units, title);
+          }
+          if (!_.isEmpty(spectro_entry.file_info)) {
+            for (const file_info of spectro_entry.file_info) {
+              let lowercaseName = file_info.name.toLowerCase();
+              if (!_.isEmpty(file_info.url) && (lowercaseName.endsWith('.txt') || lowercaseName.endsWith('.ascii') || lowercaseName.endsWith('.text'))) {
+                this.downloadSpectraFile(file_info.url, i + ': ' + file_info.name, spectro_entry.flux_units, spectro_entry.wavelength_units);
+              }
+            }
+          }
+          i++;
+        }
+      }
+    },
+    addSpectraPlot(fluxArray, fluxUnits, fluxErrorArray, wavelengthArray, wavelengthUnits, title) {
+      this.plotDataByName[title] = {
+        x: wavelengthArray,
+        y: fluxArray,
+        type: 'scatter',
+        name: title,
+        exponentformat: 'e',
+        mode: 'lines'
+      };
+      if (!_.isNil(fluxErrorArray) && _.isArray(fluxErrorArray) && !_.every(fluxErrorArray, x => x == 0)) {
+        let fluxErrorLabels = _.clone(fluxErrorArray);
+        for (let i = 0; i < fluxErrorLabels.length; i++) {
+          fluxErrorLabels[i] = '\u{00B1} ' + fluxErrorLabels[i].toString();
+        }
+        this.plotDataByName[title]['text'] = fluxErrorLabels;
+      }
+      this.layoutByName[title] = _.cloneDeep(this.baseLayout);
+      this.layoutByName[title].title.text = title;
+      this.layoutByName[title].xaxis.title.text = 'Wavelength (' + wavelengthUnits + ')';
+      this.layoutByName[title].yaxis.title.text = 'Flux (' + fluxUnits + ')';
+    },
+    downloadSpectraFile(url, title, fluxUnits, wavelengthUnits) {
+      axios
+        .get(url)
+        .then((response) => {
+          let filedata = response.data;
+          var lines = filedata.split('\n');
+          let fluxArray = new Array();
+          let wavelengthArray = new Array();
+          for (const line of lines) {
+            var lineparts = line.split(/[\t\s]+/);
+            wavelengthArray.push(parseFloat(lineparts[0]));
+            fluxArray.push(parseFloat(lineparts[1]));
+          }
+          this.addSpectraPlot(fluxArray, fluxUnits, null, wavelengthArray, wavelengthUnits, title);
+          this.$forceUpdate();  // Need to force an update here since its asynchronous
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    },
     copy(value, type) {
       // Copy text to Clipboard
       // Only works with HTTPS or local
@@ -286,3 +403,10 @@ export default {
   }
 };
 </script>
+<style>
+
+.js-plotly-plot {
+  width: 100%;
+}
+
+</style>

@@ -33,6 +33,7 @@
     "lodash": "^4.17.x",
     "mutationobserver-shim": "^0.3.7",
     "ocs-component-lib": "^0.13.1",
+    "plotly.js-dist": "^2.34.0",
     "popper.js": "^1.16.1",
     "portal-vue": "^2.1.7",
     "stream-browserify": "^3.0.0",
