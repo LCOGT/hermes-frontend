@@ -39,7 +39,7 @@
         <hr>
         <div v-for="plotName in Object.keys(plotDataByName)" :key="plotName + '-spectra-plot'">
           <b-row>
-            <Plotly :data="new Array(plotDataByName[plotName])" :layout="layoutByName[plotName]"></Plotly>
+            <PlotlyChart :data="new Array(plotDataByName[plotName])" :layout="layoutByName[plotName]"></PlotlyChart>
           </b-row>
         </div>
         <!-- Main Data Table -->
@@ -140,13 +140,13 @@
 <script>
 import _ from 'lodash';
 import '@/assets/css/view.css';
-import { Plotly } from 'vue-plotly';
+import PlotlyChart from '@/components/PlotlyChart.vue';
 import axios from "axios";
 
 export default {
   name: "MessageDetail",
   components: {
-    Plotly
+    PlotlyChart
   },
   props: {
     message: {
