@@ -221,7 +221,7 @@ export default {
   },
   computed: {
     isGcnCircular: function() {
-      return this.message.topic == 'gcn.circular';
+      return this.message.topic === 'gcn.circular' || this.message.topic === 'gcn.circulars';
     }
   },
   methods: {
