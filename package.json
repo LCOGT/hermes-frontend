@@ -15,7 +15,7 @@
     "@jsonforms/vue2-vanilla": "^3.0.0-beta.1",
     "@jsonforms/vue2-vuetify": "^3.0.0-beta.1",
     "@vue/composition-api": "^1.0.0-rc.3",
-    "axios": "^0.26.1",
+    "axios": "^1.6.0",
     "bootstrap": "^4.5.2",
     "bootstrap-vue": "^2.21.2",
     "bootstrap-vue-editable-table": "github:lcogt/b-editable-table#lco",
