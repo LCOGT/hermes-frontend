@@ -200,7 +200,7 @@
                   desc="Classification of spectroscopic datum"
                   :hide=false
                   :errors="errors.classification"
-                  :options="getTnsValuesList('object_types', true)"
+                  :options="getTnsValuesList('objtypes', true)"
                   @input="update"
               />
             </b-col>
