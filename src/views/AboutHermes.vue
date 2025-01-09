@@ -713,7 +713,7 @@ export default {
             discovery_items: [
                 { Field: 'reporting_group<sup class="text-info">&dagger;</sup>', Description: 'String: Reporting Group required for TNS Submission.' },
                 { Field: 'discovery_source<sup class="text-info">&dagger;</sup>', Description: 'String: Discovery Data Source required for TNS Submission.' },
-                { Field: 'transient_type', Description: 'String: Type of transient; Accepted values are [PSN, nuc, PNV, AGN, Other].' },
+                { Field: 'transient_type', Description: 'String: Type of transient; Accepted values are the TNS accepted at_types.' },
                 { Field: 'proprietary_period', Description: 'Float: Length of time discovery should remain proprietary on TNS.' },
                 { Field: 'proprietary_period_unit', Description: 'Sring: Units for proprietary period; [Days, Months, Years].' },
                 { Field: 'nondetection_source', Description: 'String: Source catalog for the last nondetection on this target. Used in TNS reports.' },

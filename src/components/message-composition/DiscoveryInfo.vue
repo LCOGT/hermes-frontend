@@ -43,6 +43,7 @@
               label="Transient Type:"
               :hide=false
               :options="transientTypes"
+              :errors="errors.transient_type"
               @input="update"
           />
         </b-col>
@@ -109,7 +110,7 @@
     },
     data: function() {
       return {
-        transientTypes: [{value: null, text: ''}, 'AGN', 'FRB', 'NUC', 'Other', 'PNV', 'PSN'],
+        transientTypes: [{value: null, text: ''}, 'AGN - Known AGN', 'FRB - Fast Radio Burst event', 'NUC - Possibly nuclear', 'Other - Undefined', 'PNV - Possible Nova', 'PSN - Possible SN'],
         proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
         show: true,
         id: 'discovery-info-' + this.index
