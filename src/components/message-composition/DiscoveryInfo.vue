@@ -42,7 +42,7 @@
               field="transient_type"
               label="Transient Type:"
               :hide=false
-              :options="transientTypes"
+              :options="getTnsValuesList('at_types', true)"
               :errors="errors.transient_type"
               @input="update"
           />
@@ -110,7 +110,6 @@
     },
     data: function() {
       return {
-        transientTypes: [{value: null, text: ''}, 'AGN - Known AGN', 'FRB - Fast Radio Burst event', 'NUC - Possibly nuclear', 'Other - Undefined', 'PNV - Possible Nova', 'PSN - Possible SN'],
         proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
         show: true,
         id: 'discovery-info-' + this.index
