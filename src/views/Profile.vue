@@ -74,7 +74,7 @@
       <b-col md="4" class="border-top pt-4">
         <h3 class="text-center">TNS Bot Credentials</h3>
         <p>
-          By default, TNS submissions will use the built-in <b>Hermes_bot</b>.
+          By default, TNS submissions will use the built-in <b>Hermes_bot</b>. This bot only has permissions to report to the TNS from the <b>Hermes_group</b>.
           You can override this behaviour and submit with your own TNS Bot credentials by adding then to your profile
           here or via the api.
         </p>
