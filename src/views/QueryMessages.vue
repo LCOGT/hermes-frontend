@@ -15,7 +15,7 @@
           >
           </multiselect>
         </b-col>
-        <b-col class="col-md-1 text-left pl-0 pr-0">
+        <b-col class="col-md-1 pl-0 pr-0 d-flex justify-content-between">
           <b-button-group vertical class="w-5">
             <b-button class="br-0 ms-button smooth-top-border" variant="outline-secondary" @click="selectAllTopics" title="Select All Topics">
               <b-icon icon="check-all" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
@@ -24,8 +24,11 @@
               <b-icon stacked icon="stop" class="ms-icon" shift-h="-8" shift-v="8"></b-icon>
             </b-button>
           </b-button-group>
+          <b-button class="smooth-top-border smooth-bottom-border retracted-btn" :variant="this.queryParams.include_retracted ? 'danger' : 'outline-danger'" title="Include Retracted Messages" @click="toggleIncludeRetracted">
+            <b-icon icon="clipboard-x" shift-h="-5" shift-v="2"></b-icon>
+          </b-button>
         </b-col>
-        <b-col class="col-md-6 ml-auto pl-0">
+        <b-col class="col-md-6 ml-auto pl-2">
           <b-form-input type="search" placeholder="Search Terms" v-model.lazy="queryParams.search" @input="searchTerms"></b-form-input>
         </b-col>
       </b-row>
@@ -171,6 +174,7 @@ export default {
       ],
       selectedItem: null,
       topic: null,
+      includeRetracted: false
     };
   },
   mounted() {
@@ -211,6 +215,11 @@ export default {
         this.onSubmit(fakeEvent);
       }
     },
+    toggleIncludeRetracted: function() {
+      this.queryParams.include_retracted = !this.queryParams.include_retracted;
+      let fakeEvent = {'preventDefault': () => true};
+      this.onSubmit(fakeEvent);
+    },
     // Overrides method in paginationAndFilteringMixin
     initializeDataEndpoint: function() {
       return getEnv("VUE_APP_HERMES_BACKEND_ROOT_URL") + 'api/v0/messages/';
@@ -220,6 +229,7 @@ export default {
       const defaultQueryParams = {
         topic: [],
         search: '',
+        include_retracted: false,
         limit: 10,
         offset: 0
       };
@@ -262,5 +272,11 @@ export default {
 </script>
 
 <style scoped>
+
+.retracted-btn {
+  height: 32px;
+  width: 32px;
+  margin-top: 4px;
+}
 
 </style>

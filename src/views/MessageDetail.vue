@@ -3,7 +3,33 @@
     <b-container class="no-padding">
       <b-card border-variant="primary" class="mb-2" style="overflow: auto;">
         <!-- Header -->
-        <b-card-title> {{ message.title }} </b-card-title>
+        <b-card-title>
+          <b-row v-if="message.retracted" class="retracted-text">
+            <b-col class="d-flex justify-content-center">
+              <h4 class="retracted-text">MESSAGE RETRACTED</h4>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col class="d-flex justify-content-between">
+              {{ message.title }}
+              <b-button v-if="showRetractMessage" variant="outline-danger" title="Retract Message" v-b-modal.retract-modal>
+                <b-icon icon="clipboard-x"></b-icon>
+              </b-button>
+              <b-modal id="retract-modal" header-text-variant="danger" @ok="retractMessage()">
+                <template #modal-title>
+                  Are you sure you want to retract this message?
+                </template>
+                  Retracted messages are be excluded from hermes queries by default. <b>This operation is not reversible!</b>
+                <template #modal-footer="{ ok, cancel }">
+                  <b-row class="d-flex justify-content-between" style="width:100%;">
+                    <b-button size="sm" @click="cancel()">Cancel</b-button>
+                    <b-button size="sm" variant="danger" @click="ok()">Retract</b-button>
+                  </b-row>
+                </template>
+              </b-modal>
+            </b-col>
+          </b-row>
+        </b-card-title>
         <b-card-sub-title> {{ message.author }} </b-card-sub-title>
         <b-card-sub-title>
           Message ID:
@@ -142,6 +168,7 @@ import _ from 'lodash';
 import '@/assets/css/view.css';
 import PlotlyChart from '@/components/PlotlyChart.vue';
 import axios from "axios";
+import { mapGetters } from "vuex";
 
 export default {
   name: "MessageDetail",
@@ -220,8 +247,18 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
     isGcnCircular: function() {
       return this.message.topic === 'gcn.circular' || this.message.topic === 'gcn.circulars';
+    },
+    showRetractMessage: function() {
+      if (this.isLoggedIn) {
+        let group = this.message.topic.split(".", 1)[0];
+        if (group in this.getProfile.group_memberships && this.getProfile.group_memberships[group] == 'Owner') {
+          return !this.message.retracted;
+        }
+      }
+      return false;
     }
   },
   methods: {
@@ -311,6 +348,28 @@ export default {
       this.jsonData.title = "JSON for " + item.topic + " message.";
       // raise modal
       this.$root.$emit('bv::show::modal', this.jsonData.id, button);
+    },
+    retractMessage() {
+      console.log("Attempting to Retract message " + this.message.id);
+      axios({
+        method: 'patch',
+        withCredentials: true,
+        data: JSON.stringify({'retracted': true}),
+        headers: {'Content-Type': 'application/json',
+                  'X-CSRFToken': this.getCsrfToken
+                  },
+        url: new URL('/api/v0/messages/' + this.message.id + '/', this.getHermesUrl).href,
+      })
+      .then(response => {
+        console.log(response);
+        this.message.retracted = response.data.retracted;
+      })
+      .catch(error => {
+        console.log(error);
+        if (error.response.status == 401){
+          this.logout();
+        }
+      });
     },
     resetjsonData() {
       // clear JSON data and remove copy alert when window closed
@@ -404,6 +463,27 @@ export default {
 };
 </script>
 <style>
+
+.retracted-text {
+  background: linear-gradient(
+    90deg,
+    red,
+    darkorange,
+    red
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  animation: move-gradient 2s linear infinite;
+}
+
+@keyframes move-gradient {
+  to {
+    background-position: -200% 0;
+  }
+}
 
 .js-plotly-plot {
   width: 100%;
