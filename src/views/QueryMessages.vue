@@ -173,8 +173,7 @@ export default {
         },
       ],
       selectedItem: null,
-      topic: null,
-      includeRetracted: false
+      topic: null
     };
   },
   mounted() {

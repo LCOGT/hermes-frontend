@@ -19,7 +19,7 @@
                 <template #modal-title>
                   Are you sure you want to retract this message?
                 </template>
-                  Retracted messages are be excluded from hermes queries by default. <b>This operation is not reversible!</b>
+                  Retracted messages are excluded from hermes queries by default. <b>This operation is not reversible!</b>
                 <template #modal-footer="{ ok, cancel }">
                   <b-row class="d-flex justify-content-between" style="width:100%;">
                     <b-button size="sm" variant="outline-primary" @click="cancel()">Cancel</b-button>
@@ -254,7 +254,7 @@ export default {
     showRetractMessage: function() {
       if (this.isLoggedIn) {
         let group = this.message.topic.split(".", 1)[0];
-        if (group in this.getProfile.group_memberships && this.getProfile.group_memberships[group] == 'Owner') {
+        if (group in this.getProfile.group_memberships && this.getProfile.group_memberships[group] === 'Owner') {
           return !this.message.retracted;
         }
       }
