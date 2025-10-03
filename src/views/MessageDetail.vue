@@ -1,7 +1,7 @@
 <template>
   <div class="overflow-auto px-4 no-padding" :style="{ width: '100%' }">
     <b-container class="no-padding">
-      <b-card border-variant="primary" class="mb-2" style="overflow: auto;">
+      <b-card border-variant="primary" class="mb-2" :class="message.retracted ? 'retracted-body': ''" style="overflow: auto;">
         <!-- Header -->
         <b-card-title>
           <b-row v-if="message.retracted" class="retracted-text">
@@ -22,8 +22,8 @@
                   Retracted messages are be excluded from hermes queries by default. <b>This operation is not reversible!</b>
                 <template #modal-footer="{ ok, cancel }">
                   <b-row class="d-flex justify-content-between" style="width:100%;">
-                    <b-button size="sm" @click="cancel()">Cancel</b-button>
-                    <b-button size="sm" variant="danger" @click="ok()">Retract</b-button>
+                    <b-button size="sm" variant="outline-primary" @click="cancel()">Cancel</b-button>
+                    <b-button size="sm" variant="outline-danger" @click="ok()">Retract</b-button>
                   </b-row>
                 </template>
               </b-modal>
@@ -477,6 +477,10 @@ export default {
   -webkit-text-fill-color: transparent;
   text-fill-color: transparent;
   animation: move-gradient 2s linear infinite;
+}
+
+.retracted-body {
+  background-image: repeating-linear-gradient(45deg, #f003 0px, #f003 2px, transparent 2px, transparent 50px);
 }
 
 @keyframes move-gradient {

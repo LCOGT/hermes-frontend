@@ -278,5 +278,8 @@ export default {
   width: 32px;
   margin-top: 4px;
 }
+.retracted-btn.btn-danger {
+  color: white;
+}
 
 </style>
