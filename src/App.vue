@@ -1,50 +1,23 @@
-<template>
-  <div id="app">
-    <div id="nav"> <nav-header></nav-header></div>
-    <router-view />
-    <div id="footer"> <footer-bar></footer-bar></div>
-  </div>
-</template>
+<script setup>
+import { onMounted } from 'vue';
+import NavHeader from '@/components/NavHeader.vue'
+import { useStateStore } from '@/stores/state'
 
-<script lang="ts">
-import NavHeader from "@/components/NavHeader.vue"
-import FooterBar from "@/components/FooterBar.vue"
+const stateStore = useStateStore()
 
-export default {
-  components: {
-    "nav-header": NavHeader,
-    "footer-bar": FooterBar
-  }
-};
+onMounted(() => {
+  stateStore.hermesUrl = import.meta.env.VITE_APP_HERMES_BACKEND_ROOT_URL
+})
 </script>
 
-<style lang="scss">
-@import "assets/_custom.scss";
-@import "~bootstrap/scss/bootstrap.scss";
-@import '~bootstrap-vue/dist/bootstrap-vue.css';
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-left: 10px;
-  margin-right: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-#nav {
-  padding: 30px;
-  padding-top: 10px;
-  width: 100%;
+<template>
+  <v-app>
+    <nav-header />
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
+</template>
 
-}
-#footer {
-  padding: 30px;
-  padding-top: 10px;
-  width: 100%;
-
-}
-
+<style scoped>
 </style>

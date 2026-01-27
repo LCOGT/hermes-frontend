@@ -1,27 +1,29 @@
-<template>
-  <div ref="plotElement"></div>
-</template>
-
-<script>
+<script setup>
+import { ref, onMounted} from 'vue';
 import Plotly from 'plotly.js-dist'
 
-export default {
-  name: 'PlotlyChart',
-  props: {
-    data: Array,
-    layout: Object
+const props = defineProps({
+  data: {
+    type: Array,
+    required: true,
   },
-  mounted() {
-    this.renderChart();
-  },
-  methods: {
-    renderChart() {
-    Plotly.newPlot(this.$refs.plotElement, this.data, this.layout);
-    }
-  },
-  watch: {
-    data: 'renderChart',
-    layout: 'renderChart'
+  layout: {
+    type: Object,
+    required: true,
   }
+})
+
+const plotElementDiv = ref(null);
+
+onMounted(() => {
+  renderChart();
+})
+
+function renderChart() {
+  Plotly.newPlot(plotElementDiv.value, this.data, this.layout);
 }
+
 </script>
+<template>
+  <div ref="plotElementDiv"></div>
+</template>

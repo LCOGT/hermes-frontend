@@ -1,73 +1,62 @@
-<template>
-  <b-container class="p-0" :id="'data-reference-' + index">
-    <b-form-row>
-      <b-col md="1" class="text-center data-label-text">
-        <b>{{ index }}</b>
-      </b-col>
-      <b-col md="3">
-        <ocs-custom-field v-model="reference.source" field="source" label="Source:" :hide=false
-          :errors="errors.source" @input="update" :list="sourceList"/>
-      </b-col>
-      <b-col md="3">
-        <ocs-custom-field v-model="reference.citation" field="citation" label="Citation:" :hide=false
-          :errors="errors.citation" @input="update" />
-      </b-col>
-      <b-col md="4">
-        <ocs-custom-field v-model="reference.url" field="url" label="Url:" :hide=false :errors="errors.url"
-          @input="update" />
-      </b-col>
-      <b-col md="1" class="text-right">
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
-            <b-button title="Copy this Reference" @click="copy">
-              <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
-            </b-button>
-            <b-button title="Remove this Reference" @click="confirm('Are you sure you want to remove this Reference?', remove)">
-              <b-icon icon="trash" aria-hidden="true"></b-icon>
-            </b-button>
-          </b-button-group>
-        </b-button-toolbar>
-      </b-col>
-    </b-form-row>
-  </b-container>
-</template>
-<script>
-import { OCSMixin } from 'ocs-component-lib';
+<script setup>
 import '@/assets/css/submissions.css';
-import {schemaDataMixin} from '@/mixins/schemaDataMixin.js';
+import { useSchemaDataUtils } from '@/utils/schemaDataUtils.js';
+import ConfirmDialogBtn from '@/components/message-composition/ConfirmDialogBtn.vue';
 
-export default {
-  name: 'DataReference',
-  mixins: [OCSMixin.confirmMixin, schemaDataMixin],
-  props: {
-    index: {
-      type: Number,
-      required: true
-    },
-    errors: {
-      type: Object,
-      required: true
-    },
-    reference: {
-      type: Object,
-      required: true
-    },
-    show: {
-      type: Boolean,
-      default: true
-    }
+const props = defineProps({
+  index: {
+    type: Number,
+    required: true
   },
-  data: function() {
-    return {
-      sourceList: [
-        { value: "hop_uuid", text: "Hop UUID" },
-        { value: "doi", text: "DOI" },
-        { value: "gracedb_id", text: "GraceDB ID" },
-        { value: 'gcn_circular', text: 'GCN Circular ID'}
-      ],
-      id: 'reference-' + this.index
-    }
+  errors: {
+    type: Object,
+    required: true
+  },
+  reference: {
+    type: Object,
+    required: true
   }
-};
+})
+
+const emit = defineEmits(['remove', 'copy', 'message-updated']);
+
+const { remove, copy, update } = useSchemaDataUtils(emit)
+
+const sourceList = [
+  { value: "hop_uuid", text: "Hop UUID" },
+  { value: "doi", text: "DOI" },
+  { value: "gracedb_id", text: "GraceDB ID" },
+  { value: 'gcn_circular', text: 'GCN Circular ID'}
+]
+
 </script>
-  
+<template>
+  <v-container class="p-0" :id="'data-reference-' + props.index">
+    <v-row align="center">
+      <v-col md="1" class="text-center data-label-text">
+        <b>{{ props.index }}</b>
+      </v-col>
+      <v-col md="2">
+        <v-combobox v-model="props.reference.source" label="Source" variant="outlined" :error-messages="props.errors.source" :items="sourceList" item-value="value" item-title="text" @update:modelValue="update" />
+      </v-col>
+      <v-col md="3">
+        <v-text-field v-model="props.reference.citation" label="Citation" variant="outlined" :error-messages="props.errors.citation" @update:modelValue="update" />
+      </v-col>
+      <v-col md="4">
+        <v-text-field v-model="props.reference.url" label="Url" variant="outlined" :error-messages="props.errors.url" @update:modelValue="update" />
+      </v-col>
+      <v-col md="2" class="text-right">
+        <v-btn-group divided color="primary-darken-1" class="data-label-text">
+          <v-btn icon="mdi-file-document-plus-outline" v-tooltip="'Copy this Reference'" @click="copy" />
+          <confirm-dialog-btn
+            btn-tooltip="Remove this Reference"
+            btn-icon="mdi-trash-can-outline"
+            confirm-text="Are you sure you want to remove this Reference?"
+            confirm-action="Remove"
+            @confirmed="remove">
+          </confirm-dialog-btn>
+        </v-btn-group>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>

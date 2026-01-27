@@ -1,124 +1,107 @@
-<template>
-  <b-card no-body class="mt-2">
-    <b-card-header header-tag="header" class="p-1" role="tab">
-      <b>Discovery Info</b>
-    </b-card-header>
-    <b-card-body>
-      <ocs-custom-alert v-for="error in errors.non_field_errors" :key="error" alert-class="danger" :dismissible="false">
-        {{ error }}
-      </ocs-custom-alert>
-      <b-form-row>
-        <b-col md="3">
-          <ocs-custom-field v-if="!isTns" v-model="data.reporting_group" field="reporting_group" label="Reporting Group:" :hide=false
-            :errors="errors.reporting_group" @input="update" />
-          <ocs-custom-select
-              v-else
-              v-model="data.reporting_group"
-              field="reporting_group"
-              label="Reporting Group:"
-              :hide=false
-              :options="getTnsValuesList('groups', true)"
-              :errors="errors.reporting_group"
-              @input="update"
-          />
-        </b-col>
-        <b-col md="3">
-          <ocs-custom-field v-if="!isTns" v-model="data.discovery_source" field="discovery_source" label="Source:" :hide=false
-            :errors="errors.discovery_source" @input="update" />
-          <ocs-custom-select
-              v-else
-              v-model="data.discovery_source"
-              field="discovery_source"
-              label="Source:"
-              :hide=false
-              :options="getTnsValuesList('groups', true)"
-              :errors="errors.discovery_source"
-              @input="update"
-          />
-        </b-col>
-        <b-col md="3">
-          <ocs-custom-select
-              v-model="data.transient_type"
-              field="transient_type"
-              label="Transient Type:"
-              :hide=false
-              :options="getTnsValuesList('at_types', true)"
-              :errors="errors.transient_type"
-              @input="update"
-          />
-        </b-col>
-        <b-col md="3">
-          <ocs-custom-field v-model="data.proprietary_period" field="proprietary_period" label="Proprietary:" :hide=false
-            :errors="errors.proprietary_period" @input="update" >
-            <b-input-group-append slot="inline-input">
-              <b-form-select
-                :id="'proprietary-period-units-select-' + this.index"
-                v-model="data.proprietary_period_units"
-                :options="proprietaryPeriodUnits"
-                @input="update"
-              />
-            </b-input-group-append>
-          </ocs-custom-field>
-        </b-col>
-      </b-form-row>
-      <b-form-row>
-            <b-col md="4">
-              <ocs-custom-field v-if="!isTns" v-model="data.nondetection_source" field="nondetection_source" label="Nondetection Source:" :hide=false
-                :errors="errors.nondetection_source" @input="update" />
-              <ocs-custom-select
-                  v-else
-                  v-model="data.nondetection_source"
-                  field="nondetection_source"
-                  label="Nondetection Source:"
-                  :hide=false
-                  :options="getTnsValuesList('archives', true)"
-                  :errors="errors.nondetection_source"
-                  @input="update"
-              />
-            </b-col>
-            <b-col md="8">
-              <ocs-custom-field v-model="data.nondetection_comments" field="nondetection_comments" label="Nondetection Comments:" :hide=false
-                :errors="errors.nondetection_comments" @input="update" />
-            </b-col>
-          </b-form-row>
-    </b-card-body>
-  </b-card>
-</template>
-<script>
-  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
+<script setup>
+import { useTnsUtils } from '@/utils/tnsUtils.js';
 
-  export default {
-    name: 'DiscoveryInfo',
-    mixins: [tnsUtilsMixin],
-    props: {
-      index: {
-        type: Number,
-        required: true
-      },
-      errors: {
-        type: Object,
-        required: true
-      },
-      data: {
-        type: Object,
-        required: true
-      },
-      isTns: {
-        type: Boolean,
-        default: false
-      }
-    },
-    data: function() {
-      return {
-        proprietaryPeriodUnits: ['Days', 'Months', 'Years'],
-        show: true,
-        id: 'discovery-info-' + this.index
-      };
-    },
-    methods: {
-      update: function () {
-        this.$emit('message-updated');
-      }
-    }
-  };
+const props = defineProps({
+  index: {
+    type: Number,
+    required: true
+  },
+  errors: {
+    type: Object,
+    required: true
+  },
+  data: {
+    type: Object,
+    required: true
+  },
+  isTns: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['message-updated']);
+
+const { getTnsValuesList } = useTnsUtils();
+
+const proprietaryPeriodUnits = ['Days', 'Months', 'Years']
+
+function update() {
+  emit('message-updated');
+}
 </script>
+<template>
+  <v-card no-body class="mt-2" variant="outlined">
+    <v-card-title class="p-1">
+      <b>Discovery Info</b>
+    </v-card-title>
+    <v-card-text>
+      <v-alert v-for="error in errors.non_field_errors" :key="error" type="error" :text="error" title="Discovery Info Errors:">
+      </v-alert>
+      <v-row>
+        <v-col md="3">
+          <v-text-field v-if="!props.isTns" v-model="props.data.reporting_group" label="Reporting Group" variant="outlined" :error-messages="props.errors.reporting_group" @update:modelValue="update" />
+          <v-autocomplete
+            v-else
+            v-model="props.data.reporting_group"
+            label="Reporting Group"
+            variant="outlined"
+            :items="getTnsValuesList('groups', false)"
+            clearable
+            :error-messages="props.errors.reporting_group"
+            @update:modelValue="update"
+          />
+        </v-col>
+        <v-col md="3">
+          <v-text-field v-if="!props.isTns" v-model="props.data.discovery_source" label="Source" variant="outlined" :error-messages="props.errors.discovery_source" @update:modelValue="update" />
+          <v-autocomplete
+            v-else
+            v-model="props.data.discovery_source"
+            label="Source"
+            variant="outlined"
+            :items="getTnsValuesList('groups', false)"
+            clearable
+            :error-messages="props.errors.discovery_source"
+            @update:modelValue="update"
+          />
+        </v-col>
+        <v-col md="3">
+          <v-select
+            v-model="props.data.transient_type"
+            label="Transient Type"
+            variant="outlined"
+            :items="getTnsValuesList('at_types', false)"
+            clearable
+            :error-messages="props.errors.transient_type"
+            @update:modelValue="update"
+          />
+        </v-col>
+        <v-col md="3">
+          <v-text-field v-model="props.data.proprietary_period" label="Proprietary" variant="outlined" rounded="0" :error-messages="props.errors.proprietary_period" @update:modelValue="update" >
+            <template v-slot:append>
+              <v-select v-model="props.data.proprietary_period_units" label="Units" class="appended-element" variant="outlined" rounded="0" :items="proprietaryPeriodUnits" hide-details @update:modelValue="update" style="min-width:100px;"></v-select>
+            </template>
+          </v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col md="4">
+          <v-text-field v-if="!props.isTns" v-model="props.data.nondetection_source" label="Nondetection Source" variant="outlined" :error-messages="props.errors.nondetection_source" @update:modelValue="update" />
+          <v-select
+            v-else
+            v-model="props.data.nondetection_source"
+            label="Nondetection Source"
+            variant="outlined"
+            :items="getTnsValuesList('archives', false)"
+            clearable
+            :error-messages="props.errors.nondetection_source"
+            @update:modelValue="update"
+          />
+        </v-col>
+        <v-col md="8">
+          <v-text-field v-model="props.data.nondetection_comments" label="Nondetection Comments" variant="outlined" :error-messages="props.errors.nondetection_comments" @update:modelValue="update" />
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</template>

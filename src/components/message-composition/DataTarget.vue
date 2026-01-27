@@ -1,264 +1,314 @@
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue';
+import _ from 'lodash';
+import '@/assets/css/submissions.css';
+import DiscoveryInfo from '@/components/message-composition/DiscoveryInfo.vue'
+import SexagesimalCustomField from '@/components/message-composition/SexagesimalCustomField.vue';
+import ConfirmDialogBtn from '@/components/message-composition/ConfirmDialogBtn.vue';
+import { useTnsUtils } from '@/utils/tnsUtils.js';
+import { useSchemaDataUtils } from '@/utils/schemaDataUtils.js';
+import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
+
+const props = defineProps({
+  index: {
+    type: Number,
+    required: true
+  },
+  errors: {
+    type: Object,
+    required: true
+  },
+  target: {
+    type: Object,
+    required: true
+  },
+  isTns: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['remove', 'copy', 'message-updated']);
+
+const { getTnsValuesList } = useTnsUtils();
+const { remove, copy, update, getErrors } = useSchemaDataUtils(emit)
+
+const type =  ref('Sidereal')
+const typeOptions = ref(['Sidereal', 'Non-Sidereal'])
+const errorUnits = ['mas', 'arcsec', 'arcmin', 'degrees']
+const distanceUnits = ['cm', 'm', 'km', 'pc', 'kpc', 'Mpc', 'Gpc', 'ly', 'au']
+const advancedOptionsCollapsed = ref(!props.isTns)
+const groupsArray = ref([])
+const id = ref('target-' + props.index)
+
+onMounted(() => {
+  type.value = defaultType.value
+})
+
+watch(() => props.isTns, (value) => {
+  if (value) {
+    advancedOptionsCollapsed.value = false;
+    typeOptions.value = ['Sidereal'];
+    type.value = 'Sidereal';
+    groupsArray.value = [];
+  }
+  else {
+    typeOptions.value = ['Sidereal', 'Non-Sidereal'];
+  }
+});
+
+watch(() => groupsArray, (value) => {
+  if (!_.isEmpty(value)) {
+    props.target.group_associations = value.join(',');
+  }
+  props.target.group_associations = ''
+  update()
+});
+
+const advancedOptionsIcon = computed(() => {
+  if (advancedOptionsCollapsed.value) {
+    return 'mdi-arrow-expand-vertical';
+  }
+  else {
+    return 'mdi-arrow-collapse-vertical';
+  }
+})
+
+const defaultType = computed(() => {
+  if (_.isEmpty(_.omitBy(props.target.orbital_elements, field => field === null || (_.isEmpty(field) && !_.isBoolean(field))))) {
+    return 'Sidereal';
+  }
+  else{
+    return 'Non-Sidereal';
+  }
+})
+
+const getErrorAlignment = computed(() => {
+  if (!_.isEmpty(props.target.ra) || !_.isEmpty(props.target.dec)){
+    return "center";
+  }
+  else{
+    return "baseline";
+  }
+})
+
+function onTypeChange() {
+  if (props.target.type === 'Sidereal') {
+    props.target.orbital_elements = {
+      'epoch_of_elements': null,
+      'orbital_inclination': null,
+      'longitude_of_the_ascending_node': null,
+      'argument_of_the_perihelion': null,
+      'eccentricity': null,
+      'semimajor_axis': null,
+      'mean_anomaly': null,
+      'perihelion_distance': null,
+      'epoch_of_perihelion': null
+    }
+  }
+  else {
+    props.target.ra = null;
+    props.target.ra_error = null;
+    props.target.pm_ra = null;
+    props.target.dec = null;
+    props.target.dec_error = null;
+    props.target.pm_dec = null;
+  }
+  update();
+}
+</script>
 <template>
-    <b-container class="p-0" :id="'data-target-' + index">
-      <b-card header-tag="header">
-        <template #header>
-          <b-form-row>
-            <b-col md="2" class=" text-center data-label-text">
-              <b>Target {{ index }}</b>
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.name" field="name" label="Name:" :hide=false
-                :errors="errors.name" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-select
-                  v-model="target.type"
-                  field="type"
-                  label="Type:"
-                  :hide=false
-                  :options="typeOptions"
-                  @change="onTypeChange"
-              />
-            </b-col>
-            <b-col md="2" offset-md="2">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <b-button title="Advanced Target Fields" :class="advancedOptionsCollapsed ? 'collapsed': null" :aria-expanded="advancedOptionsCollapsed ? 'false': 'true'" aria-controls="'advanced-target-collapse-' + index" @click="toggleCollapse" :disabled="isTns">
-                    <span v-if="advancedOptionsCollapsed">
-                      <b-icon icon="arrows-expand" aria-hidden="true"></b-icon>
-                    </span>
-                    <span v-if="!advancedOptionsCollapsed">
-                      <b-icon icon="arrows-collapse" aria-hidden="true"></b-icon>
-                    </span>
-                  </b-button>
-                  <b-button title="Copy this Target" @click="copy">
-                    <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
-                  </b-button>
-                  <b-button title="Remove this Target" @click="confirm('Are you sure you want to remove this Target?', remove)">
-                    <b-icon icon="trash" aria-hidden="true"></b-icon>
-                  </b-button>
-                </b-button-group>
-              </b-button-toolbar>
-            </b-col>
-          </b-form-row>
-        </template>
-        <span v-show="type === 'Sidereal'" class="sidereal">
-          <b-form-row>
-            <b-col md="3">
-              <ocs-sexagesimal-custom-field
-                v-model="target.ra"
+  <v-container class="p-0">
+    <v-card variant="outlined">
+      <v-card-title>
+        <v-row align="center">
+          <v-col md="2" class=" text-center data-label-text">
+            <b>Target {{ props.index }}</b>
+          </v-col>
+          <v-col md="3">
+            <v-text-field v-model="props.target.name" label="Name" variant="outlined" :error-messages="props.errors.name" @update:modelValue="update" />
+          </v-col>
+          <v-col md="3">
+            <v-select
+                v-model="props.target.type"
+                label="Type"
+                variant="outlined"
+                :items="typeOptions"
+                @update:modelValue="onTypeChange"
+            />
+          </v-col>
+          <v-col md="2" offset-md="2">
+            <v-btn-group divided color="primary-darken-1" class="data-label-text">
+              <v-btn v-tooltip="'Advanced Target Fields'" :icon="advancedOptionsIcon" :disabled="props.isTns" @click="advancedOptionsCollapsed = !advancedOptionsCollapsed">
+              </v-btn>
+              <v-btn v-tooltip="'Copy this Target'" icon="mdi-file-document-plus-outline" @click="copy">
+              </v-btn>
+              <confirm-dialog-btn
+                btn-tooltip="Remove this Target"
+                btn-icon="mdi-trash-can-outline"
+                confirm-text="Are you sure you want to remove this Target?"
+                confirm-action="Remove"
+                @confirmed="remove">
+              </confirm-dialog-btn>
+            </v-btn-group>
+          </v-col>
+        </v-row>
+      </v-card-title>
+      <v-card-text>
+        <span v-if="props.target.type === 'Sidereal'" class="sidereal">
+          <v-row>
+            <v-col md="3">
+              <sexagesimal-custom-field
+                v-model="props.target.ra"
                 coordinate="ra"
-                field="ra"
-                label="Right Ascension:"
-                :hide=false
-                :collapse=false
-                :errors="errors.ra"
-                @input="update"
-              />
-            </b-col>
-            <b-col md="3" :align-self="getErrorAlignment">
-              <ocs-custom-field v-model="target.ra_error" field="ra_error" label="Error:" :hide=false
-                :errors="errors.ra_error" @input="update" >
-                <b-input-group-append slot="inline-input">
-                  <b-form-select
-                    :id="'ra-error-units-select-' + this.index"
-                    v-model="target.ra_error_units"
-                    :options="errorUnits"
-                    @input="update"
-                  />
-                </b-input-group-append>
-              </ocs-custom-field>
-            </b-col>
-            <b-col md="3">
-              <ocs-sexagesimal-custom-field
-                v-model="target.dec"
-                coordinate="dec"
-                field="dec"
-                label="Declination:"
-                :hide=false
-                :collapse=false
-                :errors="errors.dec"
-                @input="update"
-              />
-            </b-col>
-            <b-col md="3" :align-self="getErrorAlignment">
-              <ocs-custom-field v-model="target.dec_error" field="dec_error" label="Error:" :hide=false
-                :errors="errors.dec_error" @input="update" >
-                <b-input-group-append slot="inline-input">
-                  <b-form-select
-                    :id="'dec-error-units-select-' + this.index"
-                    v-model="target.dec_error_units"
-                    :options="errorUnits"
-                    @input="update"
-                  />
-                </b-input-group-append>
-              </ocs-custom-field>
-            </b-col>
-          </b-form-row>
-          <b-form-row>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.pm_ra" field="pm_ra" label="Proper Motion RA:" :hide=false
-                :errors="errors.pm_ra" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.pm_dec" field="pm_dec" label="Proper Motion Dec:" :hide=false
-                :errors="errors.pm_dec" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.epoch" field="epoch" label="Epoch:" :hide=false
-                :errors="errors.epoch" @input="update" />
-            </b-col>
-            <b-col md="2" offset-md="1" align-self="center">
-              <b-form-checkbox
-                :id="'target-new-discovery-' + index"
-                v-model="target.new_discovery"
-                name="new_discovery"
-                :state="newDiscoveryError"
-                v-b-tooltip.hover
-                :title="errors.new_discovery"
-                switch
-                @input="update"
+                label="Right Ascension"
+                :errors="props.errors.ra"
+                @update:modelValue="update"
               >
-                New Discovery
-              </b-form-checkbox>
-            </b-col>
-          </b-form-row>
+              </sexagesimal-custom-field>
+            </v-col>
+            <v-col md="3" :align-self="getErrorAlignment">
+              <v-text-field v-model="props.target.ra_error" label="RA Error" variant="outlined" rounded="0" :error-messages="props.errors.ra_error" @update:modelValue="update" >
+                <template v-slot:append>
+                  <v-select v-model="props.target.ra_error_units" variant="outlined" class="appended-element" label="Units" rounded="0" :items="errorUnits" hide-details @update:modelValue="update"></v-select>
+                </template>
+              </v-text-field>
+            </v-col>
+            <v-col md="3">
+              <sexagesimal-custom-field
+                v-model="props.target.dec"
+                coordinate="dec"
+                label="Declination"
+                :errors="props.errors.dec"
+                @update:modelValue="update"
+              >
+              </sexagesimal-custom-field>
+            </v-col>
+            <v-col md="3" :align-self="getErrorAlignment">
+              <v-text-field v-model="props.target.dec_error" label="Dec Error" variant="outlined" rounded="0" :error-messages="props.errors.dec_error" @update:modelValue="update" >
+                <template v-slot:append>
+                  <v-select v-model="props.target.dec_error_units" variant="outlined" class="appended-element" label="Units" rounded="0" :items="errorUnits" hide-details @update:modelValue="update"></v-select>
+                </template>
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col md="3">
+              <v-text-field v-model="props.target.pm_ra" label="Proper Motion RA" variant="outlined" :error-messages="props.errors.pm_ra" @update:modelValue="update" />
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.target.pm_dec" label="Proper Motion Dec" variant="outlined" :error-messages="props.errors.pm_dec" @update:modelValue="update" />
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.target.epoch" label="Epoch" variant="outlined" :error-messages="props.errors.epoch" @update:modelValue="update" />
+            </v-col>
+            <v-col md="2" offset-md="1" align-self="center">
+              <v-switch
+                v-model="props.target.new_discovery"
+                label="New Discovery"
+                :error-messages="props.errors.new_discovery"
+                @update:modelValue="update"
+              >
+              </v-switch>
+            </v-col>
+          </v-row>
         </span>
-        <span v-show="type === 'Non-Sidereal'" class="non-sidereal">
-          <ocs-custom-alert v-for="error in getErrors('orbital_elements.non_field_errors', [])" :key="error" alert-class="danger" :dismissible="false">
-            {{ error }}
-          </ocs-custom-alert>
-          <b-form-row>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.epoch_of_elements" field="epoch_of_elements" label="Epoch of Elements:" :hide=false
-                :errors="getErrors('orbital_elements.epoch_of_elements', {})" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.orbital_inclination" field="orbital_inclination" label="Orbital Inclination:" :hide=false
-                :errors="getErrors('orbital_elements.orbital_inclination', {})" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.longitude_of_the_ascending_node" field="longitude_of_the_ascending_node" label="Longitude of Ascending Node:" :hide=false
-                :errors="getErrors('orbital_elements.longitude_of_the_ascending_node', {})" @input="update" />
-            </b-col>
-          </b-form-row>
-          <b-form-row>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.argument_of_the_perihelion" field="argument_of_the_perihelion" label="Argument of Perihelion:" :hide=false
-                :errors="getErrors('orbital_elements.argument_of_the_perihelion', {})" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.eccentricity" field="eccentricity" label="Eccentricity:" :hide=false
-                :errors="getErrors('orbital_elements.eccentricity', {})" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.semimajor_axis" field="semimajor_axis" label="SemiMajor Axis:" :hide=false
-                :errors="getErrors('orbital_elements.semimajor_axis', {})" @input="update" />
-            </b-col>
-          </b-form-row>
-          <b-form-row>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.mean_anomaly" field="mean_anomaly" label="Mean Anomaly:" :hide=false
-                :errors="getErrors('orbital_elements.mean_anomaly', {})" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.perihelion_distance" field="perihelion_distance" label="Perihelion Distance:" :hide=false
-                :errors="getErrors('orbital_elements.perihelion_distance', {})" @input="update" />
-            </b-col>
-            <b-col md="4">
-              <ocs-custom-field v-model="target.orbital_elements.epoch_of_perihelion" field="epoch_of_perihelion" label="Epoch of Perihelion:" :hide=false
-                :errors="getErrors('orbital_elements.epoch_of_perihelion', {})" @input="update" />
-            </b-col>
-          </b-form-row>
+        <span v-else-if="props.target.type === 'Non-Sidereal'" class="non-sidereal">
+          <v-alert v-for="error in getErrors(props.errors, 'orbital_elements.non_field_errors', [])" :key="error" type="error" :text="error" title="Orbital Elements Error">
+          </v-alert>
+          <v-row class="mt-1">
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.epoch_of_elements" label="Epoch of Elements" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.epoch_of_elements', [])" @update:modelValue="update" />
+            </v-col>
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.orbital_inclination" label="Orbital Inclination" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.orbital_inclination', [])" @update:modelValue="update" />
+            </v-col>
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.longitude_of_the_ascending_node" label="Longitude of Ascending Node" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.longitude_of_the_ascending_node', [])" @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <v-row class="mt-1">
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.argument_of_the_perihelion" label="Argument of Perihelion" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.argument_of_the_perihelion', [])" @update:modelValue="update" />
+            </v-col>
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.eccentricity" label="Eccentricity" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.eccentricity', [])" @update:modelValue="update" />
+            </v-col>
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.semimajor_axis" label="SemiMajor Axis" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.semimajor_axis', [])" @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <v-row class="mt-1">
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.mean_anomaly" label="Mean Anomaly" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.mean_anomaly', [])" @update:modelValue="update" />
+            </v-col>
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.perihelion_distance" label="Perihelion Distance" variant="outlined" :error-messages="getErrors(props.errors, 'orbital_elements.perihelion_distance', [])" @update:modelValue="update" />
+            </v-col>
+            <v-col md="4">
+              <v-text-field v-model="props.target.orbital_elements.epoch_of_perihelion" label="Epoch of Perihelion" variant="outlined" :errors="getErrors(props.errors, 'orbital_elements.epoch_of_perihelion', [])" @update:modelValue="update" />
+            </v-col>
+          </v-row>
         </span>
-        <b-collapse :id="'advanced-target-collapse-' + index" v-model="collapseVisible" >
-          <b-form-row>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.redshift" field="redshift" label="Redshift:" :hide=false
-                :errors="errors.redshift" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.host_name" field="host_name" label="Host:" :hide=false
-                :errors="errors.host_name" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.host_redshift" field="host_redshift" label="Host Redshift:" :hide=false
-                :errors="errors.host_redshift" @input="update" />
-            </b-col>
-          </b-form-row>
-          <b-form-row class="mb-3">
-            <b-col md="3">
-              <ocs-custom-field v-model="target.distance" field="distance" label="Distance:" :hide=false
-                :errors="errors.distance" @input="update" >
-                <b-input-group-append slot="inline-input">
-                  <b-form-select
-                    :id="'distance-units-select-' + this.index"
-                    v-model="target.distance_units"
-                    :options="distanceUnits"
-                    @input="update"
-                  />
-                </b-input-group-append>
-              </ocs-custom-field>
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="target.distance_error" field="distance_error" label="Error:" :hide=false
-                :errors="errors.distance_error" @input="update" />
-            </b-col>
-          </b-form-row>
-          <b-form-row>
-            <b-col md="6">
-              <ocs-custom-field v-if="!isTns" v-model="target.group_associations" field="group_associations" label="Groups:" desc="Comma separated list of TNS group associations for this Target" :hide=false
-                :errors="errors.group_associations" @input="update" />
-              <multiselect
+        <span v-if="!advancedOptionsCollapsed">
+          <v-row class="mt-1">
+            <v-col md="3">
+              <v-text-field v-model="props.target.redshift" label="Redshift" variant="outlined" :error-messages="props.errors.redshift" @update:modelValue="update" />
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.target.host_name" label="Host" variant="outlined" :error-messages="props.errors.host_name" @update:modelValue="update" />
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.target.host_redshift" label="Host Redshift" variant="outlined" :error-messages="props.errors.host_redshift" @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <v-row class="mt-1">
+            <v-col md="3">
+              <v-text-field v-model="props.target.distance" label="Distance" variant="outlined" rounded="0" :error-messages="props.errors.distance" @update:modelValue="update" >
+                <template v-slot:append>
+                  <v-select v-model="props.target.distance_units" variant="outlined" class="appended-element" label="Units" rounded="0" :items="distanceUnits" hide-details @update:modelValue="update" style="min-width:100px;"/>
+                </template>
+              </v-text-field>
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.target.distance_error" label="Distance Error" variant="outlined" :error-messages="props.errors.distance_error" @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <v-row class="mt-1">
+            <v-col md="6">
+              <v-text-field v-if="!props.isTns" v-model="props.target.group_associations" label="Groups" variant="outlined" hide-details="auto" v-tooltip="'Comma separated list of TNS group associations for this Target'"
+                :error-messages="props.errors.group_associations" @update:modelValue="update" />
+              <v-autocomplete
                 v-else
                 v-model.lazy="groupsArray"
-                placeholder="Associate TNS Groups:"
-                :maxHeight=500
-                :optionHeight=38
-                :options="getTnsValuesList('groups')"
-                :multiple="true"
-                @input="update"
+                placeholder="Associate TNS Groups"
+                variant="outlined"
+                hide-details="auto"
+                multiple
+                clearable
+                chips
+                closable-chips
+                :items="getTnsValuesList('groups')"
               >
-              </multiselect>
-            </b-col>
-            <b-col md="6">
-              <ocs-custom-field v-model="target.aliases" field="aliases" label="Aliases:" desc="Comma separated list of aliases for this Target" :hide=false
-                :errors="errors.aliases" @input="update" />
-            </b-col>
-          </b-form-row>
-          <b-form-row>
-            <b-col md="12">
-              <b-form-group
-                :id="'target-comments-fieldgroup' + id"
-                label-size="sm"
-                label-align-sm="right"
-                label-cols-sm="1"
-                label-for="comments"
-              >
-                <template slot="label">
-                  Comments:
-                </template>
-                <b-input-group>
-                  <b-form-textarea
-                    :id="'target-comments-field' + id"
-                    v-model="target.comments"
-                    placeholder="Enter something..."
-                    rows="2"
-                    max-rows="4"
-                    @input="update"
-                  />
-                  <slot name="inline-input" />
-                </b-input-group>
-              </b-form-group>
-            </b-col>
-          </b-form-row>
-          <discovery-info :data="target.discovery_info" :errors="getErrors('discovery_info', {})" :index="index" :is-tns="isTns" @message-updated="update">
+              </v-autocomplete>
+            </v-col>
+            <v-col md="6">
+              <v-text-field v-model="props.target.aliases" label="Aliases" variant="outlined" hide-details="auto" v-tooltip="'Comma separated list of aliases for this Target'"
+                :error-messages="props.errors.aliases" @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <v-row class="mt-1">
+            <v-col md="12">
+              <v-textarea v-model="props.target.comments" max-rows="4" rows="2" label="Comments" variant="outlined" placeholder="Enter something..." @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <discovery-info :data="props.target.discovery_info" :errors="getErrors(props.errors, 'discovery_info', {})" :index="props.index" :is-tns="props.isTns" @message-updated="update">
           </discovery-info>
-          <b-card no-body class="mt-2">
-            <b-card-header header-tag="header" class="p-1" role="tab">
+          <v-card no-body class="mt-2" variant="outlined">
+            <v-card-title class="p-1">
               <b>Related Target Files</b>
-            </b-card-header>
-            <b-card-body>
+            </v-card-title>
+            <v-card-text>
               <p class="text-primary">
                 Upload one or more related target files to associate with your message. If you are submitting to the TNS, these files
                 will be uploaded there. If your target proprietary period is 0, the files will also be stored
@@ -266,150 +316,23 @@
               </p>
               <files-with-descriptions
                 :id="id + '-files'"
-                :errors="getErrors('files', [])"
+                :errors="getErrors(props.errors, 'files', [])"
                 :multiple=true
                 v-bind:files.sync="target.files"
                 v-bind:fileDescriptions.sync="target.file_descriptions"
                 @message-updated="update"
               >
               </files-with-descriptions>
-            </b-card-body>
-          </b-card>
-        </b-collapse>
-      </b-card>
-    </b-container>
-  </template>
-  <script>
-  import _ from 'lodash';
-  import '@/assets/css/submissions.css';
-  import Multiselect from 'vue-multiselect';
-  import "vue-multiselect/dist/vue-multiselect.min.css";
-  import "vue-multiselect-bootstrap-theme/dist/vue-multiselect-bootstrap4.scss";
-  import { OCSMixin } from 'ocs-component-lib';
-  import DiscoveryInfo from '@/components/message-composition/DiscoveryInfo.vue'
-  import { schemaDataMixin } from '@/mixins/schemaDataMixin.js';
-  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
-  import FilesWithDescriptions from '@/components/message-composition/FilesWithDescriptions.vue'
+            </v-card-text>
+          </v-card>
+        </span>
+      </v-card-text>
+    </v-card>
+  </v-container>
+</template>
+<style>
+.v-input__append:has(.appended-element) {
+  margin-left: 0;
+}
 
-  export default {
-    name: 'DataTarget',
-    components: {
-      DiscoveryInfo,
-      Multiselect,
-      FilesWithDescriptions
-    },
-    mixins: [OCSMixin.confirmMixin, schemaDataMixin, tnsUtilsMixin],
-    props: {
-      index: {
-        type: Number,
-        required: true
-      },
-      errors: {
-        type: Object,
-        required: true
-      },
-      target: {
-        type: Object,
-        required: true
-      },
-      isTns: {
-        type: Boolean,
-        default: false
-      }
-    },
-    data: function() {
-      return {
-        type: 'Sidereal',
-        typeOptions: ['Sidereal', 'Non-Sidereal'],
-        errorUnits: ['mas', 'arcsec', 'arcmin', 'degrees'],
-        distanceUnits: ['cm', 'm', 'km', 'pc', 'kpc', 'Mpc', 'Gpc', 'ly', 'au'],
-        advancedOptionsCollapsed: !this.isTns,
-        show: true,
-        groupsArray: [],
-        id: 'target-' + this.index
-      };
-    },
-    created() {
-      this.type = this.getDefaultType;
-    },
-    watch: {
-      isTns: function(value) {
-        if (value){
-          this.advancedOptionsCollapsed = false;
-          this.typeOptions = ['Sidereal'];
-          this.type = 'Sidereal';
-          this.groupsArray = [];
-        }
-        else {
-          this.typeOptions = ['Sidereal', 'Non-Sidereal'];
-        }
-      },
-      groupsArray: function(value) {
-        if (!_.isEmpty(value)) {
-          this.target.group_associations = value.join(',');
-        }
-      }
-    },
-    computed: {
-      collapseVisible: {
-        get: function() {
-          return !this.advancedOptionsCollapsed;
-        },
-        set: function(_val) {
-
-        }
-      },
-      newDiscoveryError: function() {
-        if (_.isEmpty(this.errors.new_discovery)){
-          return null;
-        }
-        else {
-          return false;
-        }
-      },
-      getDefaultType: function() {
-        if (_.isEmpty(_.omitBy(this.target.orbital_elements, field => field === null || (_.isEmpty(field) && !_.isBoolean(field))))) {
-          return 'Sidereal';
-        }
-        else{
-          return 'Non-Sidereal';
-        }
-      },
-      getErrorAlignment: function () {
-        if (!_.isEmpty(this.target.ra) || !_.isEmpty(this.target.dec)){
-          return "center";
-        }
-        else{
-          return "baseline";
-        }
-      }
-    },
-    methods: {
-      onTypeChange: function() {
-        if (this.type === 'Sidereal') {
-          this.target.orbital_elements = {
-            'epoch_of_elements': null,
-            'orbital_inclination': null,
-            'longitude_of_the_ascending_node': null,
-            'argument_of_the_perihelion': null,
-            'eccentricity': null,
-            'semimajor_axis': null,
-            'mean_anomaly': null,
-            'perihelion_distance': null,
-            'epoch_of_perihelion': null
-          }
-        }
-        else {
-          this.target.ra = null;
-          this.target.ra_error = null;
-          this.target.pm_ra = null;
-          this.target.dec = null;
-          this.target.dec_error = null;
-          this.target.pm_dec = null;
-        }
-        this.update();
-      }
-    }
-  };
-  </script>
-    
+</style>

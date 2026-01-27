@@ -1,101 +1,103 @@
-<template>
-    <div>
-      <b-editable-table striped bordered small :class="id + '-data-table'" v-model="tableData" :fields="fields" @input-change="handleInput">
-        <template v-for="field in fields" v-slot:[`cell(${field.key})`]="data">
-          <b-form-group v-if="'type' in field" :key="field.key + '-group' + '-' + data.index" :state="getCellState(data.index, data.field.key)" v-b-tooltip.hover :title="getCellError(data.index, data.field.key)" style="width:100%;">
-            <b-form-input v-if="field.type == 'text'" :value="getFieldValue(field, data)" :list="field.list ? field.key + '-input-' + data.index + '-list' : null" :state="getCellState(data.index, data.field.key)" :key="field.key + '-input-' + data.index" :placeholder="field.label" @input="handleInput($event, data)"></b-form-input>
-            <b-form-datalist v-if="field.type == 'text' && field.list" :id="field.key + '-input-' + data.index + '-list'" :options="field.list"></b-form-datalist>
-            <b-form-select v-if="field.type == 'select'" :value="getFieldValue(field, data)" :options="field.options" :state="getCellState(data.index, data.field.key)" :key="field.key + '-select-' + data.index" @input="handleInput($event, data)"></b-form-select>
-            <b-form-checkbox switch v-if="field.type == 'checkbox'" :checked="getFieldValue(field, data)" size="lg" :state="getCellState(data.index, data.field.key)" :key="field.key + '-checkbox-' + data.index" @input="handleInput($event, data)"></b-form-checkbox>
-            <b-form-datepicker v-if="field.type == 'date'" :value="getFieldValue(field, data)" :state="getCellState(data.index, data.field.key)" :key="field.key + '-datepicker-' + data.index" @input="handleInput($event, data)"></b-form-datepicker>
-          </b-form-group>
-          <!-- Index Row -->
-          <span v-if="field.key == 'index'" :key="field.key + '-index'">
-            <b>{{ data.index }}</b>
-          </span>
-          <!-- Copy Row -->
-          <span v-if="field.key == 'copy'" :key="field.key + '-btn'">
-            <b-button :title="'Copy this ' + id" @click="copy(data)">
-              <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
-            </b-button>
-          </span>
-          <!-- Delete Row -->
-          <span v-if="field.key == 'delete' && (allowEmpty || tableData.length > 1)" :key="field.key + '-btn'">
-            <b-button :title="'Remove this ' + id" @click="remove(data)">
-              <b-icon icon="trash" aria-hidden="true"></b-icon>
-            </b-button>
-          </span>
-        </template>
-      </b-editable-table>
-    </div>
-  </template>
-  <script>
-  import '@/assets/css/submissions.css';
-  import BEditableTable from "bootstrap-vue-editable-table";
 
-  export default {
-    name: 'DataTable',
-    components: {
-      BEditableTable,
-    },
-    props: {
-      id: {
-        type: String,
-        required: true
-      },
-      errors: {
-        type: Array,
-        required: true
-      },
-      tableData: {
-        type: Array,
-        required: true
-      },
-      fields: {
-        type: Array,
-        required: true
-      },
-      allowEmpty: {
-        type: Boolean,
-        default: true
-      },
-      show: {
-        type: Boolean,
-        default: true
-      }
-    },
-    methods: {
-      getFieldValue(field, row) {
-        return this.tableData[row.index][field.key];
-      },
-      getCellState(row, key) {
-        let error = this.getCellError(row, key);
-        if (error) {
-          return false;
-        }
-        return null;
-      },
-      getCellError(row, key) {
-        if (row < this.errors.length) {
-          if (key in this.errors[row]){
-            return this.errors[row][key].join(', ');
-          }
-        }
-        return '';
-      },
-      remove: function (row) {
-        this.$emit('remove', row.index);
-      },
-      copy: function (row) {
-        this.$emit('copy', row.index);
-      },
-      handleInput: function (value, row) {
-        this.tableData[row.index][row.field.key] = value;
-        this.update();
-      },
-      update: function () {
-        this.$emit('message-updated');
-      }
+<script setup>
+import '@/assets/css/submissions.css';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import ConfirmDialogBtn from '@/components/message-composition/ConfirmDialogBtn.vue';
+
+const props = defineProps({
+  id: {
+    type: String,
+    required: true
+  },
+  errors: {
+    type: Array,
+    required: true
+  },
+  tableData: {
+    type: Array,
+    required: true
+  },
+  fields: {
+    type: Array,
+    required: true
+  },
+  allowEmpty: {
+    type: Boolean,
+    default: true
+  },
+  show: {
+    type: Boolean,
+    default: true
+  }
+})
+
+const emit = defineEmits(['remove', 'copy', 'message-updated']);
+
+function getCellError(row, key) {
+  if (row < props.errors.length) {
+    if (key in props.errors[row]){
+      return props.errors[row][key].join(', ');
     }
-  };
-  </script>
+  }
+  return '';
+}
+
+function remove(index) {
+  emit('remove', index);
+}
+
+function copy(index) {
+  emit('copy', index);
+}
+
+function update() {
+  emit('message-updated');
+}
+
+</script>
+<template>
+  <div>
+    <v-data-table class="data-table-style" :items="props.tableData" :headers="props.fields" density="compact" hide-default-footer disable-sort>
+      <template v-for="header in props.fields" v-slot:[`item.${header.key}`]="{ item, index }">
+        <v-text-field v-if="header.type == 'text' && !header.list" v-model="props.tableData[index][header.key]" :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" :placeholder="header.title" style="width:100%" @update:modelValue="update()"></v-text-field>
+        <v-combobox v-else-if="header.type == 'text' && header.list" item-title="text" item-value="value" :items="header.list" v-model="props.tableData[index][header.key]" :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" :placeholder="header.title" @update:modelValue="update()"></v-combobox>
+        <v-select v-else-if="header.type == 'select'" v-model="props.tableData[index][header.key]" :items="header.options" item-value="value" item-title="text" :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" @update:modelValue="update()"></v-select>
+        <v-switch v-else-if="header.type == 'checkbox'" class="d-flex justify-center align-with-fields" v-model="props.tableData[index][header.key]" color="primary" hide-details :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" @update:modelValue="update()"></v-switch>
+        <VueDatePicker v-else-if="header.type == 'date'" class="cell-date-picker" v-model="props.tableData[index][header.key]" model-type="iso" :dark="true" :teleport="true" :placeholder="header.title" required  @update:modelValue="update()"></VueDatePicker>
+        <b v-else-if="header.key == 'index'" class="align-with-fields">{{ index }}</b>
+        <v-btn v-else-if="header.key == 'copy'" class="align-with-fields" density="compact" variant="plain" rounded="0" icon="mdi-file-document-plus-outline" v-tooltip="'Copy this ' + props.id" @click="copy(index)"></v-btn>
+        <confirm-dialog-btn
+          v-else-if="header.key == 'delete' && (props.allowEmpty || props.tableData.length > 1)"
+          variant="plain"
+          density="compact"
+          rounded="0"
+          class="align-with-fields"
+          btn-tooltip="Remove this row"
+          btn-icon="mdi-trash-can-outline"
+          confirm-text="Are you sure you want to remove this row?"
+          confirm-action="Remove"
+          @confirmed="remove(index)">
+        </confirm-dialog-btn>
+      </template>
+    </v-data-table>
+  </div>
+</template>
+<style>
+  .align-with-fields {
+    position: relative;
+    top: -10px;
+  }
+
+  .v-data-table__td:has(.cell-date-picker) {
+    vertical-align:top;
+  }
+
+  .v-table > .v-table__wrapper > table > tbody > tr > td,
+  .v-table > .v-table__wrapper > table > tbody > tr > th,
+  .v-table > .v-table__wrapper > table > thead > tr > td,
+  .v-table > .v-table__wrapper > table > thead > tr > th,
+  .v-table > .v-table__wrapper > table > tfoot > tr > td,
+  .v-table > .v-table__wrapper > table > tfoot > tr > th {
+    padding: 0 4px !important;
+  }
+</style>

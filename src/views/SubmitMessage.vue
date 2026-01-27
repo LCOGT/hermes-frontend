@@ -1,23 +1,16 @@
+
+<script setup>
+import MessageCompositionForm from "@/components/message-composition/MessageCompositionForm.vue";
+import { useStateStore } from '@/stores/state';
+
+const stateStore = useStateStore()
+
+</script>
 <template>
-  <b-container>
-    <b-alert v-if="!isLoggedIn" :show="!isLoggedIn" variant="danger" style="text-align:center;">
-      You must login to submit a message
-    </b-alert>
+  <v-container class="pt-0 pl-0 pr-0">
+    <v-alert v-if="!stateStore.userIsAuthenticated" type="error" style="text-align:center;" text="You must login to submit a message">
+    </v-alert>
     <message-composition-form v-else page-title="Photometry Reporting Form" submission-endpoint="submit_message">
     </message-composition-form>
-  </b-container>
+  </v-container>
 </template>
-<script>
-import MessageCompositionForm from "@/components/message-composition/MessageCompositionForm.vue";
-import { mapGetters } from "vuex";
-
-export default {
-  name: "SubmitPhotometry",
-  components: {
-    MessageCompositionForm
-  },
-  computed: {
-    ...mapGetters(["isLoggedIn"])
-  }
-};
-</script>
