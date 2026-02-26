@@ -13,7 +13,7 @@ onMounted(() => {
 <template>
   <v-app>
     <nav-header />
-    <v-main>
+    <v-main style="--v-layout-top: 36px;">
       <router-view />
     </v-main>
   </v-app>

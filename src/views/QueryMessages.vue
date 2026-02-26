@@ -3,10 +3,13 @@ import { ref, computed, onMounted } from 'vue';
 import _ from 'lodash';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@/assets/css/view.css';
+import { useDebounceFn } from '@vueuse/core';
 import MessageDetail from '@/views/MessageDetail.vue';
 import { useStateStore } from '@/stores/state'
 import { useLogout } from '@/utils/logout.js';
+import DataExtra from '../components/message-composition/DataExtra.vue';
 
 dayjs.extend(relativeTime);
 
@@ -22,6 +25,9 @@ const headers = ref([
 const selectedUUID= ref(null)
 const topics = ref([])
 const searchTerms = ref(null)
+// Initial date range is last 30 days
+const startDate = ref((new Date(Date.now() - (3600 * 1000 * 24 * 30))).toISOString())
+const endDate = ref((new Date(Date.now())).toISOString());
 const limit = ref(10)
 const isQuerying = ref(false)
 const results = ref({})
@@ -29,9 +35,18 @@ const results = ref({})
 const queryParams = computed(() => {
   let params = `?limit=${limit.value}`;
   topics.value.forEach((topic) => {
-    params += `&topic=${topic}`
+    params += `&topic=${topic}`;
   })
-  return params
+  if (searchTerms.value) {
+    params += `&search_query=${searchTerms.value}`;
+  }
+  if (startDate.value) {
+    params += `&start=${startDate.value}`
+  }
+  if (endDate.value) {
+    params += `&end=${endDate.value}`
+  }
+  return params;
 })
 
 onMounted(async () => {
@@ -97,9 +112,9 @@ async function onTopicChange() {
   queryMessages();
 }
 
-async function onSearchTermsChange() {
+const debounceQuery = useDebounceFn(() => {
   queryMessages();
-}
+}, 300)
 
 const selectRow = (event, { item }) => {
   const uuid = item.annotations.con_text_uuid;
@@ -118,12 +133,6 @@ const tableRowProps = ({ item }) => {
   return { class: '' };
 }
 
-// function searchTerms() {
-//   _.debounce(function() {
-//   let fakeEvent = {'preventDefault': () => true};
-//   this.onSubmit(fakeEvent);
-// }, 300)}
-
 </script>
 <template>
   <div class="overflow-auto px-4" :style="{width: '100%'}">
@@ -133,8 +142,22 @@ const tableRowProps = ({ item }) => {
     </v-row>
     <v-row class="m-0" v-if="stateStore.userIsAuthenticated">
       <v-col md="6">
+        <v-row class="pb-2 pt-2">
+          <v-col class="pr-0 pb-0">
+            <div class="datepicker-group">
+              <v-label id="start-dp-label" class="datepicker-label">Start Date</v-label>
+              <VueDatePicker v-model="startDate" model-type="iso" placeholder="Start Date" label="Start" required dark :clearable="false" @update:model-value="debounceQuery"></VueDatePicker>
+            </div>
+          </v-col>
+          <v-col class="pr-0 pb-0">
+            <div class="datepicker-group">
+              <v-label id="end-dp-label" class="datepicker-label">End Date</v-label>
+              <VueDatePicker v-model="endDate" model-type="iso" placeholder="End Date" required dark :clearable="false" @update:model-value="debounceQuery"></VueDatePicker>
+            </div>
+          </v-col>
+        </v-row>
         <v-row class="pb-2 pt-1">
-          <v-col class="col-md-7 pr-0">
+          <v-col class="col-md-7 pr-0 pt-1">
             <v-autocomplete
               v-model="topics"
               multiple
@@ -151,8 +174,8 @@ const tableRowProps = ({ item }) => {
             >
             </v-autocomplete>
           </v-col>
-          <v-col class="col-md-4 ml-auto pl-2">
-            <v-text-field type="search" clearable disabled variant="outlined" label="Search Terms" v-model="searchTerms" @input="onSearchTermsChange"></v-text-field>
+          <v-col class="col-md-4 ml-auto pl-2 pt-1">
+            <v-text-field type="search" clearable variant="outlined" label="Search Terms" v-model="searchTerms" @input="debounceQuery" @click:clear="debounceQuery"></v-text-field>
           </v-col>
         </v-row>
         <div class="table-container">
@@ -214,6 +237,23 @@ const tableRowProps = ({ item }) => {
 }
 .retracted-btn.btn-danger {
   color: white;
+}
+
+.datepicker-group {
+  position: relative;
+}
+
+.datepicker-label {
+  z-index: 2;
+  position:absolute;
+  font-size:small;
+  top:-12px;
+  left: 8px;
+  background-color: var(--vt-c-black);
+}
+
+button.dp--clear-btn {
+  display: none;
 }
 
 </style>

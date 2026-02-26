@@ -1,4 +1,3 @@
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import _ from 'lodash';
@@ -62,37 +61,37 @@ onMounted(async () => {
   }
 })
 
-    // ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions", "isLoggedIn"]),
-
 async function validate() {
   isValidating.value = true
   let url = new URL('/api/v0/submit_message/validate/', stateStore.hermesUrl).href
   fetch(url, {
     method: 'post',
-    headers: {'Content-Type': 'application/json',
-              'X-CSRFToken': stateStore.csrf_token              },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': stateStore.csrf_token
+    },
     credentials: 'include',
     body: JSON.stringify(sanitizeMessage(hermesMessage.value))
   })
-  .then((response) => response.json())
-  .then(data => {
-    validationErrors.value = data
-    if (!_.isEmpty(validationErrors.value)) {
-      readyToSubmit.value = false
-    }
-    else {
-      readyToSubmit.value = true
-    }
-  })
-  .catch((error) => {
-    console.log(error);
-    if (error.response.status == 401){
-      logout();
-    }
-  })
-  .finally(() => {
-    isValidating.value = false
-  });
+    .then((response) => response.json())
+    .then(data => {
+      validationErrors.value = data
+      if (!_.isEmpty(validationErrors.value)) {
+        readyToSubmit.value = false
+      }
+      else {
+        readyToSubmit.value = true
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
+      }
+    })
+    .finally(() => {
+      isValidating.value = false
+    });
 }
 
 const debouncedValidate = _.debounce(validate, 200);
@@ -110,25 +109,26 @@ async function generatePlainText() {
   isPlainTexting.value = true
   fetch(url, {
     method: 'post',
-    headers: {'Content-Type': 'application/json',
-              'X-CSRFToken': stateStore.csrf_token
-              },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': stateStore.csrf_token
+    },
     credentials: 'include',
     body: JSON.stringify(sanitizeMessage(hermesMessage.value))
   })
-  .then((response) => response.json())
-  .then(data => {
-    plainText.value = data
-  })
-  .catch((error) => {
-    console.log(error);
-    if (error.response.status == 401){
-      logout();
-    }
-  })
-  .finally(() => {
-    isPlainTexting.value = false
-  });
+    .then((response) => response.json())
+    .then(data => {
+      plainText.value = data
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
+      }
+    })
+    .finally(() => {
+      isPlainTexting.value = false
+    });
 }
 
 function hasAnyFiles() {
@@ -148,7 +148,7 @@ function hasAnyFiles() {
 async function submitToHop() {
   let payload = JSON.stringify(sanitizeMessage(hermesMessage.value));
   let formData = null;
-  if (hasAnyFiles()){
+  if (hasAnyFiles()) {
     formData = new FormData();
     // Add files from within the targets sections of the message
     for (var i = 0; i < hermesMessage.value.data.targets.length; i += 1) {
@@ -169,28 +169,29 @@ async function submitToHop() {
   submissionError.value = ''
   fetch(url, {
     method: 'post',
-    headers: {'Content-Type': _.isNull(formData) ? 'application/json' : 'multipart/form-data',
-              'X-CSRFToken': stateStore.csrf_token
-              },
+    headers: {
+      'Content-Type': _.isNull(formData) ? 'application/json' : 'multipart/form-data',
+      'X-CSRFToken': stateStore.csrf_token
+    },
     credentials: 'include',
     body: _.isNull(formData) ? payload : formData
   })
-  .then(() => {
-    // on success redirect to homepage
-    location.href = '/';
-  })
-  .catch((error) => {
-    console.log(error);
-    if (error.response.status == 401){
-      logout();
-    }
-    else if (error.response.status == 400) {
-      submissionError.value = error.response.data.error;
-    }
-  })
-  .finally(() => {
-    isSubmitting.value = false
-  });
+    .then(() => {
+      // on success redirect to homepage
+      location.href = '/';
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
+      }
+      else if (error.response.status == 400) {
+        submissionError.value = error.response.data.error;
+      }
+    })
+    .finally(() => {
+      isSubmitting.value = false
+    });
 }
 
 function clearForm() {
@@ -226,8 +227,8 @@ async function preloadData(preloadId) {
     credentials: 'include',
     method: 'get'
   })
-  .then((response) => response.json())
-  .then(data => {
+    .then((response) => response.json())
+    .then(data => {
       if ('topic' in data && stateStore.profile.writable_topics.includes(data['topic'])) {
         hermesMessage.value.topic = data['topic'];
       }
@@ -243,18 +244,18 @@ async function preloadData(preloadId) {
       }
       debouncedValidate();
     })
-  .catch((error) => {
-    console.log(error);
-    if (error.response.status == 401){
-      logout();
-    }
-    else if (error.response.status == 404) {
-      preloadError.value = 'Preloaded Message with ID ' + preloadId + ' does not exist on the server.';
-    }
-  })
-  .finally(() => {
-    isPreloading.value = false;
-  });
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
+      }
+      else if (error.response.status == 404) {
+        preloadError.value = 'Preloaded Message with ID ' + preloadId + ' does not exist on the server.';
+      }
+    })
+    .finally(() => {
+      isPreloading.value = false;
+    });
 }
 
 // TODO: Do we still want to allow unauthenticated submission??
@@ -265,30 +266,30 @@ async function checkSessionAndSubmitToHop() {
     credentials: 'include',
     method: 'get'
   })
-  .then((response) => response.json())
-  .then(data => {
-    if (stateStore.userIsAuthenticated && !data.is_authenticated) {
+    .then((response) => response.json())
+    .then(data => {
+      if (stateStore.userIsAuthenticated && !data.is_authenticated) {
         logout(false);
         submissionError.value = 'Your user session expired while composing this message.' +
-                               ' Refresh the page and login again to submit as your user account' +
-                               ', or click the submit button again to send the message as the HERMES Guest user';
+          ' Refresh the page and login again to submit as your user account' +
+          ', or click the submit button again to send the message as the HERMES Guest user';
       }
       else {
         submitToHop();
       }
     })
-  .catch((error) => {
-    console.log(error);
-    if (error.response.status == 401){
-      logout(false);
-      submissionError.value = 'Your user session expired while composing this message.' +
-                              ' Refresh the page and login again to submit as your user account' +
-                              ', or click the submit button again to send the message as the HERMES Guest user';
-    }
-  })
-  .finally(() => {
-    isSubmitting.value = false;
-  });
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout(false);
+        submissionError.value = 'Your user session expired while composing this message.' +
+          ' Refresh the page and login again to submit as your user account' +
+          ', or click the submit button again to send the message as the HERMES Guest user';
+      }
+    })
+    .finally(() => {
+      isSubmitting.value = false;
+    });
 }
 
 </script>
@@ -301,8 +302,8 @@ async function checkSessionAndSubmitToHop() {
     </v-row>
     <v-row>
       <v-col class="m-0 p-0">
-        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText" ref="messageForm"
-          @hermes-message-updated="debouncedValidate()" @generate-plain-text="generatePlainText">
+        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText"
+          ref="messageForm" @hermes-message-updated="debouncedValidate()" @generate-plain-text="generatePlainText">
         </hermes-message>
       </v-col>
     </v-row>
@@ -317,7 +318,8 @@ async function checkSessionAndSubmitToHop() {
         </div>
         <div v-if="hermesMessage.submit_to_tns">
           and {{ tnsDesination }} through {{ stateStore.tnsBot }}
-          <div v-if="stateStore.tnsBot === 'Hermes Bot'">&#42; Click <a href="profile" target="_blank">here</a> to set your own TNS Bot credentials</div>
+          <div v-if="stateStore.tnsBot === 'Hermes Bot'">&#42; Click <a href="profile" target="_blank">here</a> to set
+            your own TNS Bot credentials</div>
         </div>
       </v-col>
       <v-col sm="6">
