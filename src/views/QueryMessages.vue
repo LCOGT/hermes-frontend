@@ -20,9 +20,11 @@ const { logout } = useLogout();
 const headers = ref([
   { title: 'Timestamp', key: 'metadata.timestamp', align: 'start' },
   { title: 'Topic', key: 'metadata.topic', align: 'start' },
+  { title: 'Title', key: 'annotations.title', align: 'start' },
+  { title: 'Sender', key: 'annotations.sender', align: 'start' },
 ])
 
-const selectedUUID= ref(null)
+const selectedUUID = ref(null)
 const topics = ref([])
 const searchTerms = ref(null)
 // Initial date range is last 30 days
@@ -67,7 +69,7 @@ function formatDate(datetime) {
   return dayjs(datetime).format('MMM D, YYYY, HH:mm');
 }
 
-async function queryMessages(page=null) {
+async function queryMessages(page = null) {
   let params = queryParams.value;
   if (page) {
     params += `&page=${page}`;
@@ -77,20 +79,20 @@ async function queryMessages(page=null) {
     credentials: 'include',
     method: 'get',
   })
-  .then((response) => response.json())
-  .then(data => {
-    results.value = data;
-  })
-  .catch((error) => {
-    console.log(error);
-    results.value = {};
-    if (error.response.status == 401){
-      logout()
-    }
-  })
-  .finally(() => {
-    isQuerying.value = false;
-  });
+    .then((response) => response.json())
+    .then(data => {
+      results.value = data;
+    })
+    .catch((error) => {
+      console.log(error);
+      results.value = {};
+      if (error.response.status == 401) {
+        logout()
+      }
+    })
+    .finally(() => {
+      isQuerying.value = false;
+    });
 }
 
 async function pageForward() {
@@ -135,9 +137,10 @@ const tableRowProps = ({ item }) => {
 
 </script>
 <template>
-  <div class="overflow-auto px-4" :style="{width: '100%'}">
+  <div class="overflow-auto px-4" :style="{ width: '100%' }">
     <v-row class="m-0" v-if="!stateStore.userIsAuthenticated">
-      <v-alert class="text-center" variant="outlined" color="warning" text="You must login to use HERMES" icon="mdi-account-alert">
+      <v-alert class="text-center" variant="outlined" color="warning" text="You must login to use HERMES"
+        icon="mdi-account-alert">
       </v-alert>
     </v-row>
     <v-row class="m-0" v-if="stateStore.userIsAuthenticated">
@@ -146,56 +149,48 @@ const tableRowProps = ({ item }) => {
           <v-col class="pr-0 pb-0">
             <div class="datepicker-group">
               <v-label id="start-dp-label" class="datepicker-label">Start Date</v-label>
-              <VueDatePicker v-model="startDate" model-type="iso" placeholder="Start Date" label="Start" required dark :clearable="false" @update:model-value="debounceQuery"></VueDatePicker>
+              <VueDatePicker v-model="startDate" model-type="iso" placeholder="Start Date" label="Start" required dark
+                :clearable="false" @update:model-value="debounceQuery"></VueDatePicker>
             </div>
           </v-col>
           <v-col class="pr-0 pb-0">
             <div class="datepicker-group">
               <v-label id="end-dp-label" class="datepicker-label">End Date</v-label>
-              <VueDatePicker v-model="endDate" model-type="iso" placeholder="End Date" required dark :clearable="false" @update:model-value="debounceQuery"></VueDatePicker>
+              <VueDatePicker v-model="endDate" model-type="iso" placeholder="End Date" required dark :clearable="false"
+                @update:model-value="debounceQuery"></VueDatePicker>
             </div>
           </v-col>
         </v-row>
         <v-row class="pb-2 pt-1">
           <v-col class="col-md-7 pr-0 pt-1">
-            <v-autocomplete
-              v-model="topics"
-              multiple
-              chips
-              closable-chips
-              variant="outlined"
-              width="400px"
-              :items="stateStore.topic_options"
-              placeholder="Filter by Topic"
-              label="Topics"
-              persistent-clear
-              clearable
-              @update:modelValue="onTopicChange"
-            >
+            <v-autocomplete v-model="topics" multiple chips closable-chips variant="outlined" width="400px"
+              :items="stateStore.topic_options" placeholder="Filter by Topic" label="Topics" persistent-clear clearable
+              @update:modelValue="onTopicChange">
             </v-autocomplete>
           </v-col>
           <v-col class="col-md-4 ml-auto pl-2 pt-1">
-            <v-text-field type="search" clearable variant="outlined" label="Search Terms" v-model="searchTerms" @input="debounceQuery" @click:clear="debounceQuery"></v-text-field>
+            <v-text-field type="search" clearable variant="outlined" label="Search Terms" v-model="searchTerms"
+              @input="debounceQuery" @click:clear="debounceQuery"></v-text-field>
           </v-col>
         </v-row>
         <div class="table-container">
           <!-- Main Message Table -->
-          <v-data-table-server
-            hover
-            :items="results.messages"
-            :headers="headers"
-            :loading="isQuerying"
-            loading-text="Loading messages..."
-            item-value="annotations.con_text_uuid"
-            :row-props="tableRowProps"
-            hide-default-footer
-            @click:row="selectRow"
-            items-length="99999"
-            density="compact"
-          >
+          <v-data-table-server hover :items="results.messages" :headers="headers" :loading="isQuerying"
+            loading-text="Loading messages..." item-value="annotations.con_text_uuid" :row-props="tableRowProps"
+            hide-default-footer @click:row="selectRow" items-length="99999" density="compact">
             <template v-slot:item.metadata.timestamp="{ value }">
               <span v-tooltip="formatDate(value)">
                 {{ timeFromNow(value) }}
+              </span>
+            </template>
+              <template v-slot:item.metadata.topic="{ value }">
+              <span v-tooltip="value">
+                {{ value.substring(value.lastIndexOf('.') + 1, value.length) }}
+              </span>
+            </template>
+            <template v-slot:item.annotations.sender="{ value }">
+              <span v-tooltip="value">
+                {{ value.substring(0, value.indexOf('-')) }}
               </span>
             </template>
             <template #bottom>
@@ -216,8 +211,10 @@ const tableRowProps = ({ item }) => {
         <message-detail v-if="selectedUUID" :uuid="selectedUUID"></message-detail>
         <!-- Initial Message Box Display -->
         <v-card v-else border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
-          <h4 class="text-center" >
-            HERMES is a Message Exchange Service for Multi-Messenger Astronomy applications that allow users to both send and review messages related to a variety of events and targets of interest.
+          <h4 class="text-center">
+            HERMES is a Message Exchange Service for Multi-Messenger Astronomy applications that allow users to both
+            send and
+            review messages related to a variety of events and targets of interest.
           </h4>
         </v-card>
       </v-col>
@@ -225,7 +222,6 @@ const tableRowProps = ({ item }) => {
   </div>
 </template>
 <style>
-
 .selected-row {
   background-color: rgb(45, 120, 163);
 }
@@ -235,6 +231,7 @@ const tableRowProps = ({ item }) => {
   width: 32px;
   margin-top: 4px;
 }
+
 .retracted-btn.btn-danger {
   color: white;
 }
@@ -245,9 +242,9 @@ const tableRowProps = ({ item }) => {
 
 .datepicker-label {
   z-index: 2;
-  position:absolute;
-  font-size:small;
-  top:-12px;
+  position: absolute;
+  font-size: small;
+  top: -12px;
   left: 8px;
   background-color: var(--vt-c-black);
 }
@@ -255,5 +252,4 @@ const tableRowProps = ({ item }) => {
 button.dp--clear-btn {
   display: none;
 }
-
 </style>
