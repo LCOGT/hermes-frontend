@@ -170,7 +170,15 @@ async function loadMessageData() {
       credentials: 'include',
       method: 'get'
     })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
     .then(data => {
       messageData.value = data.message
       messageHeaders.value = data.metadata?.headers
@@ -244,8 +252,16 @@ async function downloadSpectraFile(url, title, fluxUnits, wavelengthUnits) {
   fetch(url, {
     method: 'get'
   })
-  .then((response) => {response.text()})
-  .then(text => {
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.text();
+    })
+    .then(text => {
     var lines = text.split('\n');
     let fluxArray = new Array();
     let wavelengthArray = new Array();
@@ -280,6 +296,7 @@ async function retractMessage() {
   console.log("Attempting to Retract message " + props.uuid);
   const url = new URL('/api/v0/messages/' + props.uuid + '/', stateStore.hermesUrl).href
   fetch(url, {
+    mode: 'cors',
     method: 'patch',
     headers: {'Content-Type': 'application/json',
               'X-CSRFToken': stateStore.csrf_token
@@ -287,7 +304,13 @@ async function retractMessage() {
     credentials: 'include',
     body: JSON.stringify({'retracted': true})
   })
-  .then(() => {
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
     messageData.annotations.retracted = response.data.retracted;
   })
   .catch((error) => {

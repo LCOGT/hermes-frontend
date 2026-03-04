@@ -79,20 +79,28 @@ async function queryMessages(page = null) {
     credentials: 'include',
     method: 'get',
   })
-    .then((response) => response.json())
-    .then(data => {
-      results.value = data;
-    })
-    .catch((error) => {
-      console.log(error);
-      results.value = {};
-      if (error.response.status == 401) {
-        logout()
-      }
-    })
-    .finally(() => {
-      isQuerying.value = false;
-    });
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    return response.json();
+  })
+  .then(data => {
+    results.value = data;
+  })
+  .catch((error) => {
+    console.log(error);
+    results.value = {};
+    if (error.response.status == 401) {
+      logout()
+    }
+  })
+  .finally(() => {
+    isQuerying.value = false;
+  });
 }
 
 async function pageForward() {

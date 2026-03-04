@@ -57,10 +57,18 @@ onMounted(async () => {
     method: 'GET',
     credentials: 'include'
   })
-  .then((response) => response.json())
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    return response.json();
+  })
   .then(data => {
-      stateStore.csrf_token = data["token"]
-    })
+    stateStore.csrf_token = data["token"]
+  })
   .catch((error) => {
     console.log(error);
     if (error.response.status == 401){
@@ -103,7 +111,15 @@ function checkHeartbeat() {
     method: 'GET',
     credentials: 'include'
   })
-  .then((response) => response.json())
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    return response.json();
+  })
   .then(data => {
     heartbeat_data.value = data.last_timestamps;
     if (stateStore.userIsAuthenticated && !data.is_authenticated) {

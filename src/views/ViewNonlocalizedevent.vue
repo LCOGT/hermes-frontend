@@ -37,10 +37,18 @@ onMounted(async () => {
     credentials: 'include',
     method: 'get'
   })
-  .then((response) => response.json())
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    return response.json();
+  })
   .then(data => {
-      this.nlevent.value = data
-    })
+    this.nlevent.value = data
+  })
   .catch((error) => {
     console.log(error);
     failedToLoad.value = true

@@ -119,7 +119,13 @@ async function performRevokeToken() {
               },
     credentials: 'include',
   })
-  .then(() => {
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
     stateStore.getProfileData();
     alertMessage.value = 'Token Successfully Revoked!';
     alertVariant.value = 'success';
@@ -142,7 +148,13 @@ async function performRevokeCredential() {
               },
     credentials: 'include',
   })
-  .then(() => {
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
     stateStore.getProfileData();
     alertMessage.value = 'Hop Credentials Successfully Revoked!';
     alertVariant.value = 'success';
@@ -187,6 +199,7 @@ async function updateTNSBotCredentials(success_message) {
   };
   let url = new URL('/api/v0/profile/', stateStore.hermesUrl).href
   fetch(url, {
+    mode: 'cors',
     method: 'patch',
     headers: {'Content-Type': 'application/json',
               'X-CSRFToken': stateStore.csrf_token
@@ -194,7 +207,13 @@ async function updateTNSBotCredentials(success_message) {
     credentials: 'include',
     body: JSON.stringify(tns_data)
   })
-  .then(() => {
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
     stateStore.getProfileData();
     alertMessage.value = success_message;
     alertVariant.value = 'success';

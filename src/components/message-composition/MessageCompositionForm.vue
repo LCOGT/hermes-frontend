@@ -73,7 +73,15 @@ async function validate() {
     credentials: 'include',
     body: JSON.stringify(sanitizeMessage(hermesMessage.value))
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
     .then(data => {
       validationErrors.value = data
       if (!_.isEmpty(validationErrors.value)) {
@@ -116,7 +124,15 @@ async function generatePlainText() {
     credentials: 'include',
     body: JSON.stringify(sanitizeMessage(hermesMessage.value))
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
     .then(data => {
       plainText.value = data
     })
@@ -176,7 +192,13 @@ async function submitToHop() {
     credentials: 'include',
     body: _.isNull(formData) ? payload : formData
   })
-    .then(() => {
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
       // on success redirect to homepage
       location.href = '/';
     })
@@ -227,7 +249,15 @@ async function preloadData(preloadId) {
     credentials: 'include',
     method: 'get'
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
     .then(data => {
       if ('topic' in data && stateStore.profile.writable_topics.includes(data['topic'])) {
         hermesMessage.value.topic = data['topic'];
@@ -266,7 +296,15 @@ async function checkSessionAndSubmitToHop() {
     credentials: 'include',
     method: 'get'
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
     .then(data => {
       if (stateStore.userIsAuthenticated && !data.is_authenticated) {
         logout(false);

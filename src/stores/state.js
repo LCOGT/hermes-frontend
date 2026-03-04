@@ -46,7 +46,15 @@ export const useStateStore = defineStore('state', {
         credentials: 'include',
         method: 'get'
       })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          let error = new Error("HTTP " + response.status);
+          error.response = response;
+          error.status = response.status;
+          throw error;
+        }
+        return response.json();
+      })
       .then(data => {
           this.profile = data
           this.mid_login = false
@@ -64,7 +72,15 @@ export const useStateStore = defineStore('state', {
         credentials: 'include',
         method: 'get',
       })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          let error = new Error("HTTP " + response.status);
+          error.response = response;
+          error.status = response.status;
+          throw error;
+        }
+        return response.json();
+      })
       .then(data => {
         this.topic_options = data.topics;
       })
@@ -80,7 +96,15 @@ export const useStateStore = defineStore('state', {
         credentials: 'include',
         method: 'get',
       })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          let error = new Error("HTTP " + response.status);
+          error.response = response;
+          error.status = response.status;
+          throw error;
+        }
+        return response.json();
+      })
       .then(data => {
         this.tns_options = data;
       })
