@@ -206,6 +206,7 @@ function onTypeChange() {
               <v-switch
                 v-model="props.target.new_discovery"
                 label="New Discovery"
+                color="primary"
                 :error-messages="props.errors.new_discovery"
                 @update:modelValue="update"
               >

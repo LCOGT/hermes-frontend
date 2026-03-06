@@ -181,7 +181,7 @@ const targetNames = computed(() => {
               <v-text-field v-model="props.astrometry.mpc_sitecode" label="MPC Sitecode" variant="outlined" :error-messages="props.errors.mpc_sitecode" @update:modelValue="update" />
             </v-col>
             <v-col md="3">
-              <v-combobox v-model="props.astrometry.catalog" label="Astrometric Catalog" variant="outlined" :error-messages="props.errors.catalog" @update:modelValue="update" :items="catalogList" item-title="text" item-value="value"/>
+              <v-combobox v-model="props.astrometry.catalog" label="Astrometric Catalog" variant="outlined" :error-messages="props.errors.catalog" @update:modelValue="update" :items="catalogList" item-title="text" item-value="value" :return-object="false"/>
             </v-col>
           </v-row>
           <v-row class="mt-1">

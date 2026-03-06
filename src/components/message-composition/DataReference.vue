@@ -37,7 +37,7 @@ const sourceList = [
         <b>{{ props.index }}</b>
       </v-col>
       <v-col md="2">
-        <v-combobox v-model="props.reference.source" label="Source" variant="outlined" :error-messages="props.errors.source" :items="sourceList" item-value="value" item-title="text" @update:modelValue="update" />
+        <v-combobox v-model="props.reference.source" label="Source" variant="outlined" :error-messages="props.errors.source" :items="sourceList" item-value="value" item-title="text" :return-object="false" @update:modelValue="update" />
       </v-col>
       <v-col md="3">
         <v-text-field v-model="props.reference.citation" label="Citation" variant="outlined" :error-messages="props.errors.citation" @update:modelValue="update" />
