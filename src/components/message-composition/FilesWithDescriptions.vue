@@ -123,7 +123,7 @@ function update() {
   <div class="mb-2">
     <v-row>
       <v-col md="11" class="mt-2">
-        <v-file-input v-model="filesModel" variant="outlined" :error-messages="props.errors" :multiple="props.multiple" :chips="props.multiple" clearable placeholder="Choose a file or drop it here..." @input="addFiles">
+        <v-file-input v-model="filesModel" variant="outlined" :error-messages="props.errors" :multiple="props.multiple" :chips="props.multiple" clearable placeholder="Choose a file or drop it here..." @update:model-value="addFiles">
         </v-file-input>
       </v-col>
     </v-row>

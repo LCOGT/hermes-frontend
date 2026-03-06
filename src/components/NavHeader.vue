@@ -23,11 +23,16 @@ const streamState = computed(() => {
   let maxOutOfDate = 0;
   _.forEach(heartbeat_data, function(value, _key) {
     let date = Date.parse(value);
-    maxOutOfDate = Math.max(maxOutOfDate, (new Date() - date) / 60000);
+    if (_.isNaN(date)) {
+      maxOutOfDate = 9999999;
+    }
+    else {
+      maxOutOfDate = Math.max(maxOutOfDate, (new Date() - date) / 60000);
+    }
   });
   if (maxOutOfDate > 15) {
-    // If there is a stream that is more than 15 minutes old, report danger
-    return "error";
+    // If there is a stream that is more than 15 minutes old, report error color
+    return "red";
   }
   return "success";
   
@@ -41,12 +46,20 @@ const streamStateText = computed(() => {
   let text = "";
   _.forEach(heartbeat_data.value, function(value, key) {
     let date = Date.parse(value);
-    let minutesOld = (new Date() - date) / 60000;
+    let minutesOld = 0;
     let textClass = 'text-success';
-    if (minutesOld > 15) {
-      textClass = "text-error"
+    if (_.isNaN(date)) {
+      minutesOld = date;
+      textClass = 'text-error';
     }
-    text += '<p class="' + textClass + '"><strong>' + _.capitalize(key) + '</strong>: ' + minutesOld.toFixed(2) + ' minutes old</p>';
+    else {
+      minutesOld = (new Date() - date) / 60000;
+      if (minutesOld > 15) {
+        textClass = "text-error"
+      }
+    }
+
+    text += '<p class="' + textClass + '"><strong>' + _.capitalize(key) + '</strong>: ' + (_.isNaN(minutesOld) ? 'NaN' : minutesOld.toFixed(2)) + ' minutes old</p>';
   });
   return text;
 })

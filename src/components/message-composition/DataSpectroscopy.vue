@@ -207,7 +207,7 @@ function switchToRaw() {
               density="compact"
               v-tooltip="'Target name as defined in the Targets section'"
               :error-messages="props.errors.target_name"
-              :items="targetNames.value"
+              :items="targetNames"
               @update:modelValue="update"
             />
           </v-col>
@@ -261,8 +261,8 @@ function switchToRaw() {
                   :id="id + '-files'"
                   :errors="getErrors(props.errors, 'files', [])"
                   :multiple=true
-                  v-bind:files.sync="props.spectroscopy.files"
-                  v-bind:fileDescriptions.sync="props.spectroscopy.file_descriptions"
+                  v-model:files="props.spectroscopy.files"
+                  v-model:fileDescriptions="props.spectroscopy.file_descriptions"
                   @message-updated="update"
                 >
                 </files-with-descriptions>

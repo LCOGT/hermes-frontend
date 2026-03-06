@@ -183,12 +183,13 @@ async function submitToHop() {
   let url = new URL('/api/v0/submit_message/', stateStore.hermesUrl).href
   isSubmitting.value = true
   submissionError.value = ''
+  let headers =  {'X-CSRFToken': stateStore.csrf_token};
+  if (_.isNull(formData)) {
+    headers['Content-Type'] = 'application/json';
+  }
   fetch(url, {
     method: 'post',
-    headers: {
-      'Content-Type': _.isNull(formData) ? 'application/json' : 'multipart/form-data',
-      'X-CSRFToken': stateStore.csrf_token
-    },
+    headers: headers,
     credentials: 'include',
     body: _.isNull(formData) ? payload : formData
   })
@@ -204,11 +205,13 @@ async function submitToHop() {
     })
     .catch((error) => {
       console.log(error);
-      if (error.response.status == 401) {
+      if (error.status == 401) {
         logout();
       }
-      else if (error.response.status == 400) {
-        submissionError.value = error.response.data.error;
+      else if (error.status == 400) {
+        error.response.text().then(errorMessage => {
+          submissionError.value = `Failed to submit message: ${errorMessage}`;
+        })
       }
     })
     .finally(() => {
@@ -365,7 +368,7 @@ async function checkSessionAndSubmitToHop() {
       </v-col>
     </v-row>
     <v-row v-if="submissionError">
-      <v-alert type="error" closable @click:close="submissionError.value = ''">
+      <v-alert type="error" closable @click:close="submissionError = ''">
         {{ submissionError }}
       </v-alert>
     </v-row>

@@ -1,6 +1,6 @@
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, toRaw } from 'vue';
 import _ from 'lodash';
 import '@/assets/css/view.css';
 import PlotlyChart from '@/components/PlotlyChart.vue';
@@ -39,10 +39,13 @@ const baseLayout = {
     b: 40,
     l: 80
   },
+  plot_bgcolor: "#1f1f1f",
+  paper_bgcolor: "#1f1f1f",
   title: {
     text: 'Spectrum Plot',
     font: {
-      size: 26
+      size: 26,
+      color: "#ffffff"
     },
     yref: 'paper',
     automargin: true
@@ -52,12 +55,16 @@ const baseLayout = {
       text: 'Flux'
     },
     tickformat: '.1e',
-    type: 'linear'
+    type: 'linear',
+    gridcolor: '#444444',
+    color: '#ffffff'
   },
   xaxis: {
     title: {
       text: 'Wavelength'
     },
+    gridcolor: '#444444',
+    color: '#ffffff',
     showgrid: false
   },
   legend: {
@@ -84,8 +91,8 @@ watch(() => props.uuid, async () => {
   await loadMessageData();
 })
 
-watch(() => messageData, async () => {
-  if (messageData) {
+watch(() => messageData.value, async () => {
+  if (messageData.value) {
     await createSpectraPlots();
   }
 })
@@ -123,7 +130,7 @@ const messageAuthor = computed(() => {
 })
 
 const messageText = computed(() => {
-  if (messageData.value) {
+  if (messageData.value && _.isObjectLike(messageData.value)) {
     if ('message_text' in messageData.value) {
       // HERMES formatted message text
       return messageData.value.message_text
@@ -540,10 +547,10 @@ function getDataFields(section, values) {
           </span>
           <hr class="mt-4">
         </v-row>
-        <div v-if="!_.isEmpty(plotDataByName)">
+        <div v-if="Object.keys(plotDataByName).length > 0">
           <div v-for="plotName in Object.keys(plotDataByName)" :key="plotName + '-spectra-plot'">
             <v-row>
-              <PlotlyChart :data="new Array(plotDataByName.value[plotName])" :layout="layoutByName[plotName]"></PlotlyChart>
+              <PlotlyChart :data="new Array(plotDataByName[plotName])" :layout="layoutByName[plotName]"></PlotlyChart>
             </v-row>
           </div>
           <hr class="mt-4">
@@ -558,8 +565,8 @@ function getDataFields(section, values) {
                   <v-btn v-else-if="item.source == 'gracedb_id'" :href="getGraceDBLink(item.citation)" target="_blank" v-tooltip="getGraceDBLink(item.citation)">{{ item.citation }}</v-btn>
                   <p v-else>{{ item.citation }}</p>
                 </template>
-                <template v-slot:item.file_info="item">
-                  <v-btn v-for="(file_info, idx) in item.file_info" class="pr-2" :key="'file_info-' + file_info.name" :href="file_info.url" target="_blank" :disabled="!file_info.url">{{ file_info.name }}</v-btn>
+                <template v-slot:item.file_info="{ item }">
+                  <v-btn v-for="(file_info, idx) in item.file_info" class="pr-2" :key="'file_info-' + file_info.name" :href="file_info.url" target="_blank" :disabled="!file_info.url" color="secondary" variant="plain">{{ file_info.name }}</v-btn>
                 </template>
                 <template v-slot:item.url="item">
                   <v-btn :href="item.url" target="_blank">{{ item.url }}</v-btn>

@@ -20,7 +20,7 @@ onMounted(() => {
 })
 
 function renderChart() {
-  Plotly.newPlot(plotElementDiv.value, this.data, this.layout);
+  Plotly.newPlot(plotElementDiv.value, props.data, props.layout);
 }
 
 </script>

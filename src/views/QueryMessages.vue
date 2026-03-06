@@ -9,7 +9,6 @@ import { useDebounceFn } from '@vueuse/core';
 import MessageDetail from '@/views/MessageDetail.vue';
 import { useStateStore } from '@/stores/state'
 import { useLogout } from '@/utils/logout.js';
-import DataExtra from '../components/message-composition/DataExtra.vue';
 
 dayjs.extend(relativeTime);
 
@@ -25,6 +24,7 @@ const headers = ref([
 ])
 
 const selectedUUID = ref(null)
+const selectedItem = ref(null)
 const topics = ref([])
 const searchTerms = ref(null)
 // Initial date range is last 30 days
@@ -49,6 +49,16 @@ const queryParams = computed(() => {
     params += `&end=${endDate.value}`
   }
   return params;
+})
+
+const fileIsSelected = computed(() => {
+  if (selectedUUID.value) {
+    if (selectedItem.value.annotations.file_name) {
+      // Right now seeing if there is a filename seems like the best way to check
+      return true;
+    }
+  }
+  return false;
 })
 
 onMounted(async () => {
@@ -117,6 +127,35 @@ async function pageBackward() {
 //   this.onSubmit(fakeEvent);
 // }
 
+async function downloadSelectedFile() {
+  if (selectedItem.value) {
+    let params = `?filename=${selectedItem.value.annotations.file_name}`;
+    if (selectedItem.value.annotations.media_type) {
+      params += `&content_type=${selectedItem.value.annotations.media_type}`;
+    }
+    try {
+      const response = await fetch(stateStore.hermesUrl + `api/v0/query/download/${selectedUUID.value}/${params}`, {
+        credentials: 'include',
+        method: 'get',
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to Download File ${selectedItem.value.annotations.file_name}`);
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = selectedItem.value.annotations.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+    catch (error) {
+      console.error('Download error: ', error);
+    }
+  }
+}
 
 async function onTopicChange() {
   queryMessages();
@@ -130,9 +169,11 @@ const selectRow = (event, { item }) => {
   const uuid = item.annotations.con_text_uuid;
   if (uuid == selectedUUID.value) {
     selectedUUID.value = null;
+    selectedItem.value = null;
   }
   else {
     selectedUUID.value = uuid;
+    selectedItem.value = item;
   }
 }
 
@@ -216,7 +257,24 @@ const tableRowProps = ({ item }) => {
       </v-col>
       <!-- Full Message Box -->
       <v-col md="6">
-        <message-detail v-if="selectedUUID" :uuid="selectedUUID"></message-detail>
+        <v-card v-if="fileIsSelected" border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
+          <v-card-title>
+            <b>{{ selectedItem.annotations.file_name }}</b>
+          </v-card-title>
+          <v-card-subtitle v-if="selectedItem.annotations.media_type">
+            Type: <b>{{ selectedItem.annotations.media_type }}</b>
+          </v-card-subtitle>
+          <v-card-subtitle v-if="selectedItem.annotations.size">
+            Size: <b>{{ selectedItem.annotations.size }}</b>
+          </v-card-subtitle>
+          <v-card-subtitle v-if="selectedItem.annotations.sender">
+            Sender: <b>{{ selectedItem.annotations.sender }}</b>
+          </v-card-subtitle>
+          <v-card-text>
+            <v-btn variant="outlined" @click="downloadSelectedFile" color="secondary">Download {{ selectedItem.annotations.file_name }}</v-btn>
+          </v-card-text>
+        </v-card>
+        <message-detail v-else-if="selectedUUID" :uuid="selectedUUID"></message-detail>
         <!-- Initial Message Box Display -->
         <v-card v-else border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
           <h4 class="text-center">

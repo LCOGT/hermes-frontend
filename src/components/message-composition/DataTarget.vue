@@ -318,8 +318,8 @@ function onTypeChange() {
                 :id="id + '-files'"
                 :errors="getErrors(props.errors, 'files', [])"
                 :multiple=true
-                v-bind:files.sync="target.files"
-                v-bind:fileDescriptions.sync="target.file_descriptions"
+                v-model:files="target.files"
+                v-model:fileDescriptions="target.file_descriptions"
                 @message-updated="update"
               >
               </files-with-descriptions>

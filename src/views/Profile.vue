@@ -241,7 +241,7 @@ async function updateTNSBotCredentials(success_message) {
     <v-alert v-if="!stateStore.userIsAuthenticated" type="warning">
       <p>You must login to access your profile</p>
     </v-alert>
-    <v-alert closable :type="alertVariant" v-model="showAlert" @dismissed="showAlert.value=false">{{ alertMessage.value }}</v-alert>
+    <v-alert closable :type="alertVariant" v-model="showAlert" @dismissed="showAlert.value=false">{{ alertMessage }}</v-alert>
     <v-row v-if="stateStore.userIsAuthenticated">
       <v-col md="4" class="border-md">
         <h3 class="text-center">Writable Topics</h3>
