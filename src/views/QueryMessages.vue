@@ -21,6 +21,7 @@ const headers = ref([
   { title: 'Topic', key: 'metadata.topic', align: 'start' },
   { title: 'Title', key: 'annotations.title', align: 'start' },
   { title: 'Sender', key: 'annotations.sender', align: 'start' },
+  { title: 'Type', key: 'annotations.media_type', align: 'end'}
 ])
 
 const selectedUUID = ref(null)
@@ -184,6 +185,25 @@ const tableRowProps = ({ item }) => {
   return { class: '' };
 }
 
+function mediaTypeToIcon(item) {
+  if (item.annotations.file_name) {
+    return 'mdi-file-download-outline';
+  }
+  else if (item.annotations.media_type.includes('voevent')) {
+    return 'mdi-circle-outline';
+  }
+  else if (item.annotations.media_type.includes('json') || item.annotations.media_type.includes('avro') ||
+          item.annotations.media_type == 'application/x.gcn.notice' || item.annotations.media_type == 'application/x.gcn.circular') {
+    return 'mdi-code-json';
+  }
+  else if (item.annotations.media_type.includes('text')){
+    return 'mdi-text';
+  }
+  else {
+    return 'mdi-help';
+  }
+}
+
 </script>
 <template>
   <div class="overflow-auto px-4" :style="{ width: '100%' }">
@@ -226,7 +246,7 @@ const tableRowProps = ({ item }) => {
           <!-- Main Message Table -->
           <v-data-table-server hover :items="results.messages" :headers="headers" :loading="isQuerying"
             loading-text="Loading messages..." item-value="annotations.con_text_uuid" :row-props="tableRowProps"
-            hide-default-footer @click:row="selectRow" items-length="99999" density="compact">
+            hide-default-footer @click:row="selectRow" items-length="99999" density="compact" disable-sort>
             <template v-slot:item.metadata.timestamp="{ value }">
               <span v-tooltip="formatDate(value)">
                 {{ timeFromNow(value) }}
@@ -240,6 +260,12 @@ const tableRowProps = ({ item }) => {
             <template v-slot:item.annotations.sender="{ value }">
               <span v-tooltip="value">
                 {{ value.substring(0, value.indexOf('-')) }}
+              </span>
+            </template>
+            <template v-slot:item.annotations.media_type="{ item, value }">
+              <span v-tooltip="value">
+                <v-btn v-if="value.includes('voevent')" icon="mdi-circle-outline" variant="plain" size="small" density="compact" readonly>vo</v-btn>
+                <v-btn v-else :icon="mediaTypeToIcon(item)" variant="plain" size="small" density="compact" readonly></v-btn>
               </span>
             </template>
             <template #bottom>
@@ -271,7 +297,7 @@ const tableRowProps = ({ item }) => {
             Sender: <b>{{ selectedItem.annotations.sender }}</b>
           </v-card-subtitle>
           <v-card-text>
-            <v-btn variant="outlined" @click="downloadSelectedFile" color="secondary">Download {{ selectedItem.annotations.file_name }}</v-btn>
+            <v-btn prepend-icon="mdi-file-download" variant="outlined" @click="downloadSelectedFile" color="secondary">Download {{ selectedItem.annotations.file_name }}</v-btn>
           </v-card-text>
         </v-card>
         <message-detail v-else-if="selectedUUID" :uuid="selectedUUID"></message-detail>
