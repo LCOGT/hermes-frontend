@@ -30,7 +30,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: HERMES_BACKEND_URL
+            - name: VITE_APP_HERMES_BACKEND_ROOT_URL
               value: {{ .Values.hermes.backendUrl }}
           ports:
             - name: http
@@ -48,8 +48,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: app-configuration
-              mountPath: /app/env-config.js
-              subPath: "env-config.js"
+              mountPath: /app/.env
+              subPath: ".env"
       volumes:
         - name: app-configuration
           configMap:

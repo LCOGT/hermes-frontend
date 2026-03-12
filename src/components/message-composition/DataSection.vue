@@ -1,192 +1,187 @@
-<template>
-  <b-container class="p-0" :id="'data-' + section">
-    <div class="accordion" role="tablist">
-      <b-card no-body class="mb-1">
-        <b-card-header header-tag="header" class="p-0" role="tab">
-          <b-button-group class="w-100">
-            <b-button block v-b-toggle:[tabName] :variant="getVariant" @click="addNewRowIfEmpty">
-              <b-row>
-                <b-col class="text-left error-icon">
-                  <b-icon v-if="hasErrors" icon="exclamation-circle-fill" variant="danger"
-                    :title="getErrorTooltipString()"></b-icon>
-                </b-col>
-                <b-col v-if="isEmpty" class="text-center" :style="textStyle">
-                  Add {{ datatype }}
-                </b-col>
-                <b-col v-else class="text-center" :style="textStyle">
-                  {{ capitalSection }}
-                </b-col>
-              </b-row>
-            </b-button>
-            <span v-if="allowLoading" class="text-right">
-              <b-button class="br-0" title="Copy Headers" @click="copyHeaders()">
-                <b-icon icon="clipboard" aria-hidden="true"></b-icon>
-              </b-button>
-            </span>
-            <span v-if="allowLoading" class="text-right">
-              <b-button class="br-0" title="Load CSV File" @click="pickCsv()">
-                <b-icon icon="upload" aria-hidden="true"></b-icon>
-                <input @change="loadCsv" type="file" :ref="section + 'File'" accept=".csv" hidden/>
-              </b-button>
-            </span>
-            <span v-if="sectionShowSimple && !onlySimple" class="text-right">
-              <b-button class="br-0" title="Advanced UI" :disabled="disabled" @click="toggleSectionShowSimple()">
-                <b-icon icon="diagram3" aria-hidden="true"></b-icon>
-              </b-button>
-            </span>
-            <span v-if="!sectionShowSimple || onlySimple" class="text-right">
-              <b-button class="br-0" title="Simple UI" :disabled="disabled" @click="toggleSectionShowSimple()">
-                <b-icon icon="card-list" aria-hidden="true"></b-icon>
-              </b-button>
-            </span>
-          </b-button-group>
-        </b-card-header>
-        <b-collapse :id="tabName" v-model="visible" :accordion="'accordion-' + tabName" role="tabpanel">
-          <b-card-body>
-              <slot />
-          </b-card-body>
-        </b-collapse>
-      </b-card>
-    </div>
-  </b-container>
-</template>
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue';
 import _ from 'lodash';
 import '@/assets/css/submissions.css';
 
-export default {
-  name: 'DataSection',
-  props: {
-    errors: {
-      required: true
-    },
-    datatype: {
-      type: String,
-      required: true
-    },
-    pluralDatatype: {
-      type: String,
-      required: false
-    },
-    isEmpty: {
-      type: Boolean,
-      default: false
-    },
-    sectionShowSimple: {
-      type: Boolean,
-      default: true
-    },
-    onlySimple: {
-      type: Boolean,
-      default: false
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    allowLoading: {
-      type: Boolean,
-      default: false
-    },
-    section: {
-      type: String,
-      required: true
-    }
+const props = defineProps({
+  errors: {
+    required: true
   },
-  data: function () {
-    return {
-      show: true,
-      visible: false,
-      id: this.section,
-      tabName: this.section.toLowerCase() + '-tab',
-      fileInput: null,
-    }
+  datatype: {
+    type: String,
+    required: true
   },
-  watch: {
-    fileInput(newTable) {
-      // emit event to parse csv when file is loaded
-      this.$emit('parse-csv', this.section, newTable);
-    }
+  pluralDatatype: {
+    type: String,
+    required: false
   },
-  computed: {
-    capitalSection: function() {
-      if (this.pluralDatatype){
-        return this.pluralDatatype;
-      }
-      return _.capitalize(this.section);
-    },
-    hasErrors: function() {
-      return !_.isEmpty(this.errors);
-    },
-    textStyle: function() {
-      if (this.allowLoading) {
-        return '';
-      }
-      else {
-        return 'margin-right: 92px !important;';
-      }
-    },
-    getVariant: function () {
-      if (this.hasErrors){
-        return 'errors';
-      }
-      else if (this.isEmpty) {
-        return 'empty';
-      }
-      else{
-        return 'valid';
-      }
-    }
+  isEmpty: {
+    type: Boolean,
+    default: false
   },
-  methods: {
-    forceVisibility: function(shouldShow) {
-      this.visible = shouldShow;
-    },
-    addNewRowIfEmpty: function() {
-      if (this.isEmpty) {
-        this.$emit('new-row');
+  sectionShowSimple: {
+    type: Boolean,
+    default: true
+  },
+  onlySimple: {
+    type: Boolean,
+    default: false
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+  allowLoading: {
+    type: Boolean,
+    default: false
+  },
+  section: {
+    type: String,
+    required: true
+  }
+})
+
+// Expose the forceVisibility function to parent component
+defineExpose({
+  forceVisibility
+});
+
+const emit = defineEmits(['parse-csv', 'new-row', 'toggle-section-show-simple', 'copy-headers']);
+
+const visible = ref(false)
+const panel = ref([])
+const fileRef = ref(null)
+const fileInput = ref(null)
+
+watch(() => fileInput, () => {
+  if (fileInput.value) {
+    emit('parse-csv', props.section, fileInput.value);
+  }
+});
+
+const capitalSection = computed(() => {
+  if (props.pluralDatatype){
+    return props.pluralDatatype;
+  }
+  return _.capitalize(props.section);
+})
+
+const hasErrors = computed(() => {
+  return !_.isEmpty(props.errors);
+})
+
+const textStyle = computed(() => {
+  if (props.allowLoading) {
+    return 'font-size: x-large;';
+  }
+  else {
+    return 'margin-right: 92px !important; font-size: x-large;';
+  }
+})
+
+const getMainColor = computed(() => {
+  if (hasErrors.value){
+    return 'error';
+  }
+  else if (props.isEmpty) {
+    return 'primary';
+  }
+  else{
+    return 'success';
+  }
+})
+
+function forceVisibility(shouldShow) {
+  if (shouldShow) {
+    panel.value = [props.section + 'Panel'];
+  }
+  else {
+    panel.value = [];
+  }
+}
+
+function addNewRowIfEmpty() {
+  if (props.isEmpty) {
+    emit('new-row');
+  }
+}
+
+const errorTooltipString = computed(() => {
+  if (_.isEmpty(props.errors)){
+    return null;
+  }
+  let errorStr = 'Field Errors:\n';
+  if (_.isArray(props.errors)){
+    for (var i = 0; i < props.errors.length; i += 1) {
+      if (_.isString(props.errors[i])) {
+        errorStr += props.errors[i] + '\n';
       }
-    },
-    getErrorTooltipString: function() {
-      if (_.isEmpty(this.errors)){
-        return null;
+      else if (_.isObject(props.errors[i]) && !_.isEmpty(props.errors[i])) {
+        _.forEach(props.errors[i], function(value, key) {
+          errorStr += i + ': ' + key + '\n';
+        });
       }
-      let errorStr = 'Field Errors:\n';
-      if (_.isArray(this.errors)){
-        for (var i = 0; i < this.errors.length; i += 1) {
-          if (_.isString(this.errors[i])) {
-            errorStr += this.errors[i] + '\n';
-          }
-          else if (_.isObject(this.errors[i]) && !_.isEmpty(this.errors[i])) {
-            _.forEach(this.errors[i], function(value, key) {
-              errorStr += i + ': ' + key + '\n';
-            });
-          }
-        }
-      }
-      return errorStr;
-    },
-    toggleSectionShowSimple: function() {
-      this.$emit('toggle-section-show-simple', this.section);
-    },
-    copyHeaders: function() {
-      this.$emit('copy-headers', this.section);
-    },
-    pickCsv: function() {
-      _.get(this.$refs, this.section + 'File').click();
-    },
-    loadCsv: function(event) {
-      // Upload CSV from file and return text
-      let files = event.target.files || event.dataTransfer.files;
-      if (!files.length)
-        return;
-      let reader = new FileReader();
-      reader.onload = () => {
-        this.fileInput = reader.result;
-      }
-      reader.readAsText(files[0]);
     }
   }
-};
+  return errorStr;
+})
+
+function toggleSectionShowSimple() {
+  emit('toggle-section-show-simple', props.section);
+}
+
+function copyHeaders() {
+  emit('copy-headers', props.section);
+}
+
+function openFileInput() {
+  if (fileRef.value) {
+    fileRef.value.click();
+  }
+}
+
+function loadCsv(files) {
+  // Upload CSV from file and return text
+  if (!files.length)
+    return;
+  let reader = new FileReader();
+  reader.onload = () => {
+    fileInput.value = reader.result;
+  }
+  reader.readAsText(files[0]);
+}
+
 </script>
-  
+<template>
+  <v-container class="pa-0" :id="'data-' + section">
+    <v-expansion-panels variant="accordion" static v-model="panel">
+      <v-expansion-panel hide-actions @click="addNewRowIfEmpty" :value="props.section + 'Panel'">
+        <v-expansion-panel-title :color="getMainColor" class="pa-0">
+          <v-row no-gutters align="center" justify="center">
+            <v-col v-if="hasErrors" class="d-flex justify-start error-icon">
+              <v-icon icon="mdi-alert-circle" color="red-darken-4" size="48" v-tooltip="errorTooltipString"></v-icon>
+            </v-col>
+            <v-col v-if="props.isEmpty" class="text-center" :style="textStyle">
+              Add {{ props.datatype }}
+            </v-col>
+            <v-col v-else class="text-center" :style="textStyle">
+              {{ capitalSection }}
+            </v-col>
+            <v-col class="d-flex justify-end">
+              <v-btn-group divided color="primary-darken-1" rounded="0">
+                <v-btn v-if="props.allowLoading" icon="mdi-clipboard-outline" v-tooltip="'Copy Headers'" @click.stop="copyHeaders()"></v-btn>
+                <v-btn v-if="props.allowLoading" icon="mdi-upload" v-tooltip="'Load CSV File'" @click.stop="openFileInput()"></v-btn>
+                <v-btn v-if="props.sectionShowSimple && !props.onlySimple" icon="mdi-sitemap-outline" v-tooltip="'Advanced UI'" :disabled="props.disabled" @click.stop="toggleSectionShowSimple()"></v-btn>
+                <v-btn v-if="!props.sectionShowSimple || props.onlySimple" icon="mdi-list-box-outline" v-tooltip="'Simple UI'" :disabled="props.disabled" @click.stop="toggleSectionShowSimple()"></v-btn>
+              </v-btn-group>
+              <v-file-input ref="fileRef" accept=".csv,.txt" @change="loadCsv" style="display: none"></v-file-input>
+            </v-col>
+          </v-row>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <slot />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </v-container>
+</template>

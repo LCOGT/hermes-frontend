@@ -1,224 +1,190 @@
-<template>
-    <b-container class="p-0" :id="'data-photometry-' + index">
-      <b-card header-tag="header">
-        <template #header>
-          <b-form-row>
-            <b-col md="3" class=" text-center data-label-text">
-              <b>Photometry Datum {{ index }}</b>
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-select
-                  v-model="photometry.target_name"
-                  field="target_name"
-                  label="Target:"
-                  desc="Target name as defined in the Targets section"
-                  :hide=false
-                  :errors="errors.target_name"
-                  :options="targetNames"
-                  @input="update"
-              />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field
-                  v-model="photometry.date_obs"
-                  field="date_obs"
-                  label="Obs Date:"
-                  desc="The date the observation producing this datum was taken"
-                  :hide=false
-                  :errors="errors.date_obs"
-                  @input="update"
-              />
-            </b-col>
-            <b-col md="2" offset-md="1" class="text-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <b-button title="Advanced Photometry Fields" v-b-toggle="'advanced-photometry-collapse-' + index" @click="toggleCollapse">
-                    <span v-if="advancedOptionsCollapsed">
-                      <b-icon icon="arrows-expand" aria-hidden="true"></b-icon>
-                    </span>
-                    <span v-if="!advancedOptionsCollapsed">
-                      <b-icon icon="arrows-collapse" aria-hidden="true"></b-icon>
-                    </span>
-                  </b-button>
-                  <b-button title="Copy this Photometry Datum" @click="copy">
-                    <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
-                  </b-button>
-                  <b-button title="Remove this Photometry Datum" @click="confirm('Are you sure you want to remove this Photometry Datum?', remove)">
-                    <b-icon icon="trash" aria-hidden="true"></b-icon>
-                  </b-button>
-                </b-button-group>
-              </b-button-toolbar>
-            </b-col>
-          </b-form-row>
-        </template>
-        <b-form-row class="mb-2">
-          <b-col md="5">
-            <ocs-custom-field v-model="photometry.brightness" field="brightness" label="Brightness:" :hide=false
-              :errors="errors.brightness" @input="update">
-              <b-input-group-append slot="inline-input">
-                <b-form-select
-                  :id="'brightness-unit-select-' + this.index"
-                  v-model="photometry.brightness_unit"
-                  :options="brightnessUnits"
-                  @input="update"
-                />
-              </b-input-group-append>
-            </ocs-custom-field>  
-          </b-col>
-          <b-col md="3">
-            <ocs-custom-field v-model="photometry.brightness_error" field="brightness_error" label="Error:" :hide=false
-              :errors="errors.brightness_error" @input="update" />
-          </b-col>
-          <b-col md="3">
-            <ocs-custom-field v-if="!isTns" v-model="photometry.bandpass" field="bandpass" label="Band:" :hide=false
-              :errors="errors.bandpass" @input="update" />
-            <ocs-custom-select
-              v-else
-              v-model="photometry.bandpass"
-              field="bandpass"
-              label="Band:"
-              :hide=false
-              :options="getTnsValuesList('filters', true)"
-              :errors="errors.bandpass"
-              @input="update"
-            />
-          </b-col>
-        </b-form-row>
-        <b-form-row>
-          <b-col md="5">
-            <ocs-custom-field v-model="photometry.limiting_brightness" field="limiting_brightness" label="Limiting Brightness:" :hide=false
-              :errors="errors.limiting_brightness" @input="update">
-              <b-input-group-append slot="inline-input">
-                <b-form-select
-                  :id="'limiting-brightness-unit-select-' + this.index"
-                  v-model="photometry.limiting_brightness_unit"
-                  :options="brightnessUnits"
-                  @input="update"
-                />
-              </b-input-group-append>
-            </ocs-custom-field>  
-          </b-col>
-          <b-col md="3">
-            <ocs-custom-field v-if="!isTns" v-model="photometry.telescope" field="telescope" label="Telescope:" :hide=false
-              :errors="errors.telescope" @input="update" />
-            <ocs-custom-select
-              v-else
-              v-model="photometry.telescope"
-              field="telescope"
-              label="Telescope:"
-              :hide=false
-              :options="getTnsValuesList('telescopes', true)"
-              :errors="errors.telescope"
-              @input="update"
-            />
-          </b-col>
-          <b-col md="3">
-            <ocs-custom-field v-if="!isTns" v-model="photometry.instrument" field="instrument" label="Instrument:" :hide=false
-              :errors="errors.instrument" @input="update" />
-            <ocs-custom-select
-              v-else
-              v-model="photometry.instrument"
-              field="instrument"
-              label="Instrument:"
-              :hide=false
-              :options="getTnsValuesList('instruments', true)"
-              :errors="errors.instrument"
-              @input="update"
-            />
-          </b-col>
-        </b-form-row>
-        <b-collapse :id="'advanced-photometry-collapse-' + index" class="mt-2">
-          <b-form-row>
-            <b-col md="2">
-              <ocs-custom-field v-model="photometry.exposure_time" field="exposure_time" label="Exp Time:" :hide=false
-                :errors="errors.exposure_time" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="photometry.observer" field="observer" label="Observer:" :hide=false
-                :errors="errors.observer" @input="update" />
-            </b-col>
-            <b-col md="3">
-              <ocs-custom-field v-model="photometry.catalog" field="catalog" label="Catalog:" :hide=false
-                :errors="errors.catalog" @input="update" />
-            </b-col>
-          </b-form-row>
-          <b-form-row>
-            <b-col md="12">
-              <b-form-group
-                :id="'photometry-comments-fieldgroup' + id"
-                label-size="sm"
-                label-align-sm="right"
-                label-cols-sm="1"
-                label-for="comments"
-              >
-                <template slot="label">
-                  Comments:
-                </template>
-                <b-input-group>
-                  <b-form-textarea
-                    :id="'photometry-comments-field' + id"
-                    v-model="photometry.comments"
-                    placeholder="Enter something..."
-                    rows="2"
-                    max-rows="4"
-                    @input="update"
-                  />
-                  <slot name="inline-input" />
-                </b-input-group>
-              </b-form-group>
-            </b-col>
-          </b-form-row>
-        </b-collapse>
-      </b-card>
-    </b-container>
-  </template>
-  <script>
-  import { OCSMixin } from 'ocs-component-lib';
-  import _ from 'lodash';
-  import { schemaDataMixin } from '@/mixins/schemaDataMixin.js';
-  import { tnsUtilsMixin } from '@/mixins/tnsUtilsMixin.js';
+<script setup>
+import { ref, computed } from 'vue';
+import _ from 'lodash';
+import ConfirmDialogBtn from '@/components/message-composition/ConfirmDialogBtn.vue';
+import { useTnsUtils } from '@/utils/tnsUtils.js';
+import { useSchemaDataUtils } from '@/utils/schemaDataUtils.js';
 
-  export default {
-    name: 'DataPhotometry',
-    mixins: [OCSMixin.confirmMixin, schemaDataMixin, tnsUtilsMixin],
-    props: {
-      index: {
-        type: Number,
-        required: true
-      },
-      errors: {
-        type: Object,
-        required: true
-      },
-      photometry: {
-        type: Object,
-        required: true
-      },
-      targets: {
-        type: Array,
-        required: true,
-        default: () => {
-          return [];
-        }
-      },
-      isTns: {
-        type: Boolean,
-        default: false
-      }
-    },
-    data: function() {
-      return {
-        brightnessUnits: ['AB mag', 'Vega mag', 'mJy', 'erg / s / cm² / Å'],
-        advancedOptionsCollapsed: true,
-        show: true,
-        id: 'photometry-' + this.index
-      };
-    },
-    computed: {
-      targetNames: function() {
-        return _.map(this.targets, 'name');
-      }
+const props = defineProps({
+  index: {
+    type: Number,
+    required: true
+  },
+  errors: {
+    type: Object,
+    required: true
+  },
+  photometry: {
+    type: Object,
+    required: true
+  },
+  targets: {
+    type: Array,
+    required: true,
+    default: () => {
+      return [];
     }
-  };
-  </script>
-    
+  },
+  isTns: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['remove', 'copy', 'message-updated']);
+
+const { remove, copy, update } = useSchemaDataUtils(emit)
+const { getTnsValuesList } = useTnsUtils();
+
+const brightnessUnits = ['AB mag', 'Vega mag', 'mJy', 'erg / s / cm² / Å'];
+const advancedOptionsCollapsed = ref(true);
+const id = 'photometry-' + props.index;
+
+const targetNames = computed(() => {
+  return _.map(props.targets, 'name');
+})
+
+const advancedOptionsIcon = computed(() => {
+  if (advancedOptionsCollapsed.value) {
+    return 'mdi-arrow-expand-vertical';
+  }
+  else {
+    return 'mdi-arrow-collapse-vertical';
+  }
+})
+
+</script>
+<template>
+  <v-container class="p-0" :id="'data-photometry-' + index">
+    <v-card variant="outlined">
+      <v-card-title>
+        <v-row align="center">
+          <v-col md="3" class=" text-center data-label-text">
+            <b>Photometry Datum {{ index }}</b>
+          </v-col>
+          <v-col md="3">
+            <v-select
+              v-model="props.photometry.target_name"
+              label="Target"
+              density="compact"
+              variant="outlined"
+              v-tooltip="'Target name as defined in the Targets section'"
+              :error-messages="props.errors.target_name"
+              :items="targetNames"
+              @update:modelValue="update"
+            />
+          </v-col>
+          <v-col md="3">
+            <VueDatePicker
+              v-model="props.photometry.date_obs"
+              model-type="iso"
+              class="cell-date-picker data-label-text"
+              placeholder="Observation Date"
+              v-tooltip="'The date the observation producing this datum was taken'"
+              :dark="true"
+              :teleport="true"
+              required
+              error-messages="props.errors.date_obs"
+              @update:modelValue="update">
+            </VueDatePicker>
+          </v-col>
+          <v-col md="2" offset-md="1" class="text-right">
+            <v-btn-group divided color="primary-darken-1" class="data-label-text">
+              <v-btn v-tooltip="'Advanced Photometry Fields'" :icon="advancedOptionsIcon" :disabled="props.isTns" @click="advancedOptionsCollapsed = !advancedOptionsCollapsed">
+              </v-btn>
+              <v-btn v-tooltip="'Copy this Photometry Datum'" icon="mdi-file-document-plus-outline" @click="copy">
+              </v-btn>
+              <confirm-dialog-btn
+                btn-tooltip="Remove this Photometry Datum"
+                btn-icon="mdi-trash-can-outline"
+                confirm-text="Are you sure you want to remove this Photometry Datum?"
+                confirm-action="Remove"
+                @confirmed="remove">
+              </confirm-dialog-btn>
+            </v-btn-group>
+          </v-col>
+        </v-row>
+      </v-card-title>
+      <v-card-text>
+        <v-row class="mb-2">
+          <v-col md="5">
+            <v-text-field v-model="props.photometry.brightness" label="Brightness" variant="outlined" :error-messages="props.errors.brightness" rounded="0" @update:modelValue="update">
+              <template v-slot:append>
+                <v-select v-model="props.photometry.brightness_unit" variant="outlined" class="appended-element" label="Units" rounded="0" :items="brightnessUnits" hide-details @update:modelValue="update"></v-select>
+              </template>
+            </v-text-field>  
+          </v-col>
+          <v-col md="3">
+            <v-text-field v-model="props.photometry.brightness_error" label="Brightness Error" variant="outlined" :error-messages="props.errors.brightness_error" @update:modelValue="update" />
+          </v-col>
+          <v-col md="3">
+            <v-text-field v-if="!props.isTns" v-model="props.photometry.bandpass" label="Band" variant="outlined" :error-messages="props.errors.bandpass" @update:modelValue="update" />
+            <v-autocomplete
+              v-else
+              v-model="props.photometry.bandpass"
+              label="Band"
+              variant="outlined"
+              :items="getTnsValuesList('filters', false)"
+              clearable=""
+              :error-messages="props.errors.bandpass"
+              @update:modelValue="update"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col md="5">
+            <v-text-field v-model="props.photometry.limiting_brightness" label="Limiting Brightness" variant="outlined" rounded="0" :error-messages="props.errors.limiting_brightness" @update:modelValue="update">
+              <template v-slot:append>
+                <v-select v-model="props.photometry.limiting_brightness_unit" variant="outlined" class="appended-element" label="Units" rounded="0" :items="brightnessUnits" hide-details @update:modelValue="update"></v-select>
+              </template>
+            </v-text-field>  
+          </v-col>
+          <v-col md="3">
+            <v-text-field v-if="!props.isTns" v-model="props.photometry.telescope" label="Telescope" variant="outlined" :error-messages="props.errors.telescope" @update:modelValue="update" />
+            <v-autocomplete
+              v-else
+              v-model="props.photometry.telescope"
+              label="Telescope"
+              variant="outlined"
+              :items="getTnsValuesList('telescopes', false)"
+              clearable=""
+              :error-messages="props.errors.telescope"
+              @update:modelValue="update"
+            />
+          </v-col>
+          <v-col md="3">
+            <v-text-field v-if="!props.isTns" v-model="props.photometry.instrument" label="Instrument" variant="outlined" :error-messages="props.errors.instrument" @update:modelValue="update" />
+            <v-autocomplete
+              v-else
+              v-model="props.photometry.instrument"
+              label="Instrument"
+              variant="outlined"
+              :items="getTnsValuesList('instruments', false)"
+              clearable=""
+              :error-messages="props.errors.instrument"
+              @update:modelValue="update"
+            />
+          </v-col>
+        </v-row>
+        <span v-if="!advancedOptionsCollapsed">
+          <v-row>
+            <v-col md="2">
+              <v-text-field v-model="props.photometry.exposure_time" label="Exp Time" variant="outlined" :error-messages="props.errors.exposure_time" @update:modelValue="update" />
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.photometry.observer" label="Observer" variant="outlined" :error-messages="props.errors.observer" @update:modelValue="update" />
+            </v-col>
+            <v-col md="3">
+              <v-text-field v-model="props.photometry.catalog" label="Catalog" variant="outlined" :error-messages="props.errors.catalog" @update:modelValue="update" />
+            </v-col>
+          </v-row>
+          <v-row class="mt-1">
+            <v-col md="12">
+              <v-textarea v-model="props.photometry.comments" max-rows="4" rows="2" label="Comments" variant="outlined" placeholder="Enter something..." @update:modelValue="update" />
+            </v-col>
+          </v-row>
+        </span>
+      </v-card-text>
+    </v-card>
+  </v-container>
+</template>

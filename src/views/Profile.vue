@@ -1,26 +1,264 @@
+<script setup>
+import { ref, computed, watchEffect, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useStateStore } from '@/stores/state';
+import { useLogout } from '@/utils/logout.js';
+
+const { logout } = useLogout();
+const route = useRoute()
+const stateStore = useStateStore()
+
+const alertMessage = ref('')
+const showAlert =  ref(false)
+const alertVariant = ref('warning')
+const tns_form = ref({
+  'bot_id': null,
+  'bot_name': null,
+  'bot_api_token': null
+})
+const updatingBotCredentials = ref(false)
+const copySnack = ref(false)
+const revokingCredential = ref(false)
+const revokingApiToken =  ref(false)
+
+onMounted(async () => {
+  console.log("ONMOUTNED")
+  if (route.query.alert){
+    console.log("OHNO")
+    alertMessage.value = route.query.alert;
+    alertVariant.value = 'error';
+    showAlert.value = true;
+  }
+  // I think its reasonable to trigger a refresh of the profile data when you hit the /profile view.
+  await stateStore.getProfileData();
+  if (stateStore.userIsAuthenticated) {
+    setTnsBotId(stateStore.profile?.tns_bot_id);
+    setTnsBotName(stateStore.profile?.tns_bot_name);
+  }
+})
+
+watchEffect(() => stateStore.profile?.tns_bot_id), () => {
+  setTnsBotId(stateStore.profile?.tns_bot_id);
+}
+watchEffect(() => stateStore.profile?.tns_bot_name), () => {
+  setTnsBotName(stateStore.profile?.tns_bot_name);
+}
+  
+const writableTopics = computed(() => {
+  return stateStore.profile.writable_topics.join('\n');
+})
+
+const isGcnAuthorized = computed(() => {
+  return stateStore.profile.integrated_apps.includes('GCN');
+})
+    
+const canSubmitToGcn = computed(() => {
+  return stateStore.profile.can_submit_to_gcn;
+})  
+    
+const gcnAuthorizationText = computed(() => {
+  if (isGcnAuthorized.value) {
+    if (canSubmitToGcn.value) {
+      return 'Current Status: <font color="green">Connected / Permitted</font>'
+    }
+    else {
+      return 'Current Status: <font color="darkorange" title="Please check your GCN accounts peer endorsements to make sure you have GCN Circular submission privileges">Connected / Not Permitted</font>'
+    }
+  }
+  else {
+    return 'Current Status: <font color="red" title="You must authorize your GCN account">Not Connected</font>'
+  }
+}) 
+    
+const tnsBotCredentialsSet = computed(() => {
+  return stateStore.profile.integrated_apps.includes('TNS');
+})
+    
+const canSetTNSCredentials = computed(() => {
+  if (tns_form.value.bot_id && tns_form.value.bot_name && tns_form.value.bot_api_token) {
+    return true;
+  }
+  return false;
+})
+    
+const botOverrideText = computed(() => {
+  if (tnsBotCredentialsSet.value) {
+    return 'Current Status: <font color="green">Bot Override Set</font>';
+  }
+  else {
+    return 'Current Status: <font color="red">No Bot Override Set</font>';
+  }
+})
+
+function setTnsBotId(value) {
+  console.log("Setting TNS BOT ID to " + value)
+  if (value != -1) {
+    tns_form.value.bot_id = value;
+  }
+}
+    
+function setTnsBotName(value) {
+  console.log("Setting TNS BOT NAME to " + value)
+  if (value != '') {
+    tns_form.value.bot_name = value;
+  }
+}
+    
+function authorizeGcn(evt) {
+  evt.preventDefault();
+  location.href =
+    stateStore.hermesUrl + "gcn-auth/login";
+}
+    
+async function performRevokeToken() {
+  let url = new URL('/api/v0/revoke_api_token/', stateStore.hermesUrl).href
+  fetch(url, {
+    method: 'post',
+    headers: {'Content-Type': 'application/json',
+              'X-CSRFToken': stateStore.csrf_token
+              },
+    credentials: 'include',
+  })
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    stateStore.getProfileData();
+    alertMessage.value = 'Token Successfully Revoked!';
+    alertVariant.value = 'success';
+    showAlert.value = true;
+  })
+  .catch((error) => {
+    console.log(error);
+    if (error.response.status == 401){
+      logout();
+    }
+  });
+}
+    
+async function performRevokeCredential() {
+  let url = new URL('/api/v0/revoke_hop_credential/', stateStore.hermesUrl).href
+  fetch(url, {
+    method: 'post',
+    headers: {'Content-Type': 'application/json',
+              'X-CSRFToken': stateStore.csrf_token
+              },
+    credentials: 'include',
+  })
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    stateStore.getProfileData();
+    alertMessage.value = 'Hop Credentials Successfully Revoked!';
+    alertVariant.value = 'success';
+    showAlert.value = true;
+  })
+  .catch((error) => {
+    console.log(error);
+    if (error.response.status == 401){
+      logout();
+    }
+  });
+}
+    
+function performRevokeBotCredentials(evt) {
+  evt.preventDefault();
+  tns_form.value.bot_id = null;
+  tns_form.value.bot_name = null;
+  tns_form.value.bot_api_token = null;
+  updateTNSBotCredentials('TNS Bot Credentials Successfully Revoked!');
+}
+
+function performUpdateBotCredentials(evt) {
+  evt.preventDefault();
+  updateTNSBotCredentials('TNS Bot Credentials Successfully Updated!');
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    copySnack.value = true;
+  } catch (err) {
+    console.error('Failed to copy')
+  }
+}
+
+async function updateTNSBotCredentials(success_message) {
+  updatingBotCredentials.value = true;
+  var tns_data = {
+    'tns_bot_id': tns_form.value.bot_id || -1,
+    'tns_bot_name': tns_form.value.bot_name || '',
+    'tns_bot_api_token': tns_form.value.bot_api_token || ''
+  };
+  let url = new URL('/api/v0/profile/', stateStore.hermesUrl).href
+  fetch(url, {
+    mode: 'cors',
+    method: 'patch',
+    headers: {'Content-Type': 'application/json',
+              'X-CSRFToken': stateStore.csrf_token
+              },
+    credentials: 'include',
+    body: JSON.stringify(tns_data)
+  })
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    stateStore.getProfileData();
+    alertMessage.value = success_message;
+    alertVariant.value = 'success';
+    showAlert.value = true;
+    updatingBotCredentials.value = false;
+  })
+  .catch((error) => {
+    console.log(error);
+    updatingBotCredentials.value = false;
+    if (error.response.status == 401){
+      logout();
+    }
+    else {
+      alertMessage.value = error.response.data;
+      alertVariant.value = 'error';
+      showAlert.value = true;
+    }
+  });
+}
+
+</script>
 <template>
-  <b-container>
-    <b-alert :show="!isLoggedIn" variant="danger">
+  <v-container>
+    <v-snackbar v-model="copySnack" timeout="2000" color="success">Copied!</v-snackbar>
+    <v-alert v-if="!stateStore.userIsAuthenticated" type="warning">
       <p>You must login to access your profile</p>
-    </b-alert>
-    <b-alert dismissible :variant="alertVariant" v-model="showAlert" @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
-    <b-row v-if="isLoggedIn">
-      <b-col md="4" class="border-right">
+    </v-alert>
+    <v-alert closable :type="alertVariant" v-model="showAlert" @dismissed="showAlert.value=false">{{ alertMessage }}</v-alert>
+    <v-row v-if="stateStore.userIsAuthenticated">
+      <v-col md="4" class="border-md">
         <h3 class="text-center">Writable Topics</h3>
-        <b-form-textarea v-model="writableTopics" readonly rows="8">
-        </b-form-textarea>
+        <v-textarea v-model="writableTopics" readonly rows="8">
+        </v-textarea>
         <p class="pt-3">To add more writable topics, attach your
           <a class="text-secondary" href="https://my.hop.scimma.org/hopauth/">Scimma Auth</a> user account
           to more groups with the topic permissions you want, or manually add write permissions to your existing Hermes SCiMMA Auth credential.
         </p>
-      </b-col>
-      <b-col md="4" class="border-right">
+      </v-col>
+      <v-col md="4" class="border-md">
         <h3 class="text-center">API Key</h3>
         <p>
           The following key may be used to authenticate when using the
-          <a class="text-secondary" :href="this.getHermesUrl + 'api/v0/'">Hermes API</a>. This key should be treated like a password.
+          <a class="text-secondary" :href="stateStore.hermesUrl + 'api/v0/'">Hermes API</a>. This key should be treated like a password.
         </p>
-        <input class="form-control" :value="getProfile.api_token" onclick="this.select()" readonly />
+        <v-text-field :model-value="stateStore.profile?.api_token" @click="copyText(stateStore.profile?.api_token)" readonly />
         <p class="pt-3">
           If you think your API token may have been compromised (by accidentally checking it in to a public source code
           repository, emailing it out, etc) you may revoke the token to obtain a new one using the button below.
@@ -28,32 +266,32 @@
         <p>
           <b>WARNING</b>: This will cause any applications that use this token to stop working!
         </p>
-        <div class="text-center">
-          <b-button variant="danger" @click="performRevokeToken">
+        <div class="text-center mt-2">
+          <v-btn color="error" @click="performRevokeToken">
             Revoke Token
-          </b-button>
+          </v-btn>
         </div>
-      </b-col>
-      <b-col md="4">
+      </v-col>
+      <v-col md="4" class="border-md">
         <h3 class="text-center">SCiMMA Auth Credential</h3>
         <p>
           The following credential name was created and is used by Hermes for all authenication with SCiMMA Auth.
         </p>
-        <input class="form-control" :value="getProfile.credential_name" onclick="this.select()" readonly />
+        <v-text-field :model-value="stateStore.profile?.credential_name" @click="copyText(stateStore.profile?.credential_name)" readonly />
         <p class="pt-3">
           If you believe this credential has been compromised, or is not working properly, you may destroy the credential
           by clicking below. This will cause Hermes to regenerate a new SCiMMA Auth credential for your account. The initial permissions
           on the credential are set using your SCiMMA Auth user accounts various group permissions.
         </p>
-        <div class="text-center">
-          <b-button variant="danger" @click="performRevokeCredential">
+        <div class="text-center mt-2">
+          <v-btn color="error" @click="performRevokeCredential">
             Revoke Credential
-          </b-button>
+          </v-btn>
         </div>
-      </b-col>
-    </b-row>
-    <b-row v-if="isLoggedIn">
-      <b-col md="4" class="border-right border-top pt-4">
+      </v-col>
+    </v-row>
+    <v-row v-if="stateStore.userIsAuthenticated">
+      <v-col md="4" class="border-md pt-4">
         <h3 class="text-center">GCN Authorization</h3>
         <p>
           To submit messages to GCN Circulars, you must have a valid <a class="text-secondary" href="https://gcn.nasa.gov/">NASA GCN</a> account
@@ -66,12 +304,12 @@
         </p>
         <div v-html="gcnAuthorizationText"></div><br />
         <div class="text-center">
-          <b-button variant="info" @click="authorizeGcn">
+          <v-btn color="info" @click="authorizeGcn">
             Authorize GCN
-          </b-button>
+          </v-btn>
         </div>
-      </b-col>
-      <b-col md="4" class="border-top pt-4">
+      </v-col>
+      <v-col md="4" class="border-md pt-4">
         <h3 class="text-center">TNS Bot Credentials</h3>
         <p>
           By default, TNS submissions will use the built-in <b>Hermes_bot</b>. This bot only has permissions to report to the TNS from the <b>Hermes_group</b>.
@@ -79,228 +317,25 @@
           here or via the api.
         </p>
         <div v-html="botOverrideText"></div><br />
-        <b-form>
-          <b-form-input class="mb-1" v-model="tns_form.bot_id" type="number" placeholder="Enter your TNS Bot ID"></b-form-input>
-          <b-form-input class="mb-1" v-model="tns_form.bot_name" placeholder="Enter your TNS Bot Name"></b-form-input>
-          <b-form-input class="mb-1" v-model="tns_form.bot_api_token" placeholder="Enter your TNS Bot API Token"></b-form-input>
-          <div class="mt-4">
-            <b-button class="mr-2" variant="danger" @click="performRevokeBotCredentials">
-              <b-spinner small v-if="updatingBotCredentials"></b-spinner>
-              Revoke Credentials
-            </b-button>
-            <b-button variant="success" @click="performUpdateBotCredentials" :disabled="!canSetTNSCredentials">
-              <b-spinner small v-if="updatingBotCredentials"></b-spinner>
-              Set Credentials
-            </b-button>
+        <v-form>
+          <v-number-input class="mb-1" v-model="tns_form.bot_id" control-variant="hidden" placeholder="Enter your TNS Bot ID"></v-number-input>
+          <v-text-field class="mb-1" v-model="tns_form.bot_name" placeholder="Enter your TNS Bot Name"></v-text-field>
+          <v-text-field  class="mb-1" v-model="tns_form.bot_api_token" placeholder="Enter your TNS Bot API Token"></v-text-field>
+          <div class="mt-3 text-center">
+            <v-btn-group divided>
+              <v-btn color="error" @click="performRevokeBotCredentials">
+                <v-progress-circular v-if="updatingBotCredentials" color="primary" size="16" indeterminate></v-progress-circular>
+                Revoke Credentials
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn color="success" @click="performUpdateBotCredentials" :disabled="!canSetTNSCredentials">
+                <v-progress-circular v-if="updatingBotCredentials" color="primary" size="16" indeterminate></v-progress-circular>
+                Set Credentials
+              </v-btn>
+            </v-btn-group>
           </div>
-        </b-form>
-      </b-col>
-    </b-row>
-  </b-container>
+        </v-form>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
-<script>
-
-import { mapGetters } from "vuex";
-import axios from "axios";
-import { logoutMixin } from '@/mixins/logoutMixin.js';
-
-export default {
-  name: 'ProfileView',
-  mixins: [logoutMixin],
-  data: function () {
-    return {
-      alertMessage: null,
-      showAlert: false,
-      alertVariant: 'warning',
-      tns_form: {
-        'bot_id': null,
-        'bot_name': null,
-        'bot_api_token': null
-      },
-      updatingBotCredentials: false,
-      revokingCredential: false,
-      revokingApiToken: false
-    };
-  },
-  mounted() {
-    if (this.$route.query.alert){
-      this.alertMessage = this.$route.query.alert;
-      this.alertVariant = 'danger';
-      this.showAlert = true;
-    }
-    // I think its reasonable to trigger a refresh of the profile data when you hit the /profile view.
-    this.$store.dispatch('getProfileData');
-    if (this.getProfile) {
-      this.setTnsBotId(this.getProfile.tns_bot_id);
-      this.setTnsBotName(this.getProfile.tns_bot_name);
-    }
-  },
-  watch: {
-    "this.getProfile.tns_bot_id": function(value) {
-      this.setTnsBotId(value);
-    },
-    "this.getProfile.tns_bot_name": function(value) {
-      this.setTnsBotName(value);
-    }
-  },
-  computed: {
-    ...mapGetters(["getProfile", "getCsrfToken", "isLoggedIn", "getHermesUrl"]),
-    writableTopics: function() {
-      return this.getProfile.writable_topics.join('\n');
-    },
-    isGcnAuthorized: function() {
-      return this.getProfile.integrated_apps.includes('GCN');
-    },
-    canSubmitToGcn: function() {
-      return this.getProfile.can_submit_to_gcn;
-    },
-    gcnAuthorizationText: function() {
-      if (this.isGcnAuthorized) {
-        if (this.canSubmitToGcn) {
-          return 'Current Status: <font color="green">Connected / Permitted</font>'
-        }
-        else {
-          return 'Current Status: <font color="darkorange" title="Please check your GCN accounts peer endorsements to make sure you have GCN Circular submission privileges">Connected / Not Permitted</font>'
-        }
-      }
-      else {
-        return 'Current Status: <font color="red" title="You must authorize your GCN account">Not Connected</font>'
-      }
-    },
-    tnsBotCredentialsSet: function() {
-      return this.getProfile.integrated_apps.includes('TNS');
-    },
-    canSetTNSCredentials: function() {
-      if (this.tns_form.bot_id && this.tns_form.bot_name && this.tns_form.bot_api_token) {
-        return true;
-      }
-      return false;
-    },
-    botOverrideText: function() {
-      if (this.tnsBotCredentialsSet) {
-        return 'Current Status: <font color="green">Bot Override Set</font>';
-      }
-      else {
-        return 'Current Status: <font color="red">No Bot Override Set</font>';
-      }
-    },
-    alertText: function() {
-      return this.$route.query.alert;
-    }
-  },
-  methods: {
-    setTnsBotId: function(value) {
-      if (value != -1) {
-        this.tns_form.bot_id = value;
-      }
-    },
-    setTnsBotName: function(value) {
-      if (value != '') {
-        this.tns_form.bot_name = value;
-      }
-    },
-    authorizeGcn: function(evt) {
-      evt.preventDefault();
-      location.href =
-        this.getHermesUrl + "gcn-auth/login";
-    },
-    performRevokeToken: function (evt) {
-      evt.preventDefault();
-      axios({
-        method: 'post',
-        withCredentials: true,
-        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': 'application/json',
-                  'X-CSRFToken': this.getCsrfToken
-                  },
-        url: new URL('/api/v0/revoke_api_token/', this.getHermesUrl).href,
-      })
-      .then(() => {
-        this.$store.dispatch('getProfileData');
-        this.alertMessage = 'Token Successfully Revoked!';
-        this.alertVariant = 'warning';
-        this.showAlert = true;
-      })
-      .catch(error => {
-        console.log(error);
-        if (error.response.status == 401){
-          this.logout();
-        }
-      });
-    },
-    performRevokeCredential: function (evt) {
-      evt.preventDefault();
-      axios({
-        method: 'post',
-        withCredentials: true,
-        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': 'application/json',
-                  'X-CSRFToken': this.getCsrfToken
-                  },
-        url: new URL('/api/v0/revoke_hop_credential/', this.getHermesUrl).href,
-      })
-      .then(() => {
-        this.$store.dispatch('getProfileData');
-        this.alertMessage = 'Hop Credentials Successfully Revoked!';
-        this.alertVariant = 'warning';
-        this.showAlert = true;
-      })
-      .catch(error => {
-        console.log(error);
-        if (error.response.status == 401){
-          this.logout();
-        }
-      });
-    },
-    performRevokeBotCredentials: function(evt) {
-      evt.preventDefault();
-      this.tns_form.bot_id = null;
-      this.tns_form.bot_name = null;
-      this.tns_form.bot_api_token = null;
-      this.updateTNSBotCredentials('TNS Bot Credentials Successfully Revoked!');
-    },
-    performUpdateBotCredentials: function(evt) {
-      evt.preventDefault();
-      this.updateTNSBotCredentials('TNS Bot Credentials Successfully Updated!');
-    },
-    updateTNSBotCredentials(success_message) {
-      this.updatingBotCredentials = true;
-      var tns_data = {
-        'tns_bot_id': this.tns_form.bot_id || -1,
-        'tns_bot_name': this.tns_form.bot_name || '',
-        'tns_bot_api_token': this.tns_form.bot_api_token || ''
-      };
-      axios({
-        method: 'patch',
-        withCredentials: true,
-        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': 'application/json',
-                  'X-CSRFToken': this.getCsrfToken
-                  },
-        url: new URL('/api/v0/profile/', this.getHermesUrl).href,
-        data: tns_data
-      })
-      .then(() => {
-        this.$store.dispatch('getProfileData');
-        this.alertMessage = success_message;
-        this.alertVariant = 'warning';
-        this.showAlert = true;
-        this.updatingBotCredentials = false;
-      })
-      .catch(error => {
-        console.log(error);
-        this.updatingBotCredentials = false;
-        if (error.response.status == 401){
-          this.logout();
-        }
-        else {
-          this.alertMessage = error.response.data;
-          this.alertVariant = 'danger';
-          this.showAlert = true;
-        }
-      });
-    }
-  }
-};
-</script>
-  

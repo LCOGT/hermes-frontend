@@ -4,5 +4,5 @@ metadata:
   name: {{ include "hermes-frontend.fullname" . }}
 
 data:
-  env-config.js: |
-    _env_ = {VUE_APP_HERMES_BACKEND_ROOT_URL: "{{ .Values.hermes.backendUrl -}}" };
+  .env: |
+    VITE_APP_HERMES_BACKEND_ROOT_URL="{{ .Values.hermes.backendUrl -}}"
