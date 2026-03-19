@@ -155,7 +155,7 @@ function activeTab1() {
 					HERMES is a Message Exchange Service for Multi-Messenger Astronomy
 					applications that allow users to both send and review messages related
 					to a variety of events and targets of interest as well as understand
-					opportunities for follow-up.
+					opportunities for follow-up. It also serves as a frontend for the SCiMMA archive.
 				</v-expansion-panel-text>
 			</v-expansion-panel>
 			<v-expansion-panel title="Logging In / Logging Out">

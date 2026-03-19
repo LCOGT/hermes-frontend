@@ -17,14 +17,14 @@ const tns_form = ref({
   'bot_api_token': null
 })
 const updatingBotCredentials = ref(false)
+const updatingDefaultTopicsList = ref(false)
 const copySnack = ref(false)
+const defaultSelectedTopics = ref([]);
 const revokingCredential = ref(false)
 const revokingApiToken =  ref(false)
 
 onMounted(async () => {
-  console.log("ONMOUTNED")
   if (route.query.alert){
-    console.log("OHNO")
     alertMessage.value = route.query.alert;
     alertVariant.value = 'error';
     showAlert.value = true;
@@ -34,6 +34,7 @@ onMounted(async () => {
   if (stateStore.userIsAuthenticated) {
     setTnsBotId(stateStore.profile?.tns_bot_id);
     setTnsBotName(stateStore.profile?.tns_bot_name);
+    defaultSelectedTopics.value = reconcileSelectedTopics();
   }
 })
 
@@ -43,6 +44,21 @@ watchEffect(() => stateStore.profile?.tns_bot_id), () => {
 watchEffect(() => stateStore.profile?.tns_bot_name), () => {
   setTnsBotName(stateStore.profile?.tns_bot_name);
 }
+
+const defaultTopicsChanged = computed(() => {
+  let currentSet = new Set(defaultSelectedTopics.value);
+  let newSet = new Set(stateStore.profile.default_topics_list)
+  return currentSet.size != newSet.size || !currentSet.isSubsetOf(newSet);
+})
+
+const defaultTopicsChangedMessage = computed(() => {
+  if (defaultTopicsChanged.value) {
+    return 'Topics have changed! Click the button below to save the change.';
+  }
+  else {
+    return '';
+  }
+})
   
 const writableTopics = computed(() => {
   return stateStore.profile.writable_topics.join('\n');
@@ -90,15 +106,17 @@ const botOverrideText = computed(() => {
   }
 })
 
+function reconcileSelectedTopics() {
+  return stateStore.profile.default_topics_list.filter(element => stateStore.topic_options.includes(element));
+}
+
 function setTnsBotId(value) {
-  console.log("Setting TNS BOT ID to " + value)
   if (value != -1) {
     tns_form.value.bot_id = value;
   }
 }
     
 function setTnsBotName(value) {
-  console.log("Setting TNS BOT NAME to " + value)
   if (value != '') {
     tns_form.value.bot_name = value;
   }
@@ -111,6 +129,7 @@ function authorizeGcn(evt) {
 }
     
 async function performRevokeToken() {
+  revokingApiToken.value = true;
   let url = new URL('/api/v0/revoke_api_token/', stateStore.hermesUrl).href
   fetch(url, {
     method: 'post',
@@ -130,9 +149,11 @@ async function performRevokeToken() {
     alertMessage.value = 'Token Successfully Revoked!';
     alertVariant.value = 'success';
     showAlert.value = true;
+    revokingApiToken.value = false;
   })
   .catch((error) => {
     console.log(error);
+    revokingApiToken.value = false;
     if (error.response.status == 401){
       logout();
     }
@@ -140,6 +161,7 @@ async function performRevokeToken() {
 }
     
 async function performRevokeCredential() {
+  revokingCredential.value = true;
   let url = new URL('/api/v0/revoke_hop_credential/', stateStore.hermesUrl).href
   fetch(url, {
     method: 'post',
@@ -158,10 +180,12 @@ async function performRevokeCredential() {
     stateStore.getProfileData();
     alertMessage.value = 'Hop Credentials Successfully Revoked!';
     alertVariant.value = 'success';
+    revokingCredential.value = false;
     showAlert.value = true;
   })
   .catch((error) => {
     console.log(error);
+    revokingCredential.value = false;
     if (error.response.status == 401){
       logout();
     }
@@ -188,6 +212,48 @@ async function copyText(text) {
   } catch (err) {
     console.error('Failed to copy')
   }
+}
+
+async function updateDefaultTopicsList() {
+  updatingDefaultTopicsList.value = true;
+  var topic_update = {
+    'default_topics_list': defaultSelectedTopics.value
+  };
+  let url = new URL('/api/v0/profile/', stateStore.hermesUrl).href
+  fetch(url, {
+    mode: 'cors',
+    method: 'patch',
+    headers: {'Content-Type': 'application/json',
+              'X-CSRFToken': stateStore.csrf_token
+              },
+    credentials: 'include',
+    body: JSON.stringify(topic_update)
+  })
+  .then((response) => {
+    if (!response.ok) {
+      let error = new Error("HTTP " + response.status);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    stateStore.getProfileData();
+    alertMessage.value = 'Default Topics List Successfully Updated!';
+    alertVariant.value = 'success';
+    showAlert.value = true;
+    updatingDefaultTopicsList.value = false;
+  })
+  .catch((error) => {
+    console.log(error);
+    updatingDefaultTopicsList.value = false;
+    if (error.response.status == 401){
+      logout();
+    }
+    else {
+      alertMessage.value = error.response.data;
+      alertVariant.value = 'error';
+      showAlert.value = true;
+    }
+  });
 }
 
 async function updateTNSBotCredentials(success_message) {
@@ -268,6 +334,7 @@ async function updateTNSBotCredentials(success_message) {
         </p>
         <div class="text-center mt-2">
           <v-btn color="error" @click="performRevokeToken">
+            <v-progress-circular v-if="revokingApiToken" color="primary" size="16" indeterminate></v-progress-circular>
             Revoke Token
           </v-btn>
         </div>
@@ -285,12 +352,24 @@ async function updateTNSBotCredentials(success_message) {
         </p>
         <div class="text-center mt-2">
           <v-btn color="error" @click="performRevokeCredential">
+            <v-progress-circular v-if="revokingCredential" color="primary" size="16" indeterminate></v-progress-circular>
             Revoke Credential
           </v-btn>
         </div>
       </v-col>
     </v-row>
     <v-row v-if="stateStore.userIsAuthenticated">
+      <v-col md="4" class="border-md pt-4">
+        <h3 class="text-center">Default UI Topics Filter</h3>
+        <p>The default set of topics that will be filtered on the HERMES homepage when you are logged in.</p><br />
+        <v-autocomplete v-model="defaultSelectedTopics" :items="stateStore.topic_options" placeholder="All Topics shown by default" :error-messages="defaultTopicsChangedMessage" multiple chips clearable closable-chips persistent-clear></v-autocomplete>
+        <div class="text-center mt-2">
+          <v-btn color="success" @click="updateDefaultTopicsList" :disabled="!defaultTopicsChanged">
+            <v-progress-circular v-if="updatingDefaultTopicsList" color="primary" size="16" indeterminate></v-progress-circular>
+            Update Topics
+          </v-btn>
+        </div>
+      </v-col>
       <v-col md="4" class="border-md pt-4">
         <h3 class="text-center">GCN Authorization</h3>
         <p>

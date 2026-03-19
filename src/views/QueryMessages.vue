@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import _ from 'lodash';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -26,7 +26,7 @@ const headers = ref([
 
 const selectedUUID = ref(null)
 const selectedItem = ref(null)
-const topics = ref([])
+const topics = ref(stateStore.profile?.default_topics_list)
 const searchTerms = ref(null)
 // Initial date range is last 30 days
 const startDate = ref((new Date(Date.now() - (3600 * 1000 * 24 * 30))).toISOString())
@@ -63,7 +63,16 @@ const fileIsSelected = computed(() => {
 })
 
 onMounted(async () => {
-  queryMessages()
+  if (stateStore.userIsAuthenticated) {
+    queryMessages();
+  }
+})
+
+watch(() => stateStore.userIsAuthenticated, async () => {
+  if (stateStore.userIsAuthenticated) {
+    topics.value = stateStore.profile.default_topics_list;
+    queryMessages();
+  }
 })
 
 function timeFromNow(datetime) {

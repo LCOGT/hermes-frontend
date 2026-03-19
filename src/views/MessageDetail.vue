@@ -1,6 +1,6 @@
 
 <script setup>
-import { ref, onMounted, computed, watch, toRaw } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import _ from 'lodash';
 import '@/assets/css/view.css';
 import PlotlyChart from '@/components/PlotlyChart.vue';

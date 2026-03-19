@@ -21,7 +21,7 @@ const streamState = computed(() => {
     return "warning";
   }
   let maxOutOfDate = 0;
-  _.forEach(heartbeat_data, function(value, _key) {
+  _.forEach(heartbeat_data.value, function(value, _key) {
     let date = Date.parse(value);
     if (_.isNaN(date)) {
       maxOutOfDate = 9999999;
@@ -88,7 +88,6 @@ onMounted(async () => {
         deauthenticate();
       }
   });
-  stateStore.getTopicOptions();
   stateStore.getTNSOptions();
 
   checkHeartbeat();
@@ -96,6 +95,9 @@ onMounted(async () => {
   // If this is the first refresh after a login workflow, attempt to get the profile data and store it
   if (stateStore.mid_login) {
     await stateStore.getProfileData();
+  }
+  if (stateStore.userIsAuthenticated) {
+    await stateStore.getTopicOptions();
   }
   username.value = stateStore.profile.email;
 })
