@@ -1,326 +1,376 @@
-<template>
-  <b-container>
-    <b-row v-if="preloadError">
-      <b-alert show dismissible variant="danger" @dismissed="clearPreloadError()" style="width:100%;">
-        {{ this.preloadError }}
-      </b-alert>
-    </b-row>
-    <b-row>
-      <b-col class="m-0 p-0">
-        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText" ref="messageForm"
-          @hermes-message-updated="hermesMessageUpdated" @generate-plain-text="generatePlainText">
-        </hermes-message>
-      </b-col>
-    </b-row>
-    <b-row class="mt-2">
-      <b-col sm="1" class="submit-container">
-        <b-button class="submit-button shadow" variant="success" @click="checkSessionAndSubmitToHop"
-          :disabled="!readyToSubmit">Submit</b-button>
-      </b-col>
-      <b-col sm="5"> to {{ this.hermesMessage.topic }}
-        <div v-if="this.hermesMessage.submit_to_gcn">
-          and {{ getGcnDestination() }}
-        </div>
-        <div v-if="this.hermesMessage.submit_to_tns">
-          and {{ getTnsDestination() }} through {{ getTnsBot() }}
-          <div v-if="getTnsBot() === 'Hermes Bot'">&#42; Click <a href="profile" target="_blank">here</a> to set your own TNS Bot credentials</div>
-        </div>
-      </b-col>
-      <b-col sm="6">
-        <b-button class="clear-button shadow mb-2" variant="outline-primary" @click="clearForm">Clear Form</b-button>
-      </b-col>
-    </b-row>
-    <b-row v-if="submissionError">
-      <b-alert show dismissible variant="danger" @dismissed="clearSubmissionError()">
-        {{ this.submissionError }}
-      </b-alert>
-    </b-row>
-  </b-container>
-</template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
 import _ from 'lodash';
-import $ from 'jquery';
-import axios from "axios";
-import { mapGetters } from "vuex";
 import HermesMessage from '@/components/message-composition/HermesMessage.vue';
-import { OCSUtil } from 'ocs-component-lib';
-import { messageFormatMixin } from '@/mixins/messageFormatMixin.js';
-import { logoutMixin } from '@/mixins/logoutMixin.js';
+import { useLogout } from '@/utils/logout.js';
+import { sanitizeMessage } from '@/utils/messageUtils.js';
+import { useStateStore } from '@/stores/state';
+import { useRoute } from 'vue-router';
 
-export default {
-  name: 'MessageCompositionForm',
-  components: {
-    HermesMessage,
+const route = useRoute()
+const { logout } = useLogout();
+const stateStore = useStateStore()
+
+// The initial hermesMessage data. The basic structure of a hermes message should be included in the
+// object, including the base elements and an empty data element that can be filled in with various
+// sections.
+const hermesMessage = ref({
+  title: '',
+  authors: '',
+  topic: '',
+  message_text: '',
+  submitter: '',
+  submit_to_tns: false,
+  submit_to_mpc: false,
+  submit_to_gcn: false,
+  data: {
+    event_id: null,
+    references: [],
+    extra_data: [],
+    targets: [],
+    photometry: [],
+    spectroscopy: [],
+    astrometry: [],
   },
-  mixins: [messageFormatMixin, logoutMixin],
-  props: {
-    // The initial hermesMessage data. The basic structure of a hermes message should be included in the
-    // object, including the base elements and an empty data element that can be filled in with various
-    // sections.
-    hermesMessage: {
-      type: Object,
-      default: () => {
-        return {
-          title: '',
-          authors: '',
-          topic: '',
-          message_text: '',
-          submitter: '',
-          submit_to_tns: false,
-          submit_to_mpc: false,
-          submit_to_gcn: false,
-          data: {
-            event_id: null,
-            references: [],
-            extra_data: [],
-            targets: [],
-            photometry: [],
-            spectroscopy: [],
-            astrometry: [],
-          },
-        };
+})
+
+const messageForm = ref(null);
+const isPlainTexting = ref(false)
+const plainText = ref('')
+const isValidating = ref(false)
+const validationErrors = ref({})
+const readyToSubmit = ref(false)
+const isSubmitting = ref(false)
+const submissionError = ref('')
+const isPreloading = ref(false)
+const preloadError = ref('')
+
+onMounted(async () => {
+  if (_.isEmpty(stateStore.tns_options)) {
+    await stateStore.getTNSOptions();
+  }
+  if (stateStore.isProd) {
+    hermesMessage.value.topic = stateStore.profile.writable_topics[0];
+  }
+  else {
+    hermesMessage.value.topic = 'hermes.test';
+  }
+  hermesMessage.value.submitter = stateStore.profile.email;
+  if (!_.isEmpty(route.query) && 'id' in route.query) {
+    preloadData(route.query.id);
+  }
+})
+
+async function validate() {
+  isValidating.value = true
+  let url = new URL('/api/v0/submit_message/validate/', stateStore.hermesUrl).href
+  fetch(url, {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': stateStore.csrf_token
+    },
+    credentials: 'include',
+    body: JSON.stringify(sanitizeMessage(hermesMessage.value))
+  })
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
       }
-    },
-    "submissionEndpoint": String,
-  },
-  data: function() {
-    return {
-        plainText: '',
-        topicOptions: [],
-        validateRequestManager: new OCSUtil.mostRecentRequestManager(this.getValidationRequest, this.onValidationSuccess, this.onValidationFail),
-        validationErrors: {},
-        readyToSubmit: false,
-        show: true,
-        submissionError: '',
-        preloadError: '',
-      };
-  },
-  mounted() {
-    if (_.isEmpty(this.getTnsOptions)) {
-      this.$store.dispatch('getTnsOptionsData');
-    }
-    this.topicOptions = this.getProfile.writable_topics;
-    if (this.isProd) {
-      this.hermesMessage.topic = this.topicOptions[0];
-    }
-    else {
-      this.hermesMessage.topic = 'hermes.test';
-    }
-    this.hermesMessage.submitter = this.getProfile.email;
-    // Accept a id in the route that will cause this to load a preloaded message from the server with that id
-    if (!_.isEmpty(this.$route.query) && 'id' in this.$route.query){
-      this.preloadData(this.$route.query.id);
-    }
-  },
-  computed: {
-    ...mapGetters(["getCsrfToken", "getProfile", "getHermesUrl", "getTnsOptions", "isLoggedIn"]),
-    isProd: function() {
-      return this.getHermesUrl == "https://hermes.lco.global/";
-    }
-  },
-  methods: {
-    validate: _.debounce(function() {
-      this.validateRequestManager.send();
-    }, 200),
-    getValidationRequest: function() {
-      return $.ajax({
-        type: 'POST',
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/validate/', this.getHermesUrl).href,
-        data: JSON.stringify(this.sanitizedMessageData()),
-        headers: {'X-CSRFToken': this.getCsrfToken},
-        contentType: 'application/json'
-      });
-    },
-    onValidationSuccess: function(data) {
-      this.validationErrors = data;
-      if (!_.isEmpty(this.validationErrors)) {
-        this.readyToSubmit = false;
+      return response.json();
+    })
+    .then(data => {
+      validationErrors.value = data
+      if (!_.isEmpty(validationErrors.value)) {
+        readyToSubmit.value = false
       }
-      else{
-        this.readyToSubmit = true;
+      else {
+        readyToSubmit.value = true
       }
-    },
-    onValidationFail: function(jqXHR) {
-      if (jqXHR.status == 401) {
-        this.logout();
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
       }
+    })
+    .finally(() => {
+      isValidating.value = false
+    });
+}
+
+const debouncedValidate = _.debounce(validate, 200);
+
+const gcnDestination = computed(() => {
+  return stateStore.isProd ? "circulars@gcn.nasa.gov" : "circulars@test.gcn.nasa.gov";
+})
+
+const tnsDesination = computed(() => {
+  return stateStore.isProd ? "TNS" : "TNS (sandbox)";
+})
+
+async function generatePlainText() {
+  let url = new URL('/api/v0/submit_message/plaintext/', stateStore.hermesUrl).href
+  isPlainTexting.value = true
+  fetch(url, {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': stateStore.csrf_token
     },
-    getGcnDestination: function() {
-      // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
-      if (this.isProd) {
-        return "circulars@gcn.nasa.gov";
+    credentials: 'include',
+    body: JSON.stringify(sanitizeMessage(hermesMessage.value))
+  })
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
       }
-      return "circulars@dev.gcn.nasa.gov";
-    },
-    getTnsBot: function() {
-      return this.getProfile.tns_bot_name ? this.getProfile.tns_bot_name + " Bot" : 'Hermes Bot'
-    },
-    getTnsDestination: function() {
-      // This should probably pull from an API endopoint on the backend, but is hopefully sufficient for now.
-      if (this.isProd) {
-        return "TNS";
+      return response.json();
+    })
+    .then(data => {
+      plainText.value = data
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
       }
-      return "TNS (sandbox)";
-    },
-    generatePlainText: function() {
-      let payload = this.sanitizedMessageData();
-      // Post message via axios
-      axios({
-        method: 'post',
-        withCredentials: true,
-        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': 'application/json',
-                  'X-CSRFToken': this.getCsrfToken
-                  },
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/plaintext/', this.getHermesUrl).href,
-        data: JSON.stringify(payload)
-      })
-      .then((response) => {
-        this.plainText = response.data;
-      })
-      .catch(error => {
-        console.log(error);
-        if (error.response.status == 401){
-          this.logout();
-        }
-      });
-    },
-    submitToHop() {
-      let payload = JSON.stringify(this.sanitizedMessageData());
-      let formData = null;
-      if (this.hasAnyFiles(this.hermesMessage)){
-        formData = new FormData();
-        // Add files from within the targets sections of the message
-        for (var i = 0; i < this.hermesMessage.data.targets.length; i += 1) {
-          this.hermesMessage.data.targets[i].files.forEach(function (file) {
-            formData.append("files", file);
-          });
-        }
-        // Add files from within the spectroscopy sections of the message
-        for (i = 0; i < this.hermesMessage.data.spectroscopy.length; i += 1) {
-          this.hermesMessage.data.spectroscopy[i].files.forEach(function (file) {
-            formData.append("files", file);
-          });
-        }
-        formData.append("data", payload);
-      }
-      // Post message via axios
-      axios({
-        method: 'post',
-        withCredentials: true,
-        // TODO: see if Vue.js can add the X-CSRFToken to all headers automagically
-        headers: {'Content-Type': _.isNull(formData) ? 'application/json' : 'multipart/form-data',
-                  'X-CSRFToken': this.getCsrfToken
-                  },
-        url: new URL('/api/v0/' + this.submissionEndpoint + '/', this.getHermesUrl).href,
-        data: _.isNull(formData) ? payload : formData
-      })
-      .then(() => {
-        // log response, redirect to homepage
-        location.href = '/';
-      })
-      .catch(error => {
-        console.log(error);
-        if (error.response.status == 401){
-          this.logout();
-        }
-        else if (error.response.status == 400) {
-          this.submissionError = error.response.data.error;
-        }
-      });
-    },
-    clearForm() {
-      // Reset the page to a clean state
-      this.hermesMessage.title = '';
-      this.hermesMessage.authors = '';
-      this.hermesMessage.topic = this.topicOptions[0];
-      this.hermesMessage.message_text = '';
-      this.hermesMessage.submitter = this.getUserName;
-      this.hermesMessage.submit_to_tns = false;
-      this.hermesMessage.submit_to_mpc = false;
-      this.hermesMessage.submit_to_gcn = false;
-      this.hermesMessage.data = {
-        event_id: null,
-        references: [],
-        extra_data: [],
-        targets: [],
-        photometry: [],
-        spectroscopy: [],
-        astrometry: [],
-      };
-      this.validate();
-    },
-    clearSubmissionError() {
-      this.submissionError = '';
-    },
-    clearPreloadError() {
-      this.preloadError = '';
-    },
-    hermesMessageUpdated: function() {
-      this.validate();
-    },
-    preloadData: function(preloadId) {
-      axios
-      .get(new URL('/api/v0/' + this.submissionEndpoint + '/load/' + preloadId, this.getHermesUrl).href, {
-          withCredentials: true,
-        })
-      .then((response) => {
-        let preloadData = response.data;
-        if ('topic' in preloadData && this.topicOptions.includes(preloadData['topic'])) {
-          this.hermesMessage.topic = preloadData['topic'];
-        }
-        this.hermesMessage.title = 'title' in preloadData ? preloadData['title'] : this.hermesMessage.title;
-        this.hermesMessage.authors = 'authors' in preloadData ? preloadData['authors'] : this.hermesMessage.authors;
-        this.hermesMessage.message_text = 'message_text' in preloadData ? preloadData['message_text'] : this.hermesMessage.message_text;
-        this.hermesMessage.submit_to_tns = 'submit_to_tns' in preloadData ? preloadData['submit_to_tns'] : this.hermesMessage.submit_to_tns;
-        this.hermesMessage.submit_to_mpc = 'submit_to_mpc' in preloadData ? preloadData['submit_to_mpc'] : this.hermesMessage.submit_to_mpc;
-        this.hermesMessage.submit_to_gcn = 'submit_to_gcn' in preloadData ? preloadData['submit_to_gcn'] : this.hermesMessage.submit_to_gcn;
-        if (!_.isEmpty(preloadData.data)) {
-          // Here we pass down into the hermesMessage component since it better understands how to check and update values of the data sections
-          this.$refs.messageForm.preloadData(preloadData.data);
-        }
-        this.validate();
-      })
-      .catch((error) => {
-        if (error.response.status == 404) {
-          // If a message with this preload ID is not found on the server, report that to the user
-          this.preloadError = 'Preloaded Message with ID ' + preloadId + ' does not exist on the server.';
-        }
-        else if (error.response.status == 401) {
-          this.logout();
-        }
-        else {
-          console.log(error);
-        }
-      });
-    },
-    checkSessionAndSubmitToHop() {
-      // Attempt to check the user session is still valid before submitting, to ensure no confusion in who is submitting the message
-      axios
-        .get(this.getHermesUrl + "api/v0/heartbeat/", {
-            withCredentials: true,
-          })
-        .then((response) => {
-          if (this.isLoggedIn && !response.data.is_authenticated) {
-            this.logout(false);
-            this.submissionError = 'Your user session expired while composing this message.' +
-                                   ' Refresh the page and login again to submit as your user account' +
-                                   ', or click the submit button again to send the message as the HERMES Guest user';
-          }
-          else {
-            this.submitToHop();
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          if (error.response.status == 401){
-            this.logout(false);
-            this.submissionError = 'Your user session expired while composing this message.' +
-                                   ' Refresh the page and login again to submit as your user account' +
-                                   ', or click the submit button again to send the message as the HERMES Guest user';
-          }
-      });
+    })
+    .finally(() => {
+      isPlainTexting.value = false
+    });
+}
+
+function hasAnyFiles() {
+  for (var i = 0; i < hermesMessage.value.data.targets.length; i += 1) {
+    if (hermesMessage.value.data.targets[i].files.length > 0) {
+      return true;
     }
   }
-};
+  for (i = 0; i < hermesMessage.value.data.spectroscopy.length; i += 1) {
+    if (hermesMessage.value.data.spectroscopy[i].files.length > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+async function submitToHop() {
+  let payload = JSON.stringify(sanitizeMessage(hermesMessage.value));
+  let formData = null;
+  if (hasAnyFiles()) {
+    formData = new FormData();
+    // Add files from within the targets sections of the message
+    for (var i = 0; i < hermesMessage.value.data.targets.length; i += 1) {
+      hermesMessage.value.data.targets[i].files.forEach(function (file) {
+        formData.append("files", file);
+      });
+    }
+    // Add files from within the spectroscopy sections of the message
+    for (i = 0; i < hermesMessage.value.data.spectroscopy.length; i += 1) {
+      hermesMessage.value.data.spectroscopy[i].files.forEach(function (file) {
+        formData.append("files", file);
+      });
+    }
+    formData.append("data", payload);
+  }
+  let url = new URL('/api/v0/submit_message/', stateStore.hermesUrl).href
+  isSubmitting.value = true
+  submissionError.value = ''
+  let headers =  {'X-CSRFToken': stateStore.csrf_token};
+  if (_.isNull(formData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  fetch(url, {
+    method: 'post',
+    headers: headers,
+    credentials: 'include',
+    body: _.isNull(formData) ? payload : formData
+  })
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      // on success redirect to homepage
+      location.href = '/';
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.status == 401) {
+        logout();
+      }
+      else if (error.status == 400) {
+        error.response.text().then(errorMessage => {
+          submissionError.value = `Failed to submit message: ${errorMessage}`;
+        })
+      }
+    })
+    .finally(() => {
+      isSubmitting.value = false
+    });
+}
+
+function clearForm() {
+  // Reset the page to a clean state
+  hermesMessage.value.title = '';
+  hermesMessage.value.authors = '';
+  hermesMessage.value.topic = stateStore.profile.writable_topics[0];
+  hermesMessage.value.message_text = '';
+  hermesMessage.value.submitter = stateStore.profile.email;
+  hermesMessage.value.submit_to_tns = false;
+  hermesMessage.value.submit_to_mpc = false;
+  hermesMessage.value.submit_to_gcn = false;
+  hermesMessage.value.data = {
+    event_id: null,
+    references: [],
+    extra_data: [],
+    targets: [],
+    photometry: [],
+    spectroscopy: [],
+    astrometry: [],
+  };
+  debouncedValidate();
+}
+
+async function hermesMessageUpdated() {
+  debouncedValidate();
+}
+
+async function preloadData(preloadId) {
+  preloadError.value = '';
+  isPreloading.value = true;
+  fetch(stateStore.hermesUrl + "api/v0/submit_message/load/" + preloadId, {
+    credentials: 'include',
+    method: 'get'
+  })
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
+    .then(data => {
+      if ('topic' in data && stateStore.profile.writable_topics.includes(data['topic'])) {
+        hermesMessage.value.topic = data['topic'];
+      }
+      hermesMessage.value.title = 'title' in data ? data['title'] : hermesMessage.value.title;
+      hermesMessage.value.authors = 'authors' in data ? data['authors'] : hermesMessage.value.authors;
+      hermesMessage.value.message_text = 'message_text' in data ? data['message_text'] : hermesMessage.value.message_text;
+      hermesMessage.value.submit_to_tns = 'submit_to_tns' in data ? data['submit_to_tns'] : hermesMessage.value.submit_to_tns;
+      hermesMessage.value.submit_to_mpc = 'submit_to_mpc' in data ? data['submit_to_mpc'] : hermesMessage.value.submit_to_mpc;
+      hermesMessage.value.submit_to_gcn = 'submit_to_gcn' in data ? data['submit_to_gcn'] : hermesMessage.value.submit_to_gcn;
+      if (!_.isEmpty(data.data) && messageForm.value) {
+        // Here we pass down into the hermesMessage component since it better understands how to check and update values of the data sections
+        messageForm.value.preloadData(data.data);
+      }
+      debouncedValidate();
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout();
+      }
+      else if (error.response.status == 404) {
+        preloadError.value = 'Preloaded Message with ID ' + preloadId + ' does not exist on the server.';
+      }
+    })
+    .finally(() => {
+      isPreloading.value = false;
+    });
+}
+
+// TODO: Do we still want to allow unauthenticated submission??
+async function checkSessionAndSubmitToHop() {
+  // Attempt to check the user session is still valid before submitting, to ensure no confusion in who is submitting the message
+  isSubmitting.value = true
+  fetch(stateStore.hermesUrl + "api/v0/heartbeat/", {
+    credentials: 'include',
+    method: 'get'
+  })
+    .then((response) => {
+      if (!response.ok) {
+        let error = new Error("HTTP " + response.status);
+        error.response = response;
+        error.status = response.status;
+        throw error;
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (stateStore.userIsAuthenticated && !data.is_authenticated) {
+        logout(false);
+        submissionError.value = 'Your user session expired while composing this message.' +
+          ' Refresh the page and login again to submit as your user account' +
+          ', or click the submit button again to send the message as the HERMES Guest user';
+      }
+      else {
+        submitToHop();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.response.status == 401) {
+        logout(false);
+        submissionError.value = 'Your user session expired while composing this message.' +
+          ' Refresh the page and login again to submit as your user account' +
+          ', or click the submit button again to send the message as the HERMES Guest user';
+      }
+    })
+    .finally(() => {
+      isSubmitting.value = false;
+    });
+}
+
 </script>
+<template>
+  <v-container>
+    <v-row v-if="preloadError">
+      <v-alert type="error" closable @click:close="preloadError.value = ''">
+        {{ preloadError }}
+      </v-alert>
+    </v-row>
+    <v-row>
+      <v-col class="m-0 p-0">
+        <hermes-message :errors="validationErrors" :hermes-message="hermesMessage" :plain-text="plainText"
+          ref="messageForm" @hermes-message-updated="debouncedValidate()" @generate-plain-text="generatePlainText">
+        </hermes-message>
+      </v-col>
+    </v-row>
+    <v-row class="mt-2">
+      <v-col sm="1" class="submit-container">
+        <v-btn class="text-white" variant="flat" color="success" @click="checkSessionAndSubmitToHop"
+          :disabled="!readyToSubmit">Submit</v-btn>
+      </v-col>
+      <v-col sm="5"> to {{ hermesMessage.topic }}
+        <div v-if="hermesMessage.submit_to_gcn">
+          and {{ gcnDestination }}
+        </div>
+        <div v-if="hermesMessage.submit_to_tns">
+          and {{ tnsDesination }} through {{ stateStore.tnsBot }}
+          <div v-if="stateStore.tnsBot === 'Hermes Bot'">&#42; Click <a href="profile" target="_blank">here</a> to set
+            your own TNS Bot credentials</div>
+        </div>
+      </v-col>
+      <v-col sm="6">
+        <v-btn class="float-right mb-2" variant="outlined" color="primary" @click="clearForm">Clear Form</v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-if="submissionError">
+      <v-alert type="error" closable @click:close="submissionError = ''">
+        {{ submissionError }}
+      </v-alert>
+    </v-row>
+  </v-container>
+</template>

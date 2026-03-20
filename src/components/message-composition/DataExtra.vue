@@ -1,95 +1,73 @@
-<template>
-  <div>
-    <b-editable-table striped bordered class="extra-data-table" v-model="extra_data" :fields="fields"
-      @input-change="handleInput">
-      <template #cell(copy)="row">
-        <!-- Copy Row -->
-        <span v-if="field.key == 'copy'" :key="field.key + '-btn'">
-          <b-button :title="'Copy Row'" @click="copy(data)">
-            <b-icon icon="file-earmark-plus" aria-hidden="true"></b-icon>
-          </b-button>
-        </span>
-      </template>
-      <template #cell(delete)="row">
-        <!-- Delete Row -->
-        <span v-if="field.key == 'delete' && (allowEmpty || tableData.length > 1)" :key="field.key + '-btn'">
-          <b-button :title="'Remove Row'" @click="remove(data)">
-            <b-icon icon="trash" aria-hidden="true"></b-icon>
-          </b-button>
-        </span>
-      </template>
-    </b-editable-table>
-  </div>
-</template>
-<script>
-import BEditableTable from "bootstrap-vue-editable-table";
-import { mapGetters } from "vuex";
+<script setup>
 import '@/assets/css/submissions.css';
 
-export default {
-  name: "AdditionalDataTable",
-  components: {
-    BEditableTable,
+const props = defineProps({
+  extra_data: {
+    type: Array,
+    required: true
   },
-  props: {
-    extra_data: {
-      type: Array,
-      required: true
-    },
-    show: {
-      type: Boolean,
-      default: true
-    }
-  },
-  data() {
-    return {
-      fields: [
-        {
-          key: "key",
-          label: "Key",
-          type: 'text',
-          editable: true,
-          placeholder: "Key",
-          class: "key-column"
-        },
-        {
-          key: "value",
-          label: "Value",
-          type: 'text',
-          editable: true,
-          placeholder: "Value",
-          class: "value-column"
-        },
-        {
-          key: "copy",
-          label: "",
-          editable: false,
-          headerTitle: "copy",
-          class: "copy-column",
-        },
-        {
-          key: "delete",
-          label: "",
-          editable: false,
-          headerTitle: "delete",
-          class: "delete-column",
-        }
-      ],
-    };
-  },
-  methods: {
-    remove: function (row) {
-      this.$emit('remove', row.index);
-    },
-    copy: function (row) {
-      this.$emit('copy', row.index);
-    },
-    handleInput: function (value, row) {
-      this.update();
-    },
-    update: function () {
-      this.$emit('message-updated');
-    }
+  show: {
+    type: Boolean,
+    default: true
   }
+})
+
+const emit = defineEmits(['remove', 'copy', 'message-updated']);
+
+const headers = [
+  {
+    key: "key",
+    label: "Key",
+    type: 'text',
+    editable: true,
+    placeholder: "Key",
+    class: "key-column"
+  },
+  {
+    key: "value",
+    label: "Value",
+    type: 'text',
+    editable: true,
+    placeholder: "Value",
+    class: "value-column"
+  },
+  {
+    key: "copy",
+    label: "",
+    editable: false,
+    headerTitle: "copy",
+    class: "copy-column",
+  },
+  {
+    key: "delete",
+    label: "",
+    editable: false,
+    headerTitle: "delete",
+    class: "delete-column",
+  }
+]
+
+function remove(row) {
+  emit('remove', row.index);
 }
+
+function copy(row) {
+  emit('copy', row.index);
+}
+
+function update() {
+  emit('message-updated');
+}
+
 </script>
+<template>
+  <div>
+    <v-data-table striped class="extra-data-table" :items="props.extra_data" :headers="headers">
+      <template v-for="header in props.fields" v-slot:[`item.${header.key}`]="{ data }">
+        <v-btn v-if="header.key == 'copy'" density="compact" variant="outlined" rounded="0" icon="mdi-file-document-plus-outline" v-tooltip="'Copy Row'" @click="copy(data)"></v-btn>
+        <v-btn v-else-if="header.key == 'delete' && (props.allowEmpty || props.tableData.length > 1)" density="compact" variant="outlined" rounded="0" icon="mdi-trash-can-outline" v-tooltip="'Remove Row'" @click="remove(data)"></v-btn>
+        <v-text-field v-else v-model="data.value" :placeholder="header.label" style="width:100%" @update:modelValue="update()"></v-text-field>
+      </template>
+    </v-data-table>
+  </div>
+</template>

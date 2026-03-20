@@ -1,15 +1,13 @@
+import { useStateStore } from '@/stores/state';
 import _ from 'lodash';
-import { mapGetters } from "vuex";
 
-export var tnsUtilsMixin = {
-  computed: {
-    ...mapGetters(["getTnsOptions", "getProfile"]),
-  },
-  methods: {
-    getTnsValuesList: function(category, addNull = false) {
-      let tnsOptions = this.getTnsOptions;
+export function useTnsUtils() {
+  const stateStore = useStateStore();
+
+  function getTnsValuesList(category, addNull=false) {
+      let tnsOptions = stateStore.tns_options;
       let outputArray = []
-      if (category == 'groups' && this.isHermesBot()){
+      if (category == 'groups' && stateStore.isHermesBot){
         return ['Hermes_group'];
       }
       if (addNull) {
@@ -21,12 +19,7 @@ export var tnsUtilsMixin = {
       else {
           return outputArray.concat(_.values(tnsOptions[category]).sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'})));
       }
-    },
-    isHermesBot: function() {
-      if (this.getProfile.tns_bot_name){
-        return false;
-      }
-      return true;
-    },
   }
-};
+
+  return { getTnsValuesList };
+}

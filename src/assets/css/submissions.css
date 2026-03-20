@@ -1,5 +1,6 @@
 .data-label-text {
-    padding-top: 5px !important; 
+    top: -10px;
+    position: relative;
 }
 
 .outside-container {
@@ -28,8 +29,8 @@
 }
 
 .error-icon {
-    width: 54px;
-    max-width: 54px;
+    width: 48px;
+    max-width: 48px;
 }
 
 .message-tabs {
@@ -214,4 +215,8 @@
     color: #212529;
     background-color: #71e36c;
     border-color: #67e161;
+}
+
+.cell-date-picker {
+    --dp-border-color:rgba(256, 256, 256, 0.33) !important;
 }
