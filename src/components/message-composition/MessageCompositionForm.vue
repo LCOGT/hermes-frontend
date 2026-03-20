@@ -105,7 +105,7 @@ async function validate() {
 const debouncedValidate = _.debounce(validate, 200);
 
 const gcnDestination = computed(() => {
-  return stateStore.isProd ? "circulars@gcn.nasa.gov" : "circulars@dev.gcn.nasa.gov";
+  return stateStore.isProd ? "circulars@gcn.nasa.gov" : "circulars@test.gcn.nasa.gov";
 })
 
 const tnsDesination = computed(() => {

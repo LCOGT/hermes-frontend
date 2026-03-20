@@ -545,7 +545,6 @@ function getDataFields(section, values) {
           <span class="mt-4 pl-6 mb-4" style="white-space: pre-wrap;">
             {{ messageText }}
           </span>
-          <hr class="mt-4">
         </v-row>
         <div v-if="Object.keys(plotDataByName).length > 0">
           <div v-for="plotName in Object.keys(plotDataByName)" :key="plotName + '-spectra-plot'">
@@ -568,8 +567,8 @@ function getDataFields(section, values) {
                 <template v-slot:item.file_info="{ item }">
                   <v-btn v-for="(file_info, idx) in item.file_info" class="pr-2" :key="'file_info-' + file_info.name" :href="file_info.url" target="_blank" :disabled="!file_info.url" color="secondary" variant="plain">{{ file_info.name }}</v-btn>
                 </template>
-                <template v-slot:item.url="item">
-                  <v-btn :href="item.url" target="_blank">{{ item.url }}</v-btn>
+                <template v-slot:item.url="{ item }">
+                  <v-btn :href="item.url" target="_blank" color="secondary" variant="plain">{{ item.url }}</v-btn>
                 </template>
                 <template v-slot:bottom v-if="!shouldShowTableFooter(items, kvItemsPerPage)"></template>
             </v-data-table>
@@ -578,8 +577,8 @@ function getDataFields(section, values) {
           <v-expansion-panel v-for="(items, field) in getDictionaryDataItems(messageData)" :key="field + '-dictionary'" :value="field + '-dictionary'" :title="field.toUpperCase().replace('_', ' ')">
             <v-expansion-panel-text>
               <v-data-table :items="getKVItems(items)" :headers="KVdataFields" fixed-header disable-sort striped="even" density="compact" :items-per-page="kvItemsPerPage">
-                <template v-slot:item.value="item">
-                  <v-btn v-if="isLink(item.value)" :href="item.value" target="_blank">{{ item.value }}</v-btn>
+                <template v-slot:item.value="{ item }">
+                  <v-btn v-if="isLink(item.value)" :href="item.value" target="_blank" color="secondary" variant="plain">{{ item.value }}</v-btn>
                   <p v-else>{{ item.value }}</p>
                 </template>
                 <template v-slot:bottom v-if="!shouldShowTableFooter(getKVItems(items), kvItemsPerPage)"></template>
