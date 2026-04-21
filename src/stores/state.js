@@ -24,8 +24,14 @@ export const useStateStore = defineStore('state', {
   }),
   persist: true,
   getters: {
-    userIsAuthenticated: (state) => {
-      return 'api_token' in state.profile
+    canSubmitToGcn: (state) => {
+      return state.profile.can_submit_to_gcn ? state.profile.can_submit_to_gcn : false
+    },
+    defaultTopicList: (state) => {
+      return state.profile?.default_topic_list || ["gcn.circulars", "igwn.gwalert", "hermes.message", "hermes.photometry", "hermes.spectroscopy"]
+    },
+    isHermesBot: (state) => {
+      return !state.profile.tns_bot_name
     },
     isProd: (state) => {
       return state.hermesUrl == "https://hermes.lco.global/"
@@ -33,11 +39,8 @@ export const useStateStore = defineStore('state', {
     tnsBot: (state) => {
       return state.profile.tns_bot_name ? state.profile.tns_bot_name + " Bot" : 'Hermes Bot'
     },
-    isHermesBot: (state) => {
-      return !state.profile.tns_bot_name
-    },
-    canSubmitToGcn: (state) => {
-      return state.profile.can_submit_to_gcn ? state.profile.can_submit_to_gcn : false
+    userIsAuthenticated: (state) => {
+      return 'api_token' in state.profile
     },
   },
   actions: {
