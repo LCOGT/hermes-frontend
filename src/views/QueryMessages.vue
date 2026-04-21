@@ -26,7 +26,7 @@ const headers = ref([
 
 const selectedUUID = ref(null)
 const selectedItem = ref(null)
-const topics = ref(stateStore.profile?.default_topics_list)
+const topics = ref(stateStore.defaultTopicList)
 const searchTerms = ref(null)
 // Initial date range is last 30 days
 const startDate = ref((new Date(Date.now() - (3600 * 1000 * 24 * 30))).toISOString())
@@ -63,9 +63,7 @@ const fileIsSelected = computed(() => {
 })
 
 onMounted(async () => {
-  if (stateStore.userIsAuthenticated) {
-    queryMessages();
-  }
+  queryMessages();
 })
 
 watch(() => stateStore.userIsAuthenticated, async () => {
@@ -216,12 +214,7 @@ function mediaTypeToIcon(item) {
 </script>
 <template>
   <div class="overflow-auto px-4" :style="{ width: '100%' }">
-    <v-row class="m-0" v-if="!stateStore.userIsAuthenticated">
-      <v-alert class="text-center" variant="outlined" color="warning" text="You must login to use HERMES"
-        icon="mdi-account-alert">
-      </v-alert>
-    </v-row>
-    <v-row class="m-0" v-if="stateStore.userIsAuthenticated">
+    <v-row class="m-0">
       <v-col md="6">
         <v-row class="pb-2 pt-2">
           <v-col class="pr-0 pb-0">
