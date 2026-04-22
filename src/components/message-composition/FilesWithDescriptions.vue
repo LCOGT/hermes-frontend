@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
-import {filesize} from "filesize";
+import { filesize } from "filesize";
+import PlotlyChart from '@/components/PlotlyChart.vue';
+import { isSpectraTextFile, loadSpectraFromFile, buildSpectraPlotData, previewLayoutOverrides } from '@/utils/spectraPlotUtils.js';
 
 const props = defineProps({
   id: {
@@ -28,6 +30,10 @@ const props = defineProps({
     default: () => {
       return [];
     }
+  },
+  showSpectraPreview: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -35,6 +41,7 @@ const emit = defineEmits(['message-updated', 'update:files', 'update:fileDescrip
 
 const filesModel = ref(props.files)
 const localDescriptions = ref(props.fileDescriptions)
+const spectraPlots = ref([]) // per-file: { plotData, layout } or null
 
 // Need to juggle filesModel (used in the file component), localFiles (list of selected files), and files (input/output files list) because
 // this component works with single file or multiple file selection
@@ -61,11 +68,33 @@ const validationState = computed(() => {
   return false;
 })
 
+async function loadSpectraPreviews() {
+  if (!props.showSpectraPreview) return;
+  const files = localFiles.value;
+  spectraPlots.value = new Array(files.length).fill(null);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (isSpectraTextFile(file.name)) {
+      try {
+        const { fluxArray, wavelengthArray } = await loadSpectraFromFile(file);
+        const { plotData, layout } = buildSpectraPlotData(
+          fluxArray, null, null,
+          wavelengthArray, null, file.name, previewLayoutOverrides
+        );
+        spectraPlots.value[i] = { plotData, layout };
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+}
+
 function removeFile(idx) {
   if (props.multiple) {
     if (idx < filesModel.value.length) {
       filesModel.value.splice(idx, 1);
       localDescriptions.value.splice(idx, 1);
+      spectraPlots.value.splice(idx, 1);
     }
     updateFiles();
     updateFileDescriptions();
@@ -84,12 +113,12 @@ function clearFiles() {
     filesModel.value = null;
     localDescriptions.value = [];
   }
-  
+  spectraPlots.value = [];
   updateFiles();
   updateFileDescriptions();
 }
 
-function addFiles() {
+async function addFiles() {
   // need to update the parent prop of files
   updateFiles();
   // If we change files, we should just clear all comments to be safe
@@ -99,6 +128,7 @@ function addFiles() {
     localDescriptions.value.push('');
   }
   updateFileDescriptions();
+  await loadSpectraPreviews();
 }
 
 function getFileSize(size) {
@@ -127,7 +157,7 @@ function update() {
         </v-file-input>
       </v-col>
     </v-row>
-    <v-row v-for="(file, index) in localFiles" :key="props.id + '-file-' + props.index" no-gutters>
+    <v-row v-for="(file, index) in localFiles" :key="props.id + '-file-' + index" no-gutters>
       <v-col md="3" align-self="center" class="pr-2">
           <b>{{ file.name }}</b>
       </v-col>
@@ -140,6 +170,9 @@ function update() {
       <v-col md="1">
           <v-btn v-tooltip="'Remove this file'" icon="mdi-trash-can-outline" variant="plain" @click="removeFile(index)"></v-btn>
       </v-col>
+      <div v-if="showSpectraPreview && spectraPlots[index]" class="pb-2">
+        <PlotlyChart :data="[spectraPlots[index].plotData]" :layout="spectraPlots[index].layout"></PlotlyChart>
+      </div>
     </v-row>
   </div>
 </template>

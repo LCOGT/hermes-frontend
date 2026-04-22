@@ -852,7 +852,7 @@ response = requests.post(url=hermes_submit_url, data=data, files=files, headers=
 					An <a href="https://lco.global/" target="_blank" rel="noopener noreferrer"><b>LCO</b></a> project
 					built in
 					<br />
-					collaboration with <a href="https://scimma.org/index.html" target="_blank"
+					collaboration with <a href="https://scimma.org/" target="_blank"
 							rel="noopener noreferrer"><b>SCiMMA</b></a>.
 				</v-col>
 				<v-col class="text-primary text-right">

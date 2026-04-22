@@ -192,7 +192,7 @@ function switchToRaw() {
 
 </script>
 <template>
-  <v-container class="p-0" :id="'data-spectroscopy-' + index">
+  <v-container class="p-0" :id="'data-spectroscopy-' + index" fluid>
     <v-card variant="outlined">
       <v-card-title>
         <v-row align="center">
@@ -251,7 +251,7 @@ function switchToRaw() {
           <v-divider />
           <v-tabs-window v-model="tab" class="w-100">
             <v-tabs-window-item value="file">
-              <v-container>
+              <v-container fluid>
                 <p class="text-primary">
                   Upload one or more spectrum files to associate with your message.
                   These files will be stored in the Scimma Archive and will be <b>publicly accessible</b> and linked from the message.
@@ -263,6 +263,7 @@ function switchToRaw() {
                   :multiple=true
                   v-model:files="props.spectroscopy.files"
                   v-model:fileDescriptions="props.spectroscopy.file_descriptions"
+                  :show-spectra-preview="true"
                   @message-updated="update"
                 >
                 </files-with-descriptions>

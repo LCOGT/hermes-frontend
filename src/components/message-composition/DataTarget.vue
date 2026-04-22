@@ -118,7 +118,7 @@ function onTypeChange() {
 }
 </script>
 <template>
-  <v-container class="p-0">
+  <v-container class="p-0" fluid>
     <v-card variant="outlined">
       <v-card-title>
         <v-row align="center">

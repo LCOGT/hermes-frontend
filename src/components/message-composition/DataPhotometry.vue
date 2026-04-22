@@ -55,7 +55,7 @@ const advancedOptionsIcon = computed(() => {
 
 </script>
 <template>
-  <v-container class="p-0" :id="'data-photometry-' + index">
+  <v-container class="p-0" :id="'data-photometry-' + index" fluid>
     <v-card variant="outlined">
       <v-card-title>
         <v-row align="center">

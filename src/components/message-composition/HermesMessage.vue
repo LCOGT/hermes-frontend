@@ -70,6 +70,7 @@ const referenceFields = [
     title: 'Source',
     type: 'text',
     align: 'center',
+    maxWidth: '100px',
     list: [
       { value: "hop_uuid", text: "Hop UUID" },
       { value: "doi", text: "DOI" },
@@ -84,6 +85,7 @@ const referenceFields = [
     title: "Citation",
     type: 'text',
     align: 'center',
+    minWidth: '80px',
     placeholder: "Citation",
     class: "citation-column"
   },
@@ -92,6 +94,7 @@ const referenceFields = [
     title: "Url",
     type: 'text',
     align: 'center',
+    minWidth: '250px',
     placeholder: "Url",
     class: "url-column"
   },
@@ -116,6 +119,7 @@ const extraDataFields = [
     title: 'Key',
     type: 'text',
     align: 'center',
+    maxWidth: '100px',
     placeholder: "Key",
     class: "key-column"
   },
@@ -123,6 +127,7 @@ const extraDataFields = [
     key: 'value',
     title: 'Value',
     type: 'text',
+    minWidth: '60%',
     align: 'center',
     placeholder: "Value",
     class: "value-column"
@@ -153,6 +158,7 @@ const targetFields = [
     title: 'Name',
     type: 'text',
     align: 'center',
+    minWidth: '140px',
     placeholder: "Name",
     class: "target-name-column"
   },
@@ -177,6 +183,7 @@ const targetFields = [
     title: "New Discovery",
     type: 'checkbox',
     align: 'center',
+    maxWidth: '60px',
     default: false,
     class: "new-discovery-column"
   },
@@ -349,6 +356,7 @@ const photometryFields = computed(() => {
       title: "Observation Date",
       type: 'date',
       align: 'center',
+      maxWidth: '130px',
       placeholder: "date",
       class: "date-obs-column"
     },
@@ -373,6 +381,7 @@ const photometryFields = computed(() => {
       title: "Band",
       type: 'text',
       align: 'center',
+      maxWidth: '50px',
       placeholder: "",
       class: "bandpass-column"
     },
@@ -389,6 +398,7 @@ const photometryFields = computed(() => {
       title: "Units",
       type: 'select',
       align: 'center',
+      maxWidth: '120px',
       options: [
         { value: "AB mag", text: "AB mag" },
         { value: "Vega mag", text: "Vega mag" },
@@ -440,6 +450,7 @@ const astrometryFields = computed(() => {
       title: "Observation Date",
       type: 'date',
       align: 'center',
+      maxWidth: '130px',
       placeholder: "date",
       class: "date-obs-column"
     },
@@ -468,18 +479,11 @@ const astrometryFields = computed(() => {
       class: "ra-column"
     },
     {
-      key: "ra_error",
-      title: "Error",
-      type: 'text',
-      align: 'center',
-      placeholder: "",
-      class: "ra-error-column"
-    },
-    {
       key: "ra_error_units",
       title: "Units",
       type: 'select',
       align: 'center',
+      maxWidth: '120px',
       options: [
         { value: "degrees", text: "Degrees" },
         { value: "marcsec", text: "marcsec" },
@@ -497,18 +501,11 @@ const astrometryFields = computed(() => {
       class: "dec-column"
     },
     {
-      key: "dec_error",
-      title: "Error",
-      type: 'text',
-      align: 'center',
-      placeholder: "",
-      class: "dec-error-column"
-    },
-    {
       key: "dec_error_units",
       title: "Units",
       type: 'select',
       align: 'center',
+      maxWidth: '120px',
       options: [
         { value: "degrees", text: "Degrees" },
         { value: "marcsec", text: "marcsec" },
@@ -743,7 +740,7 @@ function parseCsv(section, fileInput) {
     <v-divider></v-divider>
     <v-tabs-window v-model="tab">
 			<v-tabs-window-item value="submission">
-        <v-container>
+        <v-container fluid>
           <v-alert v-if="props.hermesMessage.submit_to_gcn" color="info">
             Please review the <a href="https://gcn.nasa.gov/docs/circulars/styleguide" target="_blank">GCN Style Guide</a> before your first GCN submission.
           </v-alert>
@@ -1062,20 +1059,20 @@ function parseCsv(section, fileInput) {
             <v-divider></v-divider>
             <v-tabs-window v-model="messageTab">
               <v-tabs-window-item value="edit">
-                <v-container>
+                <v-container fluid>
                   <v-textarea v-model="props.hermesMessage.message_text" variant="outlined" placeholder="Enter Message. Use '{key}' to reference values in Additional Data Table." rows="3" max-rows="10" @update:modelValue="update">
                   </v-textarea>
                 </v-container>
               </v-tabs-window-item>
               <v-tabs-window-item value="preview">
-                <v-container>
+                <v-container fluid>
                   <span style="white-space: pre;">
                     {{ formattedMessageText(props.hermesMessage) }}
                   </span>
                 </v-container>
               </v-tabs-window-item>
               <v-tabs-window-item value="help">
-                <v-container>
+                <v-container fluid>
                   <ul>
                     <li>
                       Inject elements of the message data using the api key surrounded by curly braces <code>{}</code>.
@@ -1120,7 +1117,7 @@ function parseCsv(section, fileInput) {
       </v-tabs-window-item
             >
       <v-tabs-window-item value="api">
-        <v-container>
+        <v-container fluid>
           <v-row>
             <v-col class="bg-light rounded">
               <data-view
@@ -1133,7 +1130,7 @@ function parseCsv(section, fileInput) {
         </v-container>
       </v-tabs-window-item>
       <v-tabs-window-item value="plaintext">
-        <v-container>
+        <v-container fluid>
           <v-row>
             <v-col class="bg-light rounded">
               <data-view
