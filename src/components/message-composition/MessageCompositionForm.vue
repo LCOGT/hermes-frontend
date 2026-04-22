@@ -335,7 +335,7 @@ async function checkSessionAndSubmitToHop() {
 
 </script>
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row v-if="preloadError">
       <v-alert type="error" closable @click:close="preloadError.value = ''">
         {{ preloadError }}

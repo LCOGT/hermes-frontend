@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted} from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Plotly from 'plotly.js-dist'
 
 const props = defineProps({
@@ -16,12 +16,12 @@ const props = defineProps({
 const plotElementDiv = ref(null);
 
 onMounted(() => {
-  renderChart();
+  Plotly.newPlot(plotElementDiv.value, props.data, props.layout);
 })
 
-function renderChart() {
-  Plotly.newPlot(plotElementDiv.value, props.data, props.layout);
-}
+watch([() => props.data, () => props.layout], () => {
+  Plotly.react(plotElementDiv.value, props.data, props.layout);
+}, { deep: true })
 
 </script>
 <template>
