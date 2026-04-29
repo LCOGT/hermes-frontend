@@ -246,7 +246,7 @@ function switchToRaw() {
         <v-row>
           <v-tabs color="primary" v-model="tab">
             <v-tab value="file">File Input</v-tab>
-            <v-tab value="raw" @click="switchToRaw">Raw Data</v-tab>
+            <!-- <v-tab value="raw" @click="switchToRaw">Raw Data</v-tab> -->
           </v-tabs>
           <v-divider />
           <v-tabs-window v-model="tab" class="w-100">
@@ -254,7 +254,7 @@ function switchToRaw() {
               <v-container fluid>
                 <p class="text-primary">
                   Upload one or more spectrum files to associate with your message.
-                  These files will be stored in the Scimma Archive and will be <b>publicly accessible</b> and linked from the message.
+                  These files will be stored in the Scimma Archive and will be <b>publicly accessible</b> if shared on a public topic, and linked from the message.
                   They should follow commonly used spectrum data formats.
                 </p>
                 <files-with-descriptions

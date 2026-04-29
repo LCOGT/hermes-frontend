@@ -913,7 +913,7 @@ function parseCsv(section, fileInput) {
             <data-section
               class="mb-1"
               section="spectroscopy"
-              datatype="Spectroscopy (beta)"
+              datatype="Spectroscopy"
               :errors="getErrors('data.spectroscopy', [])"
               :isEmpty="isSectionEmpty('spectroscopy')"
               :sectionShowSimple="sectionShowSimple['spectroscopy']"
