@@ -32,6 +32,7 @@ const searchTerms = ref(null)
 const startDate = ref((new Date(Date.now() - (3600 * 1000 * 24 * 30))).toISOString())
 const endDate = ref((new Date(Date.now())).toISOString());
 const limit = ref(10)
+const includeRetracted = ref(true)
 const isQuerying = ref(false)
 const results = ref({})
 
@@ -44,11 +45,12 @@ const queryParams = computed(() => {
     params += `&search_query=${searchTerms.value}`;
   }
   if (startDate.value) {
-    params += `&start=${startDate.value}`
+    params += `&start=${startDate.value}`;
   }
   if (endDate.value) {
-    params += `&end=${endDate.value}`
+    params += `&end=${endDate.value}`;
   }
+  params += `&include_retracted=${includeRetracted.value}`;
   return params;
 })
 
@@ -131,11 +133,10 @@ async function pageBackward() {
   queryMessages(results.value.prev)
 }
 
-// function toggleIncludeRetracted() {
-//   this.queryParams.include_retracted = !this.queryParams.include_retracted;
-//   let fakeEvent = {'preventDefault': () => true};
-//   this.onSubmit(fakeEvent);
-// }
+function toggleIncludeRetracted() {
+  includeRetracted.value = !includeRetracted.value;
+  queryMessages();
+}
 
 async function downloadSelectedFile() {
   if (selectedItem.value) {
@@ -182,14 +183,17 @@ const selectRow = (event, { item }) => {
     selectedItem.value = null;
   }
   else {
-    selectedUUID.value = uuid;
     selectedItem.value = item;
+    selectedUUID.value = uuid;
   }
 }
 
 const tableRowProps = ({ item }) => {
   if (item.annotations.con_text_uuid == selectedUUID.value) {
     return { class: 'selected-row' };
+  }
+  else if (item.annotations.retracted) {
+    return { class: 'retracted-row' };
   }
   return { class: '' };
 }
@@ -213,6 +217,10 @@ function mediaTypeToIcon(item) {
   }
 }
 
+function toggleSelectedItemRetraction() {
+  selectedItem.value.annotations.retracted = !selectedItem.value.annotations.retracted;
+}
+
 </script>
 <template>
   <div class="overflow-auto px-4" :style="{ width: '100%' }">
@@ -224,19 +232,25 @@ function mediaTypeToIcon(item) {
     <v-row class="m-0" v-if="stateStore.userIsAuthenticated">
       <v-col md="6">
         <v-row class="pb-2 pt-2">
-          <v-col class="pr-0 pb-0">
+          <v-col class="pr-0 pb-0" cols="5">
             <div class="datepicker-group">
               <v-label id="start-dp-label" class="datepicker-label">Start Date</v-label>
               <VueDatePicker v-model="startDate" model-type="iso" placeholder="Start Date" label="Start" required dark
                 :clearable="false" @update:model-value="debounceQuery"></VueDatePicker>
             </div>
           </v-col>
-          <v-col class="pr-0 pb-0">
+          <v-col class="pr-0 pb-0" cols="5">
             <div class="datepicker-group">
               <v-label id="end-dp-label" class="datepicker-label">End Date</v-label>
               <VueDatePicker v-model="endDate" model-type="iso" placeholder="End Date" required dark :clearable="false"
                 @update:model-value="debounceQuery"></VueDatePicker>
             </div>
+          </v-col>
+          <v-col>
+            <v-btn variant="plain" v-tooltip="(includeRetracted ? 'Including' : 'Excluding') + ' Retracted Messages'"
+              :icon="includeRetracted ? 'mdi-clipboard-remove' : 'mdi-clipboard-remove-outline'" density="comfortable"
+              :color="includeRetracted ? 'error' : 'white'" rounded="0" @click="toggleIncludeRetracted">
+            </v-btn>
           </v-col>
         </v-row>
         <v-row class="pb-2 pt-1">
@@ -309,7 +323,7 @@ function mediaTypeToIcon(item) {
             <v-btn prepend-icon="mdi-file-download" variant="outlined" @click="downloadSelectedFile" color="secondary">Download {{ selectedItem.annotations.file_name }}</v-btn>
           </v-card-text>
         </v-card>
-        <message-detail v-else-if="selectedUUID" :uuid="selectedUUID"></message-detail>
+        <message-detail v-else-if="selectedUUID" :uuid="selectedUUID" :retracted="selectedItem.annotations.retracted" @toggle-retraction="toggleSelectedItemRetraction()"></message-detail>
         <!-- Initial Message Box Display -->
         <v-card v-else border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
           <h4 class="text-center">
@@ -327,14 +341,8 @@ function mediaTypeToIcon(item) {
   background-color: rgb(45, 120, 163);
 }
 
-.retracted-btn {
-  height: 32px;
-  width: 32px;
-  margin-top: 4px;
-}
-
-.retracted-btn.btn-danger {
-  color: white;
+.retracted-row {
+  background-color: rgb(59, 26, 34);
 }
 
 .datepicker-group {
