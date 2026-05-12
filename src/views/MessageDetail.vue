@@ -165,7 +165,10 @@ const isGcnCircular = computed(() => {
 const showRetractMessage = computed(() => {
   if (stateStore.userIsAuthenticated && messageData.value) {
     let group = topic.value.split(".", 1)[0];
-    if (group in stateStore.profile.group_memberships && stateStore.profile.group_memberships[group] === 'Owner') {
+    if (stateStore.profile.credential_name == messageHeaders.value?._sender) {
+      return true;
+    }
+    else if (group in stateStore.profile.group_memberships && stateStore.profile.group_memberships[group] === 'Owner') {
       return true;
     }
   }
