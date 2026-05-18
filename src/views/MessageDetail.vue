@@ -15,8 +15,14 @@ const props = defineProps({
   uuid: {
     type: String,
     required: true,
+  },
+  retracted: {
+    type: Boolean,
+    default: false,
   }
 })
+
+const emit = defineEmits(['toggle-retraction']);
 
 const jsonData = ref({
   title: '',
@@ -119,12 +125,15 @@ const isGcnCircular = computed(() => {
 })
     
 const showRetractMessage = computed(() => {
-  // if (stateStore.userIsAuthenticated && messageData.value) {
-  //   let group = topic.value.split(".", 1)[0];
-  //   if (group in stateStore.profile.group_memberships && stateStore.profile.group_memberships[group] === 'Owner') {
-  //     return !messageData.annotations?.retracted;
-  //   }
-  // }
+  if (stateStore.userIsAuthenticated && messageData.value) {
+    let group = topic.value.split(".", 1)[0];
+    if (stateStore.profile.credential_name == messageHeaders.value?._sender) {
+      return true;
+    }
+    else if (group in stateStore.profile.group_memberships && stateStore.profile.group_memberships[group] === 'Owner') {
+      return true;
+    }
+  }
   return false;
 })
 
@@ -224,9 +233,7 @@ function info() {
 }
 
 async function retractMessage() {
-  //TODO: This is not yet implemented in scimma archive
-  console.log("Attempting to Retract message " + props.uuid);
-  const url = new URL('/api/v0/messages/' + props.uuid + '/', stateStore.hermesUrl).href
+  const url = new URL(`api/v0/query/message/${props.uuid}/` , stateStore.hermesUrl).href
   fetch(url, {
     mode: 'cors',
     method: 'patch',
@@ -234,7 +241,7 @@ async function retractMessage() {
               'X-CSRFToken': stateStore.csrf_token
               },
     credentials: 'include',
-    body: JSON.stringify({'retracted': true})
+    body: JSON.stringify({'retracted': !props.retracted})
   })
   .then((response) => {
     if (!response.ok) {
@@ -243,7 +250,7 @@ async function retractMessage() {
       error.status = response.status;
       throw error;
     }
-    messageData.annotations.retracted = response.data.retracted;
+    emit('toggle-retraction')
   })
   .catch((error) => {
     console.log(error);
@@ -251,13 +258,6 @@ async function retractMessage() {
       logout();
     }
   });
-}
-
-function resetjsonData() {
-  // clear JSON data and remove copy alert when window closed
-  jsonData.value.title = '';
-  jsonData.value.content = '';
-  showCopyAlert.value = false;
 }
 
 function getGcnCircularLink(message) {
@@ -403,31 +403,32 @@ function getDataFields(section, values) {
       <v-alert v-if="retrieveMessageError" type="error" title="Error" density="compact">
         <p>{{ retrieveMessageError }}</p>
       </v-alert>
-      <v-card v-if="messageData" variant="flat" class="mb-2" :class="messageData.annotations?.retracted ? 'retracted-body': ''" style="overflow: auto;">
+      <v-card v-if="messageData" variant="flat" class="mb-2" style="overflow: auto;">
         <!-- Header -->
         <v-card-title>
-          <v-row v-if="messageData.annotations?.retracted" class="retracted-text">
-            <v-col class="d-flex justify-content-center">
+          <v-row v-if="props.retracted" class="retracted-text" no-gutters>
+            <v-col class="text-center">
               <h4 class="retracted-text">MESSAGE RETRACTED</h4>
             </v-col>
           </v-row>
-          <v-row>
-            <v-col>
+          <v-row no-gutters>
+            <v-col cols="11" no-gutters>
               <p style="white-space: pre-wrap;">
                 {{ messageTitle }}
               </p>
-              <v-btn v-if="showRetractMessage" variant="outlined" color="error" title="Retract Message" @click="retractDialog.value = true">
-                <v-icon icon="clipboard-x"></v-icon>
+            </v-col>
+            <v-col cols="1" no-gutters>
+              <v-btn v-if="showRetractMessage" variant="plain" color="error" icon="mdi-clipboard-remove" rounded="0" v-tooltip="props.retracted ? 'Un-Retract Message': 'Retract Message'" @click="retractDialog = true">
               </v-btn>
-              <v-dialog v-model="retractDialog" persistent>
-                <v-card title="Are you sure you want to retract this message?">
+              <v-dialog v-model="retractDialog" persistent width="auto">
+                <v-card :title="'Are you sure you want to ' + (props.retracted ? 'un-retract': 'retract') + ' this message?'">
                   <v-card-text>
-                    Retracted messages are excluded from hermes queries by default. <b>This operation is not reversible!</b>
+                    Retracted messages are excluded from hermes queries by default.
                   </v-card-text>
                   <template v-slot:actions>
-                    <v-btn variant="flat" color="primary" @click="retractDialog.value = false">Cancel</v-btn>
+                    <v-btn variant="flat" color="primary" @click="retractDialog = false">Cancel</v-btn>
                     <v-spacer />
-                    <v-btn variant="flat" color="error" @click="retractDialog.value = false; retractMessage()">Retract</v-btn>
+                    <v-btn variant="flat" color="error" @click="retractDialog = false; retractMessage()">{{ props.retracted ? 'Un-Retract': 'Retract'}}</v-btn>
                   </template>
                 </v-card>
               </v-dialog>
@@ -557,10 +558,6 @@ function getDataFields(section, values) {
   -webkit-text-fill-color: transparent;
   text-fill-color: transparent;
   animation: move-gradient 2s linear infinite;
-}
-
-.retracted-body {
-  background-image: repeating-linear-gradient(45deg, #f003 0px, #f003 2px, transparent 2px, transparent 50px);
 }
 
 @keyframes move-gradient {
