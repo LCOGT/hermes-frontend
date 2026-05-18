@@ -6,6 +6,7 @@ import '@/assets/css/view.css';
 import PlotlyChart from '@/components/PlotlyChart.vue';
 import { useStateStore } from '@/stores/state';
 import { useLogout } from '@/utils/logout.js';
+import { buildSpectraPlotData, loadSpectraFromUrl, isSpectraTextFile } from '@/utils/spectraPlotUtils.js';
 
 const { logout } = useLogout();
 const stateStore = useStateStore()
@@ -33,45 +34,6 @@ const retractDialog = ref(false)
 const jsonDialog = ref(false)
 const plotDataByName = ref({})
 const layoutByName = ref({})
-const baseLayout = {
-  margin: {
-    r: 20,
-    b: 40,
-    l: 80
-  },
-  plot_bgcolor: "#1f1f1f",
-  paper_bgcolor: "#1f1f1f",
-  title: {
-    text: 'Spectrum Plot',
-    font: {
-      size: 26,
-      color: "#ffffff"
-    },
-    yref: 'paper',
-    automargin: true
-  },
-  yaxis: {
-    title: {
-      text: 'Flux'
-    },
-    tickformat: '.1e',
-    type: 'linear',
-    gridcolor: '#444444',
-    color: '#ffffff'
-  },
-  xaxis: {
-    title: {
-      text: 'Wavelength'
-    },
-    gridcolor: '#444444',
-    color: '#ffffff',
-    showgrid: false
-  },
-  legend: {
-    x: 0.85,
-    y: 1.0
-  }
-}
 
 const KVdataFields = [{ key: "key", title: "Key" }, { key: "value", title: "Value" }]
 const kvItemsPerPage = ref(10);
@@ -216,72 +178,35 @@ async function createSpectraPlots() {
     let i = 1;
     for (const spectro_entry of messageData.value.data.spectroscopy) {
       if (!_.isEmpty(spectro_entry.flux) && !_.isEmpty(spectro_entry.wavelength)) {
-        let title = i + ': ' + spectro_entry.date_obs;
-        addSpectraPlot(spectro_entry.flux, spectro_entry.flux_units, spectro_entry.flux_error,
-                            spectro_entry.wavelength, spectro_entry.wavelength_units, title);
+        const title = i + ': ' + spectro_entry.date_obs;
+        const { plotData, layout } = buildSpectraPlotData(
+          spectro_entry.flux, spectro_entry.flux_units, spectro_entry.flux_error,
+          spectro_entry.wavelength, spectro_entry.wavelength_units, title
+        );
+        plotDataByName.value[title] = plotData;
+        layoutByName.value[title] = layout;
       }
       if (!_.isEmpty(spectro_entry.file_info)) {
         for (const file_info of spectro_entry.file_info) {
-          let lowercaseName = file_info.name.toLowerCase();
-          if (!_.isEmpty(file_info.url) && (lowercaseName.endsWith('.txt') || lowercaseName.endsWith('.ascii') || lowercaseName.endsWith('.text'))) {
-            await downloadSpectraFile(file_info.url, i + ': ' + file_info.name, spectro_entry.flux_units, spectro_entry.wavelength_units);
+          if (!_.isEmpty(file_info.url) && isSpectraTextFile(file_info.name)) {
+            const title = i + ': ' + file_info.name;
+            try {
+              const { fluxArray, wavelengthArray } = await loadSpectraFromUrl(file_info.url);
+              const { plotData, layout } = buildSpectraPlotData(
+                fluxArray, spectro_entry.flux_units, null,
+                wavelengthArray, spectro_entry.wavelength_units, title
+              );
+              plotDataByName.value[title] = plotData;
+              layoutByName.value[title] = layout;
+            } catch (error) {
+              console.log(error);
+            }
           }
         }
       }
       i++;
     }
   }
-}
-
-function addSpectraPlot(fluxArray, fluxUnits, fluxErrorArray, wavelengthArray, wavelengthUnits, title) {
-  plotDataByName.value[title] = {
-    x: wavelengthArray,
-    y: fluxArray,
-    type: 'scatter',
-    name: title,
-    exponentformat: 'e',
-    mode: 'lines'
-  };
-  if (!_.isNil(fluxErrorArray) && _.isArray(fluxErrorArray) && !_.every(fluxErrorArray, x => x == 0)) {
-    let fluxErrorLabels = _.clone(fluxErrorArray);
-    for (let i = 0; i < fluxErrorLabels.length; i++) {
-      fluxErrorLabels[i] = '\u{00B1} ' + fluxErrorLabels[i].toString();
-    }
-    plotDataByName.value[title]['text'] = fluxErrorLabels;
-  }
-  layoutByName.value[title] = _.cloneDeep(baseLayout);
-  layoutByName.value[title].title.text = title;
-  layoutByName.value[title].xaxis.title.text = 'Wavelength (' + wavelengthUnits + ')';
-  layoutByName.value[title].yaxis.title.text = 'Flux (' + fluxUnits + ')';
-}
-
-async function downloadSpectraFile(url, title, fluxUnits, wavelengthUnits) {
-  fetch(url, {
-    method: 'get'
-  })
-    .then((response) => {
-      if (!response.ok) {
-        let error = new Error("HTTP " + response.status);
-        error.response = response;
-        error.status = response.status;
-        throw error;
-      }
-      return response.text();
-    })
-    .then(text => {
-    var lines = text.split('\n');
-    let fluxArray = new Array();
-    let wavelengthArray = new Array();
-    for (const line of lines) {
-      var lineparts = line.split(/[\t\s]+/);
-      wavelengthArray.push(parseFloat(lineparts[0]));
-      fluxArray.push(parseFloat(lineparts[1]));
-    }
-    addSpectraPlot(fluxArray, fluxUnits, null, wavelengthArray, wavelengthUnits, title);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
 }
 
 function copy(value, type) {

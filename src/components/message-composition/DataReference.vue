@@ -31,7 +31,7 @@ const sourceList = [
 
 </script>
 <template>
-  <v-container class="p-0" :id="'data-reference-' + props.index">
+  <v-container class="p-0" :id="'data-reference-' + props.index" fluid>
     <v-row align="center">
       <v-col md="1" class="text-center data-label-text">
         <b>{{ props.index }}</b>
