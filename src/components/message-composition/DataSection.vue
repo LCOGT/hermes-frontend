@@ -153,7 +153,7 @@ function loadCsv(files) {
 
 </script>
 <template>
-  <v-container class="pa-0" :id="'data-' + section">
+  <v-container class="pa-0" :id="'data-' + section" fluid>
     <v-expansion-panels variant="accordion" static v-model="panel">
       <v-expansion-panel hide-actions @click="addNewRowIfEmpty" :value="props.section + 'Panel'">
         <v-expansion-panel-title :color="getMainColor" class="pa-0">

@@ -42,6 +42,11 @@ function getCellError(row, key) {
   return '';
 }
 
+function getCellTooltip(row, key) {
+  const err = getCellError(row, key);
+  return { text: err, location: 'bottom', disabled: !err };
+}
+
 function remove(index) {
   emit('remove', index);
 }
@@ -59,19 +64,18 @@ function update() {
   <div>
     <v-data-table class="data-table-style" :items="props.tableData" :headers="props.fields" density="compact" hide-default-footer disable-sort>
       <template v-for="header in props.fields" v-slot:[`item.${header.key}`]="{ item, index }">
-        <v-text-field v-if="header.type == 'text' && !header.list" v-model="props.tableData[index][header.key]" :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" :placeholder="header.title" style="width:100%" @update:modelValue="update()"></v-text-field>
-        <v-combobox v-else-if="header.type == 'text' && header.list" item-title="text" item-value="value" :return-object="false" :items="header.list" v-model="props.tableData[index][header.key]" :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" :placeholder="header.title" @update:modelValue="update()"></v-combobox>
-        <v-select v-else-if="header.type == 'select'" v-model="props.tableData[index][header.key]" :items="header.options" item-value="value" item-title="text" :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" @update:modelValue="update()"></v-select>
-        <v-switch v-else-if="header.type == 'checkbox'" class="d-flex justify-center align-with-fields" v-model="props.tableData[index][header.key]" color="primary" hide-details :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" @update:modelValue="update()"></v-switch>
+        <v-text-field v-if="header.type == 'text' && !header.list" v-model="props.tableData[index][header.key]" :error-messages="getCellError(index, header.key)" hide-details v-tooltip="getCellTooltip(index, header.key)" variant="outlined" density="compact" :placeholder="header.title" style="width:100%" @update:modelValue="update()"></v-text-field>
+        <v-combobox v-else-if="header.type == 'text' && header.list" item-title="text" item-value="value" :return-object="false" :items="header.list" v-model="props.tableData[index][header.key]" :error-messages="getCellError(index, header.key)" hide-details v-tooltip="getCellTooltip(index, header.key)" variant="outlined" density="compact" :placeholder="header.title" @update:modelValue="update()"></v-combobox>
+        <v-select v-else-if="header.type == 'select'" v-model="props.tableData[index][header.key]" :items="header.options" item-value="value" item-title="text" :error-messages="getCellError(index, header.key)" hide-details v-tooltip="getCellTooltip(index, header.key)" variant="outlined" density="compact" @update:modelValue="update()"></v-select>
+        <v-switch v-else-if="header.type == 'checkbox'" class="d-flex justify-center" v-model="props.tableData[index][header.key]" color="primary" hide-details :error-messages="getCellError(index, header.key)" variant="outlined" density="compact" @update:modelValue="update()"></v-switch>
         <VueDatePicker v-else-if="header.type == 'date'" class="cell-date-picker" v-model="props.tableData[index][header.key]" model-type="iso" :dark="true" :teleport="true" :placeholder="header.title" required  @update:modelValue="update()"></VueDatePicker>
-        <b v-else-if="header.key == 'index'" class="align-with-fields">{{ index }}</b>
-        <v-btn v-else-if="header.key == 'copy'" class="align-with-fields" density="compact" variant="plain" rounded="0" icon="mdi-file-document-plus-outline" v-tooltip="'Copy this ' + props.id" @click="copy(index)"></v-btn>
+        <b v-else-if="header.key == 'index'">{{ index }}</b>
+        <v-btn v-else-if="header.key == 'copy'" density="compact" variant="plain" rounded="0" icon="mdi-file-document-plus-outline" v-tooltip="'Copy this ' + props.id" @click="copy(index)"></v-btn>
         <confirm-dialog-btn
           v-else-if="header.key == 'delete' && (props.allowEmpty || props.tableData.length > 1)"
           variant="plain"
           density="compact"
           rounded="0"
-          class="align-with-fields"
           btn-tooltip="Remove this row"
           btn-icon="mdi-trash-can-outline"
           confirm-text="Are you sure you want to remove this row?"
@@ -83,11 +87,6 @@ function update() {
   </div>
 </template>
 <style>
-  .align-with-fields {
-    position: relative;
-    top: -10px;
-  }
-
   .v-data-table__td:has(.cell-date-picker) {
     vertical-align:top;
   }

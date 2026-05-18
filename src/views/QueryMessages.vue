@@ -18,15 +18,15 @@ const { logout } = useLogout();
 
 const headers = ref([
   { title: 'Timestamp', key: 'metadata.timestamp', align: 'start' },
-  { title: 'Topic', key: 'metadata.topic', align: 'start' },
-  { title: 'Title', key: 'annotations.title', align: 'start' },
+  { title: 'Topic', key: 'metadata.topic', align: 'start', width: '25%' },
+  { title: 'Title', key: 'annotations.title', align: 'start', width: '50%' },
   { title: 'Sender', key: 'annotations.sender', align: 'start' },
   { title: 'Type', key: 'annotations.media_type', align: 'end'}
 ])
 
 const selectedUUID = ref(null)
 const selectedItem = ref(null)
-const topics = ref(stateStore.profile?.default_topics_list)
+const topics = ref(stateStore.defaultTopicList)
 const searchTerms = ref(null)
 // Initial date range is last 30 days
 const startDate = ref((new Date(Date.now() - (3600 * 1000 * 24 * 30))).toISOString())
@@ -35,6 +35,7 @@ const limit = ref(10)
 const includeRetracted = ref(true)
 const isQuerying = ref(false)
 const results = ref({})
+const activeController = ref(null)
 
 const queryParams = computed(() => {
   let params = `?limit=${limit.value}`;
@@ -65,9 +66,7 @@ const fileIsSelected = computed(() => {
 })
 
 onMounted(async () => {
-  if (stateStore.userIsAuthenticated) {
-    queryMessages();
-  }
+  queryMessages();
 })
 
 watch(() => stateStore.userIsAuthenticated, async () => {
@@ -92,6 +91,12 @@ function formatDate(datetime) {
 }
 
 async function queryMessages(page = null) {
+  if (activeController.value) {
+    activeController.value.abort();
+  }
+  const controller = new AbortController();
+  activeController.value = controller;
+
   let params = queryParams.value;
   if (page) {
     params += `&page=${page}`;
@@ -100,6 +105,7 @@ async function queryMessages(page = null) {
   fetch(stateStore.hermesUrl + "api/v0/query/" + params, {
     credentials: 'include',
     method: 'get',
+    signal: controller.signal,
   })
   .then((response) => {
     if (!response.ok) {
@@ -112,8 +118,10 @@ async function queryMessages(page = null) {
   })
   .then(data => {
     results.value = data;
+    updateHeaderWidths();
   })
   .catch((error) => {
+    if (error.name === 'AbortError') return;
     console.log(error);
     results.value = {};
     if (error.response.status == 401) {
@@ -121,7 +129,9 @@ async function queryMessages(page = null) {
     }
   })
   .finally(() => {
-    isQuerying.value = false;
+    if (activeController.value === controller) {
+      isQuerying.value = false;
+    }
   });
 }
 
@@ -221,15 +231,39 @@ function toggleSelectedItemRetraction() {
   selectedItem.value.annotations.retracted = !selectedItem.value.annotations.retracted;
 }
 
+function updateHeaderWidths() {
+  if (results.value?.messages) {
+    // Only update if we have table results
+    if (results.value.messages.some(message => message.annotations.title)) {
+      // If any messages have a title, then make room for titles in the headers
+      headers.value[1].width = '25%';  // topic field width
+      headers.value[2].width = '50%';  // title field width
+    }
+    else {
+      // otherwise give more room for topics
+      headers.value[1].width = '75%';  // topic field width
+      headers.value[2].width = '0%';  // title field width
+    }
+  }
+}
+
+function truncateTopic(topic) {
+  // Truncate the displayed topic text based on the actual header width we have available
+  const pixelsPerChar = 8.4;  //Its 14px monospaced font in the header, 60% is 8.4px
+  const tableContainer = document.querySelector('.table-container');
+  const topicHeader = tableContainer.querySelector('thead tr th:nth-child(2)');
+  const currentWidth = topicHeader ? topicHeader.offsetWidth : 0;
+  const pixelsFit = Math.floor(currentWidth / pixelsPerChar);
+  const frontSize = Math.floor(pixelsFit / 4);  // Size of beginning of topic
+  const backSize = pixelsFit - frontSize - 3;  // Size of end of topic + ellipses
+  if (topic.length <= (frontSize + backSize + 3)) return topic;
+  return topic.slice(0, frontSize) + '...' + topic.slice(-backSize);
+}
+
 </script>
 <template>
   <div class="overflow-auto px-4" :style="{ width: '100%' }">
-    <v-row class="m-0" v-if="!stateStore.userIsAuthenticated">
-      <v-alert class="text-center" variant="outlined" color="warning" text="You must login to use HERMES"
-        icon="mdi-account-alert">
-      </v-alert>
-    </v-row>
-    <v-row class="m-0" v-if="stateStore.userIsAuthenticated">
+    <v-row class="m-0">
       <v-col md="6">
         <v-row class="pb-2 pt-2">
           <v-col class="pr-0 pb-0" cols="5">
@@ -276,8 +310,8 @@ function toggleSelectedItemRetraction() {
               </span>
             </template>
               <template v-slot:item.metadata.topic="{ value }">
-              <span v-tooltip="value">
-                {{ value.substring(value.lastIndexOf('.') + 1, value.length) }}
+              <span v-tooltip="value" class="text-mono">
+                {{ truncateTopic(value) }}
               </span>
             </template>
             <template v-slot:item.annotations.sender="{ value }">
@@ -293,10 +327,10 @@ function toggleSelectedItemRetraction() {
             </template>
             <template #bottom>
               <div class="text-center pt-2 pb-2">
-                <v-btn class="mr-2" variant="outlined" :disabled="!results.prev" @click="pageBackward">
+                <v-btn class="mr-2" variant="outlined" :disabled="!results.prev || isQuerying" @click="pageBackward">
                   Previous
                 </v-btn>
-                <v-btn class="ml-2" variant="outlined" :disabled="!results.next" @click="pageForward">
+                <v-btn class="ml-2" variant="outlined" :disabled="!results.next || isQuerying" @click="pageForward">
                   Next
                 </v-btn>
               </div>
