@@ -144,7 +144,7 @@ async function loadMessageData() {
   messageData.value = null
   messageHeaders.value = null
   if (uuid) {
-    fetch(stateStore.hermesUrl + `api/v0/query/message/${uuid}`, {
+    fetch(stateStore.hermesUrl + `api/v0/query/message/${uuid}/`, {
       credentials: 'include',
       method: 'get'
     })
@@ -236,7 +236,7 @@ async function retractMessage() {
   const url = new URL(`api/v0/query/message/${props.uuid}/` , stateStore.hermesUrl).href
   fetch(url, {
     mode: 'cors',
-    method: 'patch',
+    method: 'PATCH',
     headers: {'Content-Type': 'application/json',
               'X-CSRFToken': stateStore.csrf_token
               },

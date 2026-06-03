@@ -222,7 +222,7 @@ async function updateDefaultTopicsList() {
   let url = new URL('/api/v0/profile/', stateStore.hermesUrl).href
   fetch(url, {
     mode: 'cors',
-    method: 'patch',
+    method: 'PATCH',
     headers: {'Content-Type': 'application/json',
               'X-CSRFToken': stateStore.csrf_token
               },
@@ -266,7 +266,7 @@ async function updateTNSBotCredentials(success_message) {
   let url = new URL('/api/v0/profile/', stateStore.hermesUrl).href
   fetch(url, {
     mode: 'cors',
-    method: 'patch',
+    method: 'PATCH',
     headers: {'Content-Type': 'application/json',
               'X-CSRFToken': stateStore.csrf_token
               },
