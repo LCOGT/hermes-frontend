@@ -394,12 +394,16 @@ function getDataFields(section, values) {
 </script>
 <template>
   <div class="overflow-auto px-4 no-padding" :style="{ width: '100%' }">
-    <v-container class="no-padding">
-      <v-progress-linear v-if="loadingMessage" indeterminate height="25">
-        <template v-slot:default>
-          <strong>Loading Message</strong>
-        </template>
-      </v-progress-linear>
+    <v-container class="no-padding" style="height: 100%;">
+      <v-card v-if="loadingMessage" variant="flat" class="mb-2" style="height:100%;">
+        <v-card-title>
+          <v-progress-linear  indeterminate height="25">
+            <template v-slot:default>
+              <strong>Loading Message</strong>
+            </template>
+          </v-progress-linear>
+        </v-card-title>
+      </v-card>
       <v-alert v-if="retrieveMessageError" type="error" title="Error" density="compact">
         <p>{{ retrieveMessageError }}</p>
       </v-alert>

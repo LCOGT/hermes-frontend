@@ -260,11 +260,44 @@ function truncateTopic(topic) {
   return topic.slice(0, frontSize) + '...' + topic.slice(-backSize);
 }
 
+function extractLeadingCapitalizedWords(text) {
+  // Extract all leading words until we reach a non-capitalized (lowercase) word
+  // or a word starting with '<' or '>'.
+  // Special characters and punctuation are kept and do not stop the extraction.
+  const words = text.trim().split(/\s+/);
+  const capitalized = [];
+  for (const word of words) {
+    if (/^[a-z<>]/.test(word)) {
+      break;
+    }
+    capitalized.push(word);
+  }
+  return capitalized.length ? capitalized.join(' ') : null;
+}
+
+function senderOrOriginator(item, sender) {
+  if (item.annotations.originator) {
+    return extractLeadingCapitalizedWords(item.annotations.originator) ?? item.annotations.originator.substring(0, 50)
+  }
+  else {
+    return sender.substring(0, sender.indexOf('-'))
+  }
+}
+
+function fullSenderOrOriginator(item, sender) {
+  if (item.annotations.originator) {
+    return item.annotations.originator;
+  }
+  else {
+    return sender;
+  }
+}
+
 </script>
 <template>
   <div class="overflow-auto px-4" :style="{ width: '100%' }">
     <v-row class="m-0">
-      <v-col md="6">
+      <v-col :md="selectedUUID ? 6 : 12" class="list-col">
         <v-row class="pb-2 pt-2">
           <v-col class="pr-0 pb-0" cols="5">
             <div class="datepicker-group">
@@ -314,9 +347,9 @@ function truncateTopic(topic) {
                 {{ truncateTopic(value) }}
               </span>
             </template>
-            <template v-slot:item.annotations.sender="{ value }">
-              <span v-tooltip="value">
-                {{ value.substring(0, value.indexOf('-')) }}
+            <template v-slot:item.annotations.sender="{ item, value }">
+              <span v-tooltip="fullSenderOrOriginator(item, value)">
+                {{ senderOrOriginator(item, value) }}
               </span>
             </template>
             <template v-slot:item.annotations.media_type="{ item, value }">
@@ -339,7 +372,7 @@ function truncateTopic(topic) {
         </div>
       </v-col>
       <!-- Full Message Box -->
-      <v-col md="6">
+      <v-col md="6" v-if="selectedUUID">
         <v-card v-if="fileIsSelected" border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
           <v-card-title>
             <b>{{ selectedItem.annotations.file_name }}</b>
@@ -357,15 +390,7 @@ function truncateTopic(topic) {
             <v-btn prepend-icon="mdi-file-download" variant="outlined" @click="downloadSelectedFile" color="secondary">Download {{ selectedItem.annotations.file_name }}</v-btn>
           </v-card-text>
         </v-card>
-        <message-detail v-else-if="selectedUUID" :uuid="selectedUUID" :retracted="selectedItem.annotations.retracted" @toggle-retraction="toggleSelectedItemRetraction()"></message-detail>
-        <!-- Initial Message Box Display -->
-        <v-card v-else border-variant="primary" class="mb-2" style="max-height: 50rem; overflow: auto;">
-          <h4 class="text-center">
-            HERMES is a Message Exchange Service for Multi-Messenger Astronomy applications that allow users to both
-            send and
-            review messages related to a variety of events and targets of interest.
-          </h4>
-        </v-card>
+        <message-detail v-else :uuid="selectedUUID" :retracted="selectedItem.annotations.retracted" @toggle-retraction="toggleSelectedItemRetraction()"></message-detail>
       </v-col>
     </v-row>
   </div>
@@ -377,6 +402,10 @@ function truncateTopic(topic) {
 
 .retracted-row {
   background-color: rgb(59, 26, 34);
+}
+
+.list-col {
+  transition: flex 0.3s ease, max-width 0.3s ease;
 }
 
 .datepicker-group {
