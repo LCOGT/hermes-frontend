@@ -6,7 +6,7 @@ import { useStateStore } from '@/stores/state'
 const stateStore = useStateStore()
 
 onMounted(() => {
-  stateStore.hermesUrl = import.meta.env.VITE_APP_HERMES_BACKEND_ROOT_URL
+  stateStore.hermesUrl = window.APP_CONFIG?.backendUrl || import.meta.env.VITE_APP_HERMES_BACKEND_ROOT_URL
 })
 </script>
 
