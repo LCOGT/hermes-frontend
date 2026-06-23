@@ -321,13 +321,13 @@ function fullSenderOrOriginator(item, sender) {
           </v-col>
         </v-row>
         <v-row class="pb-2 pt-1">
-          <v-col class="col-md-7 pr-0 pt-1">
-            <v-autocomplete v-model="topics" multiple chips closable-chips variant="outlined" width="400px"
+          <v-col cols="8" class="pr-0 pt-1">
+            <v-autocomplete v-model="topics" multiple chips closable-chips variant="outlined"
               :items="stateStore.topic_options" placeholder="Filter by Topic" label="Topics" persistent-clear clearable
               @update:modelValue="onTopicChange">
             </v-autocomplete>
           </v-col>
-          <v-col class="col-md-4 ml-auto pl-2 pt-1">
+          <v-col cols="4" class="ml-auto pl-2 pt-1">
             <v-text-field type="search" clearable variant="outlined" label="Search Terms" v-model="searchTerms"
               @input="debounceQuery" @click:clear="debounceQuery"></v-text-field>
           </v-col>
