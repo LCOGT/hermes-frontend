@@ -29,9 +29,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: VITE_APP_HERMES_BACKEND_ROOT_URL
-              value: {{ .Values.hermes.backendUrl }}
           ports:
             - name: http
               containerPort: 8989
@@ -48,8 +45,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: app-configuration
-              mountPath: /app/.env
-              subPath: ".env"
+              mountPath: /app/config.js
+              subPath: "config.js"
       volumes:
         - name: app-configuration
           configMap:

@@ -6,6 +6,7 @@ import '@/assets/css/view.css';
 import PlotlyChart from '@/components/PlotlyChart.vue';
 import { useStateStore } from '@/stores/state';
 import { useLogout } from '@/utils/logout.js';
+import { buildSpectraPlotData, loadSpectraFromUrl, isSpectraTextFile } from '@/utils/spectraPlotUtils.js';
 
 const { logout } = useLogout();
 const stateStore = useStateStore()
@@ -14,8 +15,14 @@ const props = defineProps({
   uuid: {
     type: String,
     required: true,
+  },
+  retracted: {
+    type: Boolean,
+    default: false,
   }
 })
+
+const emit = defineEmits(['toggle-retraction']);
 
 const jsonData = ref({
   title: '',
@@ -33,45 +40,6 @@ const retractDialog = ref(false)
 const jsonDialog = ref(false)
 const plotDataByName = ref({})
 const layoutByName = ref({})
-const baseLayout = {
-  margin: {
-    r: 20,
-    b: 40,
-    l: 80
-  },
-  plot_bgcolor: "#1f1f1f",
-  paper_bgcolor: "#1f1f1f",
-  title: {
-    text: 'Spectrum Plot',
-    font: {
-      size: 26,
-      color: "#ffffff"
-    },
-    yref: 'paper',
-    automargin: true
-  },
-  yaxis: {
-    title: {
-      text: 'Flux'
-    },
-    tickformat: '.1e',
-    type: 'linear',
-    gridcolor: '#444444',
-    color: '#ffffff'
-  },
-  xaxis: {
-    title: {
-      text: 'Wavelength'
-    },
-    gridcolor: '#444444',
-    color: '#ffffff',
-    showgrid: false
-  },
-  legend: {
-    x: 0.85,
-    y: 1.0
-  }
-}
 
 const KVdataFields = [{ key: "key", title: "Key" }, { key: "value", title: "Value" }]
 const kvItemsPerPage = ref(10);
@@ -157,12 +125,15 @@ const isGcnCircular = computed(() => {
 })
     
 const showRetractMessage = computed(() => {
-  // if (stateStore.userIsAuthenticated && messageData.value) {
-  //   let group = topic.value.split(".", 1)[0];
-  //   if (group in stateStore.profile.group_memberships && stateStore.profile.group_memberships[group] === 'Owner') {
-  //     return !messageData.annotations?.retracted;
-  //   }
-  // }
+  if (stateStore.userIsAuthenticated && messageData.value) {
+    let group = topic.value.split(".", 1)[0];
+    if (stateStore.profile.credential_name == messageHeaders.value?._sender) {
+      return true;
+    }
+    else if (group in stateStore.profile.group_memberships && stateStore.profile.group_memberships[group] === 'Owner') {
+      return true;
+    }
+  }
   return false;
 })
 
@@ -173,7 +144,7 @@ async function loadMessageData() {
   messageData.value = null
   messageHeaders.value = null
   if (uuid) {
-    fetch(stateStore.hermesUrl + `api/v0/query/message/${uuid}`, {
+    fetch(stateStore.hermesUrl + `api/v0/query/message/${uuid}/`, {
       credentials: 'include',
       method: 'get'
     })
@@ -216,72 +187,35 @@ async function createSpectraPlots() {
     let i = 1;
     for (const spectro_entry of messageData.value.data.spectroscopy) {
       if (!_.isEmpty(spectro_entry.flux) && !_.isEmpty(spectro_entry.wavelength)) {
-        let title = i + ': ' + spectro_entry.date_obs;
-        addSpectraPlot(spectro_entry.flux, spectro_entry.flux_units, spectro_entry.flux_error,
-                            spectro_entry.wavelength, spectro_entry.wavelength_units, title);
+        const title = i + ': ' + spectro_entry.date_obs;
+        const { plotData, layout } = buildSpectraPlotData(
+          spectro_entry.flux, spectro_entry.flux_units, spectro_entry.flux_error,
+          spectro_entry.wavelength, spectro_entry.wavelength_units, title
+        );
+        plotDataByName.value[title] = plotData;
+        layoutByName.value[title] = layout;
       }
       if (!_.isEmpty(spectro_entry.file_info)) {
         for (const file_info of spectro_entry.file_info) {
-          let lowercaseName = file_info.name.toLowerCase();
-          if (!_.isEmpty(file_info.url) && (lowercaseName.endsWith('.txt') || lowercaseName.endsWith('.ascii') || lowercaseName.endsWith('.text'))) {
-            await downloadSpectraFile(file_info.url, i + ': ' + file_info.name, spectro_entry.flux_units, spectro_entry.wavelength_units);
+          if (!_.isEmpty(file_info.url) && isSpectraTextFile(file_info.name)) {
+            const title = i + ': ' + file_info.name;
+            try {
+              const { fluxArray, wavelengthArray } = await loadSpectraFromUrl(file_info.url);
+              const { plotData, layout } = buildSpectraPlotData(
+                fluxArray, spectro_entry.flux_units, null,
+                wavelengthArray, spectro_entry.wavelength_units, title
+              );
+              plotDataByName.value[title] = plotData;
+              layoutByName.value[title] = layout;
+            } catch (error) {
+              console.log(error);
+            }
           }
         }
       }
       i++;
     }
   }
-}
-
-function addSpectraPlot(fluxArray, fluxUnits, fluxErrorArray, wavelengthArray, wavelengthUnits, title) {
-  plotDataByName.value[title] = {
-    x: wavelengthArray,
-    y: fluxArray,
-    type: 'scatter',
-    name: title,
-    exponentformat: 'e',
-    mode: 'lines'
-  };
-  if (!_.isNil(fluxErrorArray) && _.isArray(fluxErrorArray) && !_.every(fluxErrorArray, x => x == 0)) {
-    let fluxErrorLabels = _.clone(fluxErrorArray);
-    for (let i = 0; i < fluxErrorLabels.length; i++) {
-      fluxErrorLabels[i] = '\u{00B1} ' + fluxErrorLabels[i].toString();
-    }
-    plotDataByName.value[title]['text'] = fluxErrorLabels;
-  }
-  layoutByName.value[title] = _.cloneDeep(baseLayout);
-  layoutByName.value[title].title.text = title;
-  layoutByName.value[title].xaxis.title.text = 'Wavelength (' + wavelengthUnits + ')';
-  layoutByName.value[title].yaxis.title.text = 'Flux (' + fluxUnits + ')';
-}
-
-async function downloadSpectraFile(url, title, fluxUnits, wavelengthUnits) {
-  fetch(url, {
-    method: 'get'
-  })
-    .then((response) => {
-      if (!response.ok) {
-        let error = new Error("HTTP " + response.status);
-        error.response = response;
-        error.status = response.status;
-        throw error;
-      }
-      return response.text();
-    })
-    .then(text => {
-    var lines = text.split('\n');
-    let fluxArray = new Array();
-    let wavelengthArray = new Array();
-    for (const line of lines) {
-      var lineparts = line.split(/[\t\s]+/);
-      wavelengthArray.push(parseFloat(lineparts[0]));
-      fluxArray.push(parseFloat(lineparts[1]));
-    }
-    addSpectraPlot(fluxArray, fluxUnits, null, wavelengthArray, wavelengthUnits, title);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
 }
 
 function copy(value, type) {
@@ -299,17 +233,15 @@ function info() {
 }
 
 async function retractMessage() {
-  //TODO: This is not yet implemented in scimma archive
-  console.log("Attempting to Retract message " + props.uuid);
-  const url = new URL('/api/v0/messages/' + props.uuid + '/', stateStore.hermesUrl).href
+  const url = new URL(`api/v0/query/message/${props.uuid}/` , stateStore.hermesUrl).href
   fetch(url, {
     mode: 'cors',
-    method: 'patch',
+    method: 'PATCH',
     headers: {'Content-Type': 'application/json',
               'X-CSRFToken': stateStore.csrf_token
               },
     credentials: 'include',
-    body: JSON.stringify({'retracted': true})
+    body: JSON.stringify({'retracted': !props.retracted})
   })
   .then((response) => {
     if (!response.ok) {
@@ -318,7 +250,7 @@ async function retractMessage() {
       error.status = response.status;
       throw error;
     }
-    messageData.annotations.retracted = response.data.retracted;
+    emit('toggle-retraction')
   })
   .catch((error) => {
     console.log(error);
@@ -326,13 +258,6 @@ async function retractMessage() {
       logout();
     }
   });
-}
-
-function resetjsonData() {
-  // clear JSON data and remove copy alert when window closed
-  jsonData.value.title = '';
-  jsonData.value.content = '';
-  showCopyAlert.value = false;
 }
 
 function getGcnCircularLink(message) {
@@ -469,40 +394,45 @@ function getDataFields(section, values) {
 </script>
 <template>
   <div class="overflow-auto px-4 no-padding" :style="{ width: '100%' }">
-    <v-container class="no-padding">
-      <v-progress-linear v-if="loadingMessage" indeterminate height="25">
-        <template v-slot:default>
-          <strong>Loading Message</strong>
-        </template>
-      </v-progress-linear>
+    <v-container class="no-padding" style="height: 100%;">
+      <v-card v-if="loadingMessage" variant="flat" class="mb-2" style="height:100%;">
+        <v-card-title>
+          <v-progress-linear  indeterminate height="25">
+            <template v-slot:default>
+              <strong>Loading Message</strong>
+            </template>
+          </v-progress-linear>
+        </v-card-title>
+      </v-card>
       <v-alert v-if="retrieveMessageError" type="error" title="Error" density="compact">
         <p>{{ retrieveMessageError }}</p>
       </v-alert>
-      <v-card v-if="messageData" variant="flat" class="mb-2" :class="messageData.annotations?.retracted ? 'retracted-body': ''" style="overflow: auto;">
+      <v-card v-if="messageData" variant="flat" class="mb-2" style="overflow: auto;">
         <!-- Header -->
         <v-card-title>
-          <v-row v-if="messageData.annotations?.retracted" class="retracted-text">
-            <v-col class="d-flex justify-content-center">
+          <v-row v-if="props.retracted" class="retracted-text" no-gutters>
+            <v-col class="text-center">
               <h4 class="retracted-text">MESSAGE RETRACTED</h4>
             </v-col>
           </v-row>
-          <v-row>
-            <v-col>
+          <v-row no-gutters>
+            <v-col cols="11" no-gutters>
               <p style="white-space: pre-wrap;">
                 {{ messageTitle }}
               </p>
-              <v-btn v-if="showRetractMessage" variant="outlined" color="error" title="Retract Message" @click="retractDialog.value = true">
-                <v-icon icon="clipboard-x"></v-icon>
+            </v-col>
+            <v-col cols="1" no-gutters>
+              <v-btn v-if="showRetractMessage" variant="plain" color="error" icon="mdi-clipboard-remove" rounded="0" v-tooltip="props.retracted ? 'Un-Retract Message': 'Retract Message'" @click="retractDialog = true">
               </v-btn>
-              <v-dialog v-model="retractDialog" persistent>
-                <v-card title="Are you sure you want to retract this message?">
+              <v-dialog v-model="retractDialog" persistent width="auto">
+                <v-card :title="'Are you sure you want to ' + (props.retracted ? 'un-retract': 'retract') + ' this message?'">
                   <v-card-text>
-                    Retracted messages are excluded from hermes queries by default. <b>This operation is not reversible!</b>
+                    Retracted messages are excluded from hermes queries by default.
                   </v-card-text>
                   <template v-slot:actions>
-                    <v-btn variant="flat" color="primary" @click="retractDialog.value = false">Cancel</v-btn>
+                    <v-btn variant="flat" color="primary" @click="retractDialog = false">Cancel</v-btn>
                     <v-spacer />
-                    <v-btn variant="flat" color="error" @click="retractDialog.value = false; retractMessage()">Retract</v-btn>
+                    <v-btn variant="flat" color="error" @click="retractDialog = false; retractMessage()">{{ props.retracted ? 'Un-Retract': 'Retract'}}</v-btn>
                   </template>
                 </v-card>
               </v-dialog>
@@ -632,10 +562,6 @@ function getDataFields(section, values) {
   -webkit-text-fill-color: transparent;
   text-fill-color: transparent;
   animation: move-gradient 2s linear infinite;
-}
-
-.retracted-body {
-  background-image: repeating-linear-gradient(45deg, #f003 0px, #f003 2px, transparent 2px, transparent 50px);
 }
 
 @keyframes move-gradient {

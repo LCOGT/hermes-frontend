@@ -96,9 +96,7 @@ onMounted(async () => {
   if (stateStore.mid_login) {
     await stateStore.getProfileData();
   }
-  if (stateStore.userIsAuthenticated) {
-    await stateStore.getTopicOptions();
-  }
+  await stateStore.getTopicOptions();
   username.value = stateStore.profile.email;
 })
 
