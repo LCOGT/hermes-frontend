@@ -9,14 +9,18 @@ import { useDebounceFn } from '@vueuse/core';
 import MessageDetail from '@/views/MessageDetail.vue';
 import { useStateStore } from '@/stores/state'
 import { useLogout } from '@/utils/logout.js';
+import { useDoiCartStore } from '@/stores/doiCart';
+import DoiCartBar from '@/components/DoiCartBar.vue';
+import DoiMintDialog from '@/components/DoiMintDialog.vue';
 
 dayjs.extend(relativeTime);
 
 const stateStore = useStateStore()
 const { logout } = useLogout();
-
+const doiCart = useDoiCartStore();
 
 const headers = ref([
+  { title: '', key: 'doi', align: 'center', width: '3rem', sortable: false },
   { title: 'Timestamp', key: 'metadata.timestamp', align: 'start' },
   { title: 'Topic', key: 'metadata.topic', align: 'start', width: '25%' },
   { title: 'Title', key: 'annotations.title', align: 'start', width: '50%' },
@@ -36,6 +40,8 @@ const includeRetracted = ref(true)
 const isQuerying = ref(false)
 const results = ref({})
 const activeController = ref(null)
+const mintDialogOpen = ref(false)
+const mintDialogSingleItem = ref(null)
 
 const queryParams = computed(() => {
   let params = `?limit=${limit.value}`;
@@ -231,6 +237,32 @@ function toggleSelectedItemRetraction() {
   selectedItem.value.annotations.retracted = !selectedItem.value.annotations.retracted;
 }
 
+function messageToCartItem(item) {
+  return {
+    uuid: item.annotations.con_text_uuid,
+    title: item.annotations.title || null,
+    topic: item.metadata.topic,
+    sender: item.annotations.sender,
+    timestamp: item.metadata.timestamp,
+    sizeBytes: item.annotations.size || 0,
+    fileName: item.annotations.file_name || null,
+  };
+}
+
+function toggleCartItem(item) {
+  doiCart.toggle(messageToCartItem(item));
+}
+
+function openSingleMintDialog(item) {
+  mintDialogSingleItem.value = messageToCartItem(item);
+  mintDialogOpen.value = true;
+}
+
+function openPackageMintDialog() {
+  mintDialogSingleItem.value = null;
+  mintDialogOpen.value = true;
+}
+
 function updateHeaderWidths() {
   if (results.value?.messages) {
     // Only update if we have table results
@@ -332,11 +364,16 @@ function fullSenderOrOriginator(item, sender) {
               @input="debounceQuery" @click:clear="debounceQuery"></v-text-field>
           </v-col>
         </v-row>
+        <DoiCartBar v-if="stateStore.userIsAuthenticated" @open-mint-dialog="openPackageMintDialog"></DoiCartBar>
         <div class="table-container">
           <!-- Main Message Table -->
           <v-data-table-server hover :items="results.messages" :headers="headers" :loading="isQuerying"
             loading-text="Loading messages..." item-value="annotations.con_text_uuid" :row-props="tableRowProps"
             hide-default-footer @click:row="selectRow" items-length="99999" density="compact" disable-sort>
+            <template v-slot:item.doi="{ item }">
+              <v-checkbox-btn v-if="stateStore.userIsAuthenticated" :model-value="doiCart.hasItem(item.annotations.con_text_uuid)"
+                @click.stop="toggleCartItem(item)" density="compact"></v-checkbox-btn>
+            </template>
             <template v-slot:item.metadata.timestamp="{ value }">
               <span v-tooltip="formatDate(value)">
                 {{ timeFromNow(value) }}
@@ -393,6 +430,7 @@ function fullSenderOrOriginator(item, sender) {
         <message-detail v-else :uuid="selectedUUID" :retracted="selectedItem.annotations.retracted" @toggle-retraction="toggleSelectedItemRetraction()"></message-detail>
       </v-col>
     </v-row>
+    <DoiMintDialog v-model="mintDialogOpen" :single-item="mintDialogSingleItem"></DoiMintDialog>
   </div>
 </template>
 <style>

@@ -7,9 +7,12 @@ import PlotlyChart from '@/components/PlotlyChart.vue';
 import { useStateStore } from '@/stores/state';
 import { useLogout } from '@/utils/logout.js';
 import { buildSpectraPlotData, loadSpectraFromUrl, isSpectraTextFile } from '@/utils/spectraPlotUtils.js';
+import { useDoiCartStore } from '@/stores/doiCart';
+import DoiMintDialog from '@/components/DoiMintDialog.vue';
 
 const { logout } = useLogout();
 const stateStore = useStateStore()
+const doiCart = useDoiCartStore();
 
 const props = defineProps({
   uuid: {
@@ -38,6 +41,7 @@ const topic = ref('')
 const panels = ref([])
 const retractDialog = ref(false)
 const jsonDialog = ref(false)
+const mintDialogOpen = ref(false)
 const plotDataByName = ref({})
 const layoutByName = ref({})
 
@@ -136,6 +140,28 @@ const showRetractMessage = computed(() => {
   }
   return false;
 })
+
+const showMintDoiButton = computed(() => {
+  // Only offer single-message minting when authenticated and not already
+  // mid-way through building a multi-message package in the cart.
+  return stateStore.userIsAuthenticated && messageData.value && doiCart.isEmpty;
+});
+
+function openMintDialog() {
+  mintDialogOpen.value = true;
+}
+
+const doiCartItem = computed(() => {
+  return {
+    uuid: messageUUID.value,
+    title: messageTitle.value,
+    topic: topic.value,
+    sender: messageAuthor.value,
+    timestamp: messageData.value?.timestamp || null,
+    sizeBytes: 0,
+    fileName: messageHeaders.value?.file_name || null,
+  };
+});
 
 async function loadMessageData() {
   let uuid = messageUUID.value
@@ -422,6 +448,8 @@ function getDataFields(section, values) {
               </p>
             </v-col>
             <v-col cols="1" no-gutters>
+              <v-btn v-if="showMintDoiButton" variant="plain" color="primary" icon="mdi-fingerprint" rounded="0" v-tooltip="'Mint DOI'" @click="openMintDialog">
+              </v-btn>
               <v-btn v-if="showRetractMessage" variant="plain" color="error" icon="mdi-clipboard-remove" rounded="0" v-tooltip="props.retracted ? 'Un-Retract Message': 'Retract Message'" @click="retractDialog = true">
               </v-btn>
               <v-dialog v-model="retractDialog" persistent width="auto">
@@ -545,6 +573,7 @@ function getDataFields(section, values) {
         </v-card-actions>
       </v-card>
     </v-container>
+    <DoiMintDialog v-model="mintDialogOpen" :single-item="doiCartItem"></DoiMintDialog>
   </div>
 </template>
 <style>
