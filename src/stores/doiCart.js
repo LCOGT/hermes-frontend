@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 /*
-  Holds the set of Hermes messages a user has selected to package into
+  Holds the set of Hopskotch messages a user has selected to package into
   a single Zenodo DOI. A "cart" with exactly one item is the same code
   path as minting a DOI for a single message - there is no special case.
 

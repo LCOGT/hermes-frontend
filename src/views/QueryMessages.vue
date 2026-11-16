@@ -41,7 +41,6 @@ const isQuerying = ref(false)
 const results = ref({})
 const activeController = ref(null)
 const mintDialogOpen = ref(false)
-const mintDialogSingleItem = ref(null)
 
 const queryParams = computed(() => {
   let params = `?limit=${limit.value}`;
@@ -253,13 +252,7 @@ function toggleCartItem(item) {
   doiCart.toggle(messageToCartItem(item));
 }
 
-function openSingleMintDialog(item) {
-  mintDialogSingleItem.value = messageToCartItem(item);
-  mintDialogOpen.value = true;
-}
-
 function openPackageMintDialog() {
-  mintDialogSingleItem.value = null;
   mintDialogOpen.value = true;
 }
 
@@ -430,7 +423,7 @@ function fullSenderOrOriginator(item, sender) {
         <message-detail v-else :uuid="selectedUUID" :retracted="selectedItem.annotations.retracted" @toggle-retraction="toggleSelectedItemRetraction()"></message-detail>
       </v-col>
     </v-row>
-    <DoiMintDialog v-model="mintDialogOpen" :single-item="mintDialogSingleItem"></DoiMintDialog>
+    <DoiMintDialog v-model="mintDialogOpen"></DoiMintDialog>
   </div>
 </template>
 <style>

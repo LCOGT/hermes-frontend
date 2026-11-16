@@ -442,12 +442,12 @@ function getDataFields(section, values) {
             </v-col>
           </v-row>
           <v-row no-gutters>
-            <v-col cols="11" no-gutters>
+            <v-col no-gutters>
               <p style="white-space: pre-wrap;">
                 {{ messageTitle }}
               </p>
             </v-col>
-            <v-col cols="1" no-gutters>
+            <v-col cols="auto" no-gutters class="d-flex flex-nowrap">
               <v-btn v-if="showMintDoiButton" variant="plain" color="primary" icon="mdi-fingerprint" rounded="0" v-tooltip="'Mint DOI'" @click="openMintDialog">
               </v-btn>
               <v-btn v-if="showRetractMessage" variant="plain" color="error" icon="mdi-clipboard-remove" rounded="0" v-tooltip="props.retracted ? 'Un-Retract Message': 'Retract Message'" @click="retractDialog = true">

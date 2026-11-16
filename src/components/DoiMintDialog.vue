@@ -101,9 +101,9 @@ watch(isOpen, (open) => {
 
     const items = packageItems.value;
     if (items.length === 1) {
-      title.value = items[0].title || `Hermes message ${items[0].uuid}`;
+      title.value = items[0].title || `Hopskotch message ${items[0].uuid}`;
     } else {
-      title.value = `Hermes message package (${items.length} messages)`;
+      title.value = `Hopskotch message package (${items.length} messages)`;
     }
     description.value = buildDefaultDescription(items);
     authorName.value = stateStore.profile?.email ? stateStore.profile.email : '';
@@ -116,7 +116,7 @@ watch(isOpen, (open) => {
 
 function buildDefaultDescription(items) {
   const lines = items.map((item) => `- [${item.topic}] ${item.title || item.uuid}`);
-  return `This record packages the following Hermes message(s):\n\n${lines.join('\n')}`;
+  return `This record packages the following Hopskotch message(s):\n\n${lines.join('\n')}`;
 }
 
 async function requestConfirmation() {
